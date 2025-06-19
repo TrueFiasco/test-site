@@ -288,27 +288,44 @@ class HotspotManager {
     
     const sectionHotspots = this.hotspots.get(sectionId);
     if (!sectionHotspots || sectionHotspots.length === 0) {
+      console.log(`ℹ️ No hotspots found for section ${sectionId}`);
       return;
     }
     
-    if (this.isMobile || this.isNarrowDesktop()) {
+    const windowWidth = window.innerWidth;
+    const isMobileView = windowWidth <= 768;
+    const isNarrowDesktopView = windowWidth > 768 && windowWidth <= 1024;
+    const isWideDesktopView = windowWidth > 1024;
+    
+    console.log(`📏 Window width: ${windowWidth}px`);
+    console.log(`📱 Mobile: ${isMobileView}, Narrow: ${isNarrowDesktopView}, Wide: ${isWideDesktopView}`);
+    
+    if (isMobileView || isNarrowDesktopView) {
       // Mobile OR narrow desktop: Add parameter images to section content
+      console.log(`📋 Adding parameter images to section content`);
       this.addMobileParameterContent(sectionId, sectionHotspots);
       return;
     }
     
-    console.log(`🎯 Updating hotspots for section ${sectionId}: ${sectionHotspots.length} hotspots`);
-    
-    sectionHotspots.forEach((hotspotConfig, index) => {
-      this.createHotspot(hotspotConfig, index);
-    });
+    if (isWideDesktopView) {
+      console.log(`🎯 Creating interactive hotspots for section ${sectionId}: ${sectionHotspots.length} hotspots`);
+      
+      sectionHotspots.forEach((hotspotConfig, index) => {
+        this.createHotspot(hotspotConfig, index);
+      });
+      
+      console.log(`✅ Created ${this.activeHotspots.size} hotspots`);
+    }
   }
 
   /**
    * Check if we're in narrow desktop view (when columns stack)
    */
   isNarrowDesktop() {
-    return window.innerWidth <= 1024; // Adjust this breakpoint as needed
+    const width = window.innerWidth;
+    const isNarrow = width > 768 && width <= 1024;
+    console.log(`📏 isNarrowDesktop check: ${width}px = ${isNarrow}`);
+    return isNarrow;
   }
 
   /**
@@ -326,8 +343,9 @@ class HotspotManager {
       cursor: pointer;
       pointer-events: auto;
       transform: translate(-50%, -50%);
-      z-index: 100;
+      z-index: 6000;
       border-radius: 50%;
+      background: rgba(255, 0, 0, 0.1);
     `;
     
     // Create visual hotspot
@@ -354,7 +372,7 @@ class HotspotManager {
     clickArea.dataset.hotspotId = config.id;
     clickArea.dataset.index = index;
     
-    console.log(`🎯 Creating hotspot ${config.id} at (${config.position.x}, ${config.position.y})`);
+    console.log(`🎯 Creating hotspot ${config.id} at (${config.position.x * 100}%, ${config.position.y * 100}%)`);
     
     // Event listeners
     clickArea.addEventListener('click', (e) => {
@@ -364,6 +382,7 @@ class HotspotManager {
     });
     
     clickArea.addEventListener('mouseenter', () => {
+      console.log(`🎯 Hotspot ${config.id} hover enter`);
       hotspot.style.transform = 'translate(-50%, -50%) scale(1.5)';
       hotspot.style.background = '#ff00ff';
       hotspot.style.boxShadow = '0 0 20px rgba(255, 0, 255, 0.8)';
@@ -371,6 +390,7 @@ class HotspotManager {
     });
     
     clickArea.addEventListener('mouseleave', () => {
+      console.log(`🎯 Hotspot ${config.id} hover leave`);
       if (!this.selectedHotspots.has(config.id)) {
         hotspot.style.transform = 'translate(-50%, -50%) scale(1)';
         hotspot.style.background = '#00ffff';
@@ -379,10 +399,17 @@ class HotspotManager {
       }
     });
     
+    if (!this.container) {
+      console.error('❌ Hotspot container not found!');
+      return;
+    }
+    
     this.container.appendChild(clickArea);
     this.activeHotspots.add(clickArea);
     
     console.log(`✅ Hotspot ${config.id} created and added to container`);
+    console.log(`📊 Container children count: ${this.container.children.length}`);
+    console.log(`📊 Active hotspots count: ${this.activeHotspots.size}`);
   }
 
   /**
@@ -727,8 +754,13 @@ class HotspotManager {
     const manager = new HotspotManager(options);
     await manager.init();
     
-    // Make debug function globally accessible
+    // Make debug functions globally accessible
     window.debugHotspots = () => manager.debugDialog();
+    window.createTestHotspot = () => manager.createTestHotspot();
+    
+    console.log('🛠️ Debug functions available:');
+    console.log('  - debugHotspots() - Shows detailed debug info');
+    console.log('  - createTestHotspot() - Creates a test hotspot for debugging');
     
     return manager;
   }
@@ -739,9 +771,9 @@ class HotspotManager {
   debugDialog() {
     console.log('🔍 Dialog Debug Info:');
     console.log('- Dialog element:', this.singleDialog);
-    console.log('- Dialog display:', this.singleDialog.style.display);
-    console.log('- Dialog opacity:', this.singleDialog.style.opacity);
-    console.log('- Dialog z-index:', this.singleDialog.style.zIndex);
+    console.log('- Dialog display:', this.singleDialog?.style.display);
+    console.log('- Dialog opacity:', this.singleDialog?.style.opacity);
+    console.log('- Dialog z-index:', this.singleDialog?.style.zIndex);
     console.log('- Selected hotspots:', this.selectedHotspots.size);
     console.log('- Current section:', this.currentSection);
     console.log('- Window width:', window.innerWidth);
@@ -749,16 +781,55 @@ class HotspotManager {
     console.log('- Is narrow desktop:', this.isNarrowDesktop());
     
     // Check if dialog is in DOM
-    const dialogInDOM = document.contains(this.singleDialog);
+    const dialogInDOM = this.singleDialog ? document.contains(this.singleDialog) : false;
     console.log('- Dialog in DOM:', dialogInDOM);
     
     // Check computed styles
-    if (dialogInDOM) {
+    if (dialogInDOM && this.singleDialog) {
       const computed = window.getComputedStyle(this.singleDialog);
       console.log('- Computed display:', computed.display);
       console.log('- Computed visibility:', computed.visibility);
       console.log('- Computed z-index:', computed.zIndex);
     }
+    
+    // Check hotspots
+    console.log('- Active hotspots count:', this.activeHotspots.size);
+    console.log('- Container element:', this.container);
+    console.log('- Container children:', this.container?.children.length);
+    
+    // Check section hotspots data
+    const sectionHotspots = this.hotspots.get(this.currentSection);
+    console.log('- Section hotspot data:', sectionHotspots);
+    
+    // List all active hotspots
+    this.activeHotspots.forEach((hotspot, index) => {
+      console.log(`  Hotspot ${index}:`, {
+        id: hotspot.dataset.hotspotId,
+        position: hotspot.style.top + ', ' + hotspot.style.left,
+        display: hotspot.style.display,
+        visibility: window.getComputedStyle(hotspot).visibility
+      });
+    });
+  }
+
+  /**
+   * Force create a test hotspot for debugging
+   */
+  createTestHotspot() {
+    console.log('🧪 Creating test hotspot for debugging...');
+    
+    const testConfig = {
+      id: 'test-hotspot',
+      position: { x: 0.5, y: 0.5 },
+      content: {
+        type: 'image',
+        source: 'assets/parameters/select1.png',
+        title: 'Test Hotspot'
+      }
+    };
+    
+    this.createHotspot(testConfig, 999);
+    console.log('✅ Test hotspot created');
   }
 
   // Legacy compatibility methods
