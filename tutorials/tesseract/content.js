@@ -1,6 +1,6 @@
 /**
  * Tesseract Tutorial Content Configuration
- * Single file containing all 14 sections - edit all content here!
+ * Single file containing all 14 sections + hotspots - edit all content here!
  */
 const TesseractContent = {
   tutorial: {
@@ -47,7 +47,13 @@ const TesseractContent = {
               </ul>
             `
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/network_overview.png",
+          aspectRatio: "3615:1097",
+          transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
+        },
+        hotspots: []
       },
 
       // Section 2: The CHOP Network
@@ -83,7 +89,13 @@ const TesseractContent = {
               </ul>
             `
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/chop_network.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
+        },
+        hotspots: []
       },
 
       // Section 3: Input Data 1: Mouse UV Control
@@ -120,6 +132,27 @@ const TesseractContent = {
               <p>This gives us the flexibility to choose our input monitoring scope based on the project requirements.</p>
             `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/mouse_uv_control.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "select1-detailed",
+            position: { x: 0.17, y: 0.35 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/select1.png",
+              title: "Select1 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Select1 CHOP Parameters",
+          images: ["Tesseract%20Tutorial%20Pictures/parameters/select1.png"]
         }
       },
 
@@ -164,6 +197,40 @@ const TesseractContent = {
               <p>This converts two static positions into dynamic velocity information, essential for responsive interaction.</p>
             `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/mouse_velocity.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "math3-params",
+            position: { x: 0.29, y: 0.04 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/math3.png",
+              title: "Math3 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "filter1-params",
+            position: { x: 0.52, y: 0.04 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/filter1.png",
+              title: "Filter1 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Math3 & Filter1 CHOP Parameters",
+          images: [
+            "Tesseract%20Tutorial%20Pictures/parameters/math3.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/filter1.png"
+          ]
         }
       },
 
@@ -207,6 +274,40 @@ const TesseractContent = {
               <p><strong>Why This Matters:</strong> If we didn't limit the speed, our velocity would keep increasing indefinitely, making the interaction uncontrollable. The Speed CHOP acts like friction, giving us natural, physics-based movement.</p>
             `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/centering_and_scaling.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "math1-params",
+            position: { x: 0.29, y: 0.35 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/math1.png",
+              title: "Math1 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "speed2-params",
+            position: { x: 0.41, y: 0.35 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/speed2.png",
+              title: "Speed2 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Math1 & Speed2 CHOP Parameters",
+          images: [
+            "Tesseract%20Tutorial%20Pictures/parameters/math1.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/speed2.png"
+          ]
         }
       },
 
@@ -240,6 +341,40 @@ const TesseractContent = {
               <p>The combination of velocity-based and position-based inputs gives us both immediate responsiveness and gentle, continuous movement when the mouse is stationary.</p>
             `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/angular_velocity.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "math2-params",
+            position: { x: 0.65, y: 0.30 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/math2.png",
+              title: "Math2 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "speed3-params",
+            position: { x: 0.76, y: 0.28 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/speed3.png",
+              title: "Speed3 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Math2 & Speed3 CHOP Parameters",
+          images: [
+            "Tesseract%20Tutorial%20Pictures/parameters/math2.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/speed3.png"
+          ]
         }
       },
 
@@ -263,11 +398,78 @@ const TesseractContent = {
             `
           },
           right: {
-            type: "image",
-            source: "tutorials/tesseract/assets/images/filter_trail_example.png",
-            alt: "Filter Trail Example",
-            className: "trail-image"
+            type: "html",
+            content: `
+              <img src="Tesseract%20Tutorial%20Pictures/Network%20images/filter_trail_example.png" alt="Filter Trail Example" class="trail-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
+            `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/mouse_wheel.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "mousein1-wheel",
+            position: { x: 0.03, y: 0.67 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/mousein1.png",
+              title: "MouseIn1 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "select2-params",
+            position: { x: 0.15, y: 0.67 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/select2.png",
+              title: "Select2 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "filter4-params",
+            position: { x: 0.29, y: 0.67 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/filter4.png",
+              title: "Filter4 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "filter3-params",
+            position: { x: 0.41, y: 0.67 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/filter3.png",
+              title: "Filter3 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "filter2-params",
+            position: { x: 0.53, y: 0.67 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/filter2.png",
+              title: "Filter2 CHOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Mouse Wheel Filter Chain Parameters",
+          images: [
+            "Tesseract%20Tutorial%20Pictures/parameters/mousein1.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/select2.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/filter4.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/filter3.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/filter2.png"
+          ]
         }
       },
 
@@ -306,7 +508,13 @@ const TesseractContent = {
               </ul>
             `
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/merging_and_null.png",
+          aspectRatio: "1852:571",
+          transition: { type: "slideRight", offset: { x: 0.1, y: 0 } }
+        },
+        hotspots: []
       },
 
       // Section 9: Input Data 2: Saved Data from TSV
@@ -340,12 +548,18 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "tsv-table",
-              source: "tutorials/tesseract/assets/code/euler_cycle.tsv",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/euler%20cycle.tsv",
               title: "Euler Cycle TSV Data",
               controls: ["fullscreen", "copy", "download"]
             }
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/euler_in.png",
+          aspectRatio: "1456:478",
+          transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
+        },
+        hotspots: []
       },
 
       // Section 10: Rotation Vertex GLSL
@@ -375,13 +589,30 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "tutorials/tesseract/assets/code/vert_rotation_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/vert_rotation_pixel.frag",
               title: "Vertex Rotation GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
             }
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/rotate_vertex_glsl.png",
+          aspectRatio: "1920:571",
+          transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "vert_rotation",
+            position: { x: 0.40, y: 0.35 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/vert_rotation.png",
+              title: "Vertex Rotation GLSL Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ]
       },
 
       // Section 11: Perspective GLSL
@@ -408,13 +639,30 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "tutorials/tesseract/assets/code/vert_perspective_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/vert_persprective_pixel.frag",
               title: "Vertex Perspective GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
             }
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/prespective_glsl.png",
+          aspectRatio: "1920:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "vert_perspective",
+            position: { x: 0.50, y: 0.40 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/vert_perspective.png",
+              title: "Vertex Perspective GLSL Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ]
       },
 
       // Section 12: 2D Points to 2D Lines
@@ -446,11 +694,45 @@ const TesseractContent = {
             `
           },
           right: {
-            type: "image",
-            source: "tutorials/tesseract/assets/images/blur.png",
-            alt: "Blur Result",
-            className: "blur-image"
+            type: "html",
+            content: `
+              <img src="Tesseract%20Tutorial%20Pictures/Network%20images/blur.png" alt="Blur Result" class="blur-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
+            `
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/2d_points_to_2d_lines.png",
+          aspectRatio: "1920:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "transform1",
+            position: { x: 0.35, y: 0.45 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/transform1.png",
+              title: "Transform1 TOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          },
+          {
+            id: "reorder1",
+            position: { x: 0.65, y: 0.45 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/reorder1.png",
+              title: "Reorder1 TOP Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "Transform1 & Reorder1 Parameters",
+          images: [
+            "Tesseract%20Tutorial%20Pictures/parameters/transform1.png",
+            "Tesseract%20Tutorial%20Pictures/parameters/reorder1.png"
+          ]
         }
       },
 
@@ -486,12 +768,33 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "tutorials/tesseract/assets/code/line_mindist_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/line_mindist_pixel.frag",
               title: "SDF Line Min Distance GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
             }
           }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/sdf_uneven_capsule.png",
+          aspectRatio: "1920:571",
+          transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
+        },
+        hotspots: [
+          {
+            id: "line_mindist",
+            position: { x: 0.50, y: 0.50 },
+            content: {
+              type: "image",
+              source: "Tesseract%20Tutorial%20Pictures/parameters/line_mindist.png",
+              title: "Line Min Distance Parameters"
+            },
+            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
+          }
+        ],
+        mobileParameters: {
+          title: "SDF Line Min Distance Parameters",
+          images: ["Tesseract%20Tutorial%20Pictures/parameters/line_mindist.png"]
         }
       },
 
@@ -533,7 +836,13 @@ const TesseractContent = {
               <p>The combination of these effects allows for fine-tuned control over the final appearance of our 4D hypercube visualization.</p>
             `
           }
-        }
+        },
+        background: {
+          image: "Tesseract%20Tutorial%20Pictures/Network%20images/post_processing.png",
+          aspectRatio: "1920:571",
+          transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
+        },
+        hotspots: []
       }
     ]
   }
