@@ -173,8 +173,18 @@ class ContentBlockManager {
     } else if (block.source) {
       // ❌ External source file - this should NOT happen with your new content.js
       console.warn(`⚠️ WARNING: Using external source for ${position}: ${block.source}`);
-      htmlContent = await this._loadContent(block.source);
-      console.log(`📁 Loaded HTML from: ${block.source}`);
+      console.error(`❌ STOPPING HERE - should use embedded content instead!`);
+      
+      // Instead of fetching, show error
+      container.innerHTML = `
+        <div style="color: red; padding: 1rem; border: 2px solid red; margin: 1rem;">
+          <h3>❌ Configuration Error</h3>
+          <p>This content block is trying to load external file: <code>${block.source}</code></p>
+          <p>It should use embedded content instead!</p>
+          <p>Check your section generation in content.js</p>
+        </div>
+      `;
+      return container;
     } else {
       console.error(`❌ HTML block for ${position} has no content or source:`, block);
       throw new Error('HTML block must specify either content or source');
