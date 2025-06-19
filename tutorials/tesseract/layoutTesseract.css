@@ -6,21 +6,21 @@
 /* === FONT FACES === */
 @font-face {
   font-family: 'Spy Agency';
-  src: url('./fonts/spyagencycond.ttf') format('truetype');
+  src: url('../../fonts/spyagencycond.ttf') format('truetype');
   font-weight: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Orbitron';
-  src: url('./fonts/Orbitron-Regular.ttf') format('truetype');
+  src: url('../../fonts/Orbitron-Regular.ttf') format('truetype');
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'Orbitron';
-  src: url('./fonts/Orbitron-Medium.ttf') format('truetype');
+  src: url('../../fonts/Orbitron-Medium.ttf') format('truetype');
   font-weight: 500;
   font-display: swap;
 }
