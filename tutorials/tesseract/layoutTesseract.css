@@ -1657,3 +1657,20 @@ p {
     display: none !important;
   }
 }
+
+/* ===== HOTSPOT MANAGER OVERRIDES - ADD TO BOTTOM ===== */
+.hotspot-click-area {
+  z-index: 6000 !important;
+  background: rgba(255, 0, 0, 0.3) !important; /* Temporarily make visible */
+}
+
+.single-parameter-dialog {
+  z-index: 5000 !important;
+  border: 3px solid #00ffff !important; /* Make dialog more visible */
+  background: #1a1a2e !important;
+}
+
+.single-parameter-dialog.active {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
