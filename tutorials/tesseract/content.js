@@ -49,7 +49,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/network_overview.png",
+          image: "assets/images/network_overview.png",
           aspectRatio: "3615:1097",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
         },
@@ -91,7 +91,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/chop_network.png",
+          image: "assets/images/chop_network.png",
           aspectRatio: "1852:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
         },
@@ -134,7 +134,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/mouse_uv_control.png",
+          image: "assets/images/mouse_uv_control.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -144,7 +144,7 @@ const TesseractContent = {
             position: { x: 0.17, y: 0.35 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/select1.png",
+              source: "assets/parameters/select1.png",
               title: "Select1 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -152,7 +152,7 @@ const TesseractContent = {
         ],
         mobileParameters: {
           title: "Select1 CHOP Parameters",
-          images: ["tutorials/tesseract/assets/parameters/select1.png"]
+          images: ["assets/parameters/select1.png"]
         }
       },
 
@@ -199,7 +199,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/mouse_velocity.png",
+          image: "assets/images/mouse_velocity.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -209,7 +209,7 @@ const TesseractContent = {
             position: { x: 0.29, y: 0.04 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/math3.png",
+              source: "assets/parameters/math3.png",
               title: "Math3 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -219,7 +219,7 @@ const TesseractContent = {
             position: { x: 0.52, y: 0.04 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/filter1.png",
+              source: "assets/parameters/filter1.png",
               title: "Filter1 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -228,8 +228,8 @@ const TesseractContent = {
         mobileParameters: {
           title: "Math3 & Filter1 CHOP Parameters",
           images: [
-            "tutorials/tesseract/assets/parameters/math3.png",
-            "tutorials/tesseract/assets/parameters/filter1.png"
+            "assets/parameters/math3.png",
+            "assets/parameters/filter1.png"
           ]
         }
       },
@@ -276,7 +276,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/centering_and_scaling.png",
+          image: "assets/images/centering_and_scaling.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -286,7 +286,7 @@ const TesseractContent = {
             position: { x: 0.29, y: 0.35 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/math1.png",
+              source: "assets/parameters/math1.png",
               title: "Math1 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -296,7 +296,7 @@ const TesseractContent = {
             position: { x: 0.41, y: 0.35 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/speed2.png",
+              source: "assets/parameters/speed2.png",
               title: "Speed2 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -305,8 +305,8 @@ const TesseractContent = {
         mobileParameters: {
           title: "Math1 & Speed2 CHOP Parameters",
           images: [
-            "tutorials/tesseract/assets/parameters/math1.png",
-            "tutorials/tesseract/assets/parameters/speed2.png"
+            "assets/parameters/math1.png",
+            "assets/parameters/speed2.png"
           ]
         }
       },
@@ -343,7 +343,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/angular_velocity.png",
+          image: "assets/images/angular_velocity.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -353,7 +353,7 @@ const TesseractContent = {
             position: { x: 0.65, y: 0.30 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/math2.png",
+              source: "assets/parameters/math2.png",
               title: "Math2 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -363,7 +363,7 @@ const TesseractContent = {
             position: { x: 0.76, y: 0.28 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/speed3.png",
+              source: "assets/parameters/speed3.png",
               title: "Speed3 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -372,8 +372,8 @@ const TesseractContent = {
         mobileParameters: {
           title: "Math2 & Speed3 CHOP Parameters",
           images: [
-            "tutorials/tesseract/assets/parameters/math2.png",
-            "tutorials/tesseract/assets/parameters/speed3.png"
+            "assets/parameters/math2.png",
+            "assets/parameters/speed3.png"
           ]
         }
       },
@@ -400,12 +400,12 @@ const TesseractContent = {
           right: {
             type: "html",
             content: `
-              <img src="tutorials/tesseract/assets/imagesparameters/filter_trail_example.png" alt="Filter Trail Example" class="trail-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
+              <img src="assets/images/filter_trail_example.png" alt="Filter Trail Example" class="trail-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
             `
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/mouse_wheel.png",
+          image: "assets/images/mouse_wheel.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -415,7 +415,7 @@ const TesseractContent = {
             position: { x: 0.03, y: 0.67 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/mousein1.png",
+              source: "assets/parameters/mousein1.png",
               title: "MouseIn1 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -425,7 +425,7 @@ const TesseractContent = {
             position: { x: 0.15, y: 0.67 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/select2.png",
+              source: "assets/parameters/select2.png",
               title: "Select2 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -435,7 +435,7 @@ const TesseractContent = {
             position: { x: 0.29, y: 0.67 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/filter4.png",
+              source: "assets/parameters/filter4.png",
               title: "Filter4 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -445,7 +445,7 @@ const TesseractContent = {
             position: { x: 0.41, y: 0.67 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/filter3.png",
+              source: "assets/parameters/filter3.png",
               title: "Filter3 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -455,7 +455,7 @@ const TesseractContent = {
             position: { x: 0.53, y: 0.67 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/filter2.png",
+              source: "assets/parameters/filter2.png",
               title: "Filter2 CHOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -464,11 +464,11 @@ const TesseractContent = {
         mobileParameters: {
           title: "Mouse Wheel Filter Chain Parameters",
           images: [
-            "tutorials/tesseract/assets/parameters/mousein1.png",
-            "tutorials/tesseract/assets/parameters/select2.png",
-            "tutorials/tesseract/assets/parameters/filter4.png",
-            "tutorials/tesseract/assets/parameters/filter3.png",
-            "tutorials/tesseract/assets/parameters/filter2.png"
+            "assets/parameters/mousein1.png",
+            "assets/parameters/select2.png",
+            "assets/parameters/filter4.png",
+            "assets/parameters/filter3.png",
+            "assets/parameters/filter2.png"
           ]
         }
       },
@@ -510,7 +510,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/merging_and_null.png",
+          image: "assets/images/merging_and_null.png",
           aspectRatio: "1852:571",
           transition: { type: "slideRight", offset: { x: 0.1, y: 0 } }
         },
@@ -548,14 +548,14 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "tsv-table",
-              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/tutorials/tesseract/assets/code/euler%20cycle.tsv",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/euler%20cycle.tsv",
               title: "Euler Cycle TSV Data",
               controls: ["fullscreen", "copy", "download"]
             }
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/euler_in.png",
+          image: "assets/images/euler_in.png",
           aspectRatio: "1456:478",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
         },
@@ -589,7 +589,7 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/tutorials/tesseract/assets/code/vert_rotation_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/vert_rotation_pixel.frag",
               title: "Vertex Rotation GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
@@ -597,7 +597,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/rotate_vertex_glsl.png",
+          image: "assets/images/rotate_vertex_glsl.png",
           aspectRatio: "1920:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
         },
@@ -607,7 +607,7 @@ const TesseractContent = {
             position: { x: 0.40, y: 0.35 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/vert_rotation.png",
+              source: "assets/parameters/vert_rotation.png",
               title: "Vertex Rotation GLSL Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -639,7 +639,7 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/tutorials/tesseract/assets/code/vert_persprective_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/vert_persprective_pixel.frag",
               title: "Vertex Perspective GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
@@ -647,7 +647,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/prespective_glsl.png",
+          image: "assets/images/prespective_glsl.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -657,7 +657,7 @@ const TesseractContent = {
             position: { x: 0.50, y: 0.40 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/vert_perspective.png",
+              source: "assets/parameters/vert_perspective.png",
               title: "Vertex Perspective GLSL Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -696,12 +696,12 @@ const TesseractContent = {
           right: {
             type: "html",
             content: `
-              <img src="tutorials/tesseract/assets/imagesparameters/blur.png" alt="Blur Result" class="blur-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
+              <img src="assets/images/blur.png" alt="Blur Result" class="blur-image" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">
             `
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/2d_points_to_2d_lines.png",
+          image: "assets/images/2d_points_to_2d_lines.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -711,7 +711,7 @@ const TesseractContent = {
             position: { x: 0.35, y: 0.45 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/transform1.png",
+              source: "assets/parameters/transform1.png",
               title: "Transform1 TOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -721,7 +721,7 @@ const TesseractContent = {
             position: { x: 0.65, y: 0.45 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/reorder1.png",
+              source: "assets/parameters/reorder1.png",
               title: "Reorder1 TOP Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -730,8 +730,8 @@ const TesseractContent = {
         mobileParameters: {
           title: "Transform1 & Reorder1 Parameters",
           images: [
-            "tutorials/tesseract/assets/parameters/transform1.png",
-            "tutorials/tesseract/assets/parameters/reorder1.png"
+            "assets/parameters/transform1.png",
+            "assets/parameters/reorder1.png"
           ]
         }
       },
@@ -768,7 +768,7 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/tutorials/tesseract/assets/code/line_mindist_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/line_mindist_pixel.frag",
               title: "SDF Line Min Distance GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
@@ -776,7 +776,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/sdf_uneven_capsule.png",
+          image: "assets/images/sdf_uneven_capsule.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
         },
@@ -786,7 +786,7 @@ const TesseractContent = {
             position: { x: 0.50, y: 0.50 },
             content: {
               type: "image",
-              source: "tutorials/tesseract/assets/parameters/line_mindist.png",
+              source: "assets/parameters/line_mindist.png",
               title: "Line Min Distance Parameters"
             },
             behavior: { trigger: "hover", sticky: true, mobileHidden: true }
@@ -794,7 +794,7 @@ const TesseractContent = {
         ],
         mobileParameters: {
           title: "SDF Line Min Distance Parameters",
-          images: ["tutorials/tesseract/assets/parameters/line_mindist.png"]
+          images: ["assets/parameters/line_mindist.png"]
         }
       },
 
@@ -838,7 +838,7 @@ const TesseractContent = {
           }
         },
         background: {
-          image: "tutorials/tesseract/assets/imagesparameters/post_processing.png",
+          image: "assets/images/post_processing.png",
           aspectRatio: "1920:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
         },
@@ -853,4 +853,48 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = TesseractContent;
 } else if (typeof window !== 'undefined') {
   window.TesseractContent = TesseractContent;
+}
+
+/**
+ * Validate content structure for debugging
+ */
+function validateContentStructure() {
+  console.log('🔍 Validating TesseractContent structure...');
+  
+  if (!window.TesseractContent) {
+    console.error('❌ TesseractContent not loaded');
+    return false;
+  }
+  
+  const content = window.TesseractContent;
+  
+  if (!content.tutorial) {
+    console.error('❌ Missing tutorial object');
+    return false;
+  }
+  
+  if (!content.tutorial.sections || !Array.isArray(content.tutorial.sections)) {
+    console.error('❌ Missing or invalid sections array');
+    return false;
+  }
+  
+  const sections = content.tutorial.sections;
+  console.log(`✅ Found ${sections.length} sections`);
+  
+  // Validate each section
+  sections.forEach((section, index) => {
+    if (!section.id || !section.title || !section.layout || !section.content) {
+      console.warn(`⚠️ Section ${index + 1} missing required properties:`, section);
+    } else {
+      console.log(`✅ Section ${section.id}: ${section.title}`);
+    }
+  });
+  
+  console.log('✅ Content structure validation complete');
+  return true;
+}
+
+// Make validation function globally available
+if (typeof window !== 'undefined') {
+  window.validateContentStructure = validateContentStructure;
 }
