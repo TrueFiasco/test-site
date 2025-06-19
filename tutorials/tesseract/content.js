@@ -1,6 +1,6 @@
 /**
  * Tesseract Tutorial Content Configuration
- * Single file containing all 14 sections + hotspots - edit all content here!
+ * Content-only configuration - hotspots now managed separately in hotspots.js
  */
 const TesseractContent = {
   tutorial: {
@@ -52,8 +52,7 @@ const TesseractContent = {
           image: "assets/images/network_overview.png",
           aspectRatio: "3615:1097",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
-        },
-        hotspots: []
+        }
       },
 
       // Section 2: The CHOP Network
@@ -94,8 +93,7 @@ const TesseractContent = {
           image: "assets/images/chop_network.png",
           aspectRatio: "1852:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
-        },
-        hotspots: []
+        }
       },
 
       // Section 3: Input Data 1: Mouse UV Control
@@ -137,22 +135,6 @@ const TesseractContent = {
           image: "assets/images/mouse_uv_control.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "select1-detailed",
-            position: { x: 0.17, y: 0.35 },
-            content: {
-              type: "image",
-              source: "assets/parameters/select1.png",
-              title: "Select1 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Select1 CHOP Parameters",
-          images: ["assets/parameters/select1.png"]
         }
       },
 
@@ -202,35 +184,6 @@ const TesseractContent = {
           image: "assets/images/mouse_velocity.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "math3-params",
-            position: { x: 0.29, y: 0.04 },
-            content: {
-              type: "image",
-              source: "assets/parameters/math3.png",
-              title: "Math3 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "filter1-params",
-            position: { x: 0.52, y: 0.04 },
-            content: {
-              type: "image",
-              source: "assets/parameters/filter1.png",
-              title: "Filter1 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Math3 & Filter1 CHOP Parameters",
-          images: [
-            "assets/parameters/math3.png",
-            "assets/parameters/filter1.png"
-          ]
         }
       },
 
@@ -279,35 +232,6 @@ const TesseractContent = {
           image: "assets/images/centering_and_scaling.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "math1-params",
-            position: { x: 0.29, y: 0.35 },
-            content: {
-              type: "image",
-              source: "assets/parameters/math1.png",
-              title: "Math1 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "speed2-params",
-            position: { x: 0.41, y: 0.35 },
-            content: {
-              type: "image",
-              source: "assets/parameters/speed2.png",
-              title: "Speed2 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Math1 & Speed2 CHOP Parameters",
-          images: [
-            "assets/parameters/math1.png",
-            "assets/parameters/speed2.png"
-          ]
         }
       },
 
@@ -346,35 +270,6 @@ const TesseractContent = {
           image: "assets/images/angular_velocity.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "math2-params",
-            position: { x: 0.65, y: 0.30 },
-            content: {
-              type: "image",
-              source: "assets/parameters/math2.png",
-              title: "Math2 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "speed3-params",
-            position: { x: 0.76, y: 0.28 },
-            content: {
-              type: "image",
-              source: "assets/parameters/speed3.png",
-              title: "Speed3 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Math2 & Speed3 CHOP Parameters",
-          images: [
-            "assets/parameters/math2.png",
-            "assets/parameters/speed3.png"
-          ]
         }
       },
 
@@ -408,68 +303,6 @@ const TesseractContent = {
           image: "assets/images/mouse_wheel.png",
           aspectRatio: "1852:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "mousein1-wheel",
-            position: { x: 0.03, y: 0.67 },
-            content: {
-              type: "image",
-              source: "assets/parameters/mousein1.png",
-              title: "MouseIn1 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "select2-params",
-            position: { x: 0.15, y: 0.67 },
-            content: {
-              type: "image",
-              source: "assets/parameters/select2.png",
-              title: "Select2 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "filter4-params",
-            position: { x: 0.29, y: 0.67 },
-            content: {
-              type: "image",
-              source: "assets/parameters/filter4.png",
-              title: "Filter4 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "filter3-params",
-            position: { x: 0.41, y: 0.67 },
-            content: {
-              type: "image",
-              source: "assets/parameters/filter3.png",
-              title: "Filter3 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "filter2-params",
-            position: { x: 0.53, y: 0.67 },
-            content: {
-              type: "image",
-              source: "assets/parameters/filter2.png",
-              title: "Filter2 CHOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Mouse Wheel Filter Chain Parameters",
-          images: [
-            "assets/parameters/mousein1.png",
-            "assets/parameters/select2.png",
-            "assets/parameters/filter4.png",
-            "assets/parameters/filter3.png",
-            "assets/parameters/filter2.png"
-          ]
         }
       },
 
@@ -513,8 +346,7 @@ const TesseractContent = {
           image: "assets/images/merging_and_null.png",
           aspectRatio: "1852:571",
           transition: { type: "slideRight", offset: { x: 0.1, y: 0 } }
-        },
-        hotspots: []
+        }
       },
 
       // Section 9: Input Data 2: Saved Data from TSV
@@ -558,8 +390,7 @@ const TesseractContent = {
           image: "assets/images/euler_in.png",
           aspectRatio: "1456:478",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
-        },
-        hotspots: []
+        }
       },
 
       // Section 10: Rotation Vertex GLSL
@@ -600,19 +431,7 @@ const TesseractContent = {
           image: "assets/images/rotate_vertex_glsl.png",
           aspectRatio: "1920:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "vert_rotation",
-            position: { x: 0.40, y: 0.35 },
-            content: {
-              type: "image",
-              source: "assets/parameters/vert_rotation.png",
-              title: "Vertex Rotation GLSL Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ]
+        }
       },
 
       // Section 11: Perspective GLSL
@@ -650,19 +469,7 @@ const TesseractContent = {
           image: "assets/images/prespective_glsl.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "vert_perspective",
-            position: { x: 0.50, y: 0.40 },
-            content: {
-              type: "image",
-              source: "assets/parameters/vert_perspective.png",
-              title: "Vertex Perspective GLSL Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ]
+        }
       },
 
       // Section 12: 2D Points to 2D Lines
@@ -704,35 +511,6 @@ const TesseractContent = {
           image: "assets/images/2d_points_to_2d_lines.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "transform1",
-            position: { x: 0.35, y: 0.45 },
-            content: {
-              type: "image",
-              source: "assets/parameters/transform1.png",
-              title: "Transform1 TOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          },
-          {
-            id: "reorder1",
-            position: { x: 0.65, y: 0.45 },
-            content: {
-              type: "image",
-              source: "assets/parameters/reorder1.png",
-              title: "Reorder1 TOP Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "Transform1 & Reorder1 Parameters",
-          images: [
-            "assets/parameters/transform1.png",
-            "assets/parameters/reorder1.png"
-          ]
         }
       },
 
@@ -779,22 +557,6 @@ const TesseractContent = {
           image: "assets/images/sdf_uneven_capsule.png",
           aspectRatio: "1920:571",
           transition: { type: "slideLeft", offset: { x: 0, y: 0 } }
-        },
-        hotspots: [
-          {
-            id: "line_mindist",
-            position: { x: 0.50, y: 0.50 },
-            content: {
-              type: "image",
-              source: "assets/parameters/line_mindist.png",
-              title: "Line Min Distance Parameters"
-            },
-            behavior: { trigger: "hover", sticky: true, mobileHidden: true }
-          }
-        ],
-        mobileParameters: {
-          title: "SDF Line Min Distance Parameters",
-          images: ["assets/parameters/line_mindist.png"]
         }
       },
 
@@ -841,14 +603,13 @@ const TesseractContent = {
           image: "assets/images/post_processing.png",
           aspectRatio: "1920:571",
           transition: { type: "slideRight", offset: { x: 1.0, y: 0 } }
-        },
-        hotspots: []
+        }
       }
     ]
   }
 };
 
-// Export for use in main application
+// Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = TesseractContent;
 } else if (typeof window !== 'undefined') {
@@ -891,6 +652,7 @@ function validateContentStructure() {
   });
   
   console.log('✅ Content structure validation complete');
+  console.log('📍 Hotspots now managed separately in hotspots.js');
   return true;
 }
 
