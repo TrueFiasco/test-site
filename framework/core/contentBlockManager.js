@@ -21,15 +21,23 @@ class ContentBlockManager {
   }
 
   /**
-   * Render a complete section
+   * Render a complete section into an existing element
    */
-  async renderSection(section) {
+  async renderSection(section, targetElement = null) {
     if (!section) {
       throw new Error('Section is required');
     }
 
     try {
-      const sectionElement = document.createElement('div');
+      // Use provided element or create new one
+      const sectionElement = targetElement || document.createElement('div');
+      
+      // Clear existing content if using existing element
+      if (targetElement) {
+        sectionElement.innerHTML = '';
+      }
+      
+      // Set up element properties
       sectionElement.className = 'tutorial-section';
       sectionElement.dataset.sectionId = section.id;
 
@@ -48,7 +56,7 @@ class ContentBlockManager {
       return sectionElement;
 
     } catch (error) {
-      return this._renderErrorSection(section, error);
+      return this._renderErrorSection(section, error, targetElement);
     }
   }
 
@@ -169,17 +177,28 @@ class ContentBlockManager {
     let htmlContent;
 
     if (block.content) {
-      // Embedded HTML content (preferred)
-      htmlContent = block.content;
+      // Embedded HTML content (preferred) - process images with correct basePath
+      htmlContent = this._processEmbeddedImages(block.content);
+      console.log('📝 Rendering embedded HTML content');
     } else if (block.source) {
       // External source file (fallback)
       htmlContent = await this._loadContent(block.source);
+      console.log('📁 Rendering external HTML content from:', block.source);
     } else {
       throw new Error('HTML block must specify either content or source');
     }
 
     container.innerHTML = htmlContent;
+    console.log('✅ HTML content rendered, container children:', container.children.length);
     return container;
+  }
+
+  /**
+   * Process embedded images to add correct basePath
+   */
+  _processEmbeddedImages(htmlContent) {
+    // Replace relative image paths that start with assets/ with full basePath
+    return htmlContent.replace(/src="assets\//g, `src="${this.options.basePath}assets/`);
   }
 
   /**
@@ -237,7 +256,8 @@ class ContentBlockManager {
     const img = document.createElement('img');
     
     if (block.source) {
-      img.src = block.source;
+      // Handle relative paths correctly
+      img.src = this._resolvePath(block.source);
     } else {
       throw new Error('Image block must specify source');
     }
@@ -381,6 +401,24 @@ class ContentBlockManager {
   }
 
   /**
+   * Resolve path - handle both relative and absolute paths correctly
+   */
+  _resolvePath(path) {
+    // If it's already an absolute URL, return as-is
+    if (path.startsWith('http')) {
+      return path;
+    }
+    
+    // If it already includes the basePath, don't add it again
+    if (path.startsWith(this.options.basePath)) {
+      return path;
+    }
+    
+    // For relative paths, add basePath
+    return `${this.options.basePath}${path}`;
+  }
+
+  /**
    * Load content from external source
    */
   async _loadContent(source) {
@@ -409,8 +447,11 @@ class ContentBlockManager {
    * Fetch content from URL
    */
   async _fetchContent(url) {
-    const fullUrl = url.startsWith('http') ? url : `${this.options.basePath}${url}`;
-    const response = await fetch(fullUrl);
+    const resolvedUrl = this._resolvePath(url);
+    
+    console.log(`🔗 Fetching: ${resolvedUrl}`);
+    
+    const response = await fetch(resolvedUrl);
     
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
@@ -485,7 +526,7 @@ class ContentBlockManager {
     if (parameters.images && Array.isArray(parameters.images)) {
       parameters.images.forEach(imagePath => {
         const img = document.createElement('img');
-        img.src = imagePath;
+        img.src = this._resolvePath(imagePath);
         img.alt = 'Parameter Image';
         container.appendChild(img);
       });
@@ -513,8 +554,8 @@ class ContentBlockManager {
   /**
    * Render error section
    */
-  _renderErrorSection(section, error) {
-    const sectionElement = document.createElement('div');
+  _renderErrorSection(section, error, targetElement = null) {
+    const sectionElement = targetElement || document.createElement('div');
     sectionElement.className = 'tutorial-section error-section';
     
     const errorContainer = document.createElement('div');
@@ -530,6 +571,9 @@ class ContentBlockManager {
       </div>
     `;
     
+    if (targetElement) {
+      sectionElement.innerHTML = '';
+    }
     sectionElement.appendChild(errorContainer);
     return sectionElement;
   }
