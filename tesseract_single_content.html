@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tesseract Tutorial - Interactive TouchDesigner Guide</title>
-  <link rel="stylesheet" href="layoutTesseract.css" />
+  <link rel="stylesheet" href="tutorials/tesseract/layoutTesseract.css" />
 </head>
 <body>
   <!-- Hero Section - KEEP YOUR EXISTING STRUCTURE -->
@@ -166,34 +166,16 @@
   <!-- NEW: Content Management System -->
   <script src="framework/core/contentBlockManager.js"></script>
   <script src="tutorials/tesseract/content.js"></script>
+  <script>
   window.validateContentStructure();
+  </script>
 
   <script>
     // ==========================================
-    // CONFIGURATION - USES YOUR FILE STRUCTURE
+    // CONFIGURATION - UPDATED FOR ROOT STRUCTURE
     // ==========================================
     
-    // Update parameter image paths for your structure
-    const parameterImageMap = {
-      'select1-detailed': 'select1.png',
-      'math3-params': 'math3.png',
-      'filter1-params': 'filter1.png',
-      'math1-params': 'math1.png',
-      'speed2-params': 'speed2.png',
-      'math2-params': 'math2.png',
-      'speed3-params': 'speed3.png',
-      'mousein1-wheel': 'mousein1.png',
-      'select2-params': 'select2.png',
-      'filter4-params': 'filter4.png',
-      'filter3-params': 'filter3.png',
-      'filter2-params': 'filter2.png',
-      'vert_rotation': 'vert_rotation.png',
-      'vert_perspective': 'vert_perspective.png',
-      'transform1': 'transform1.png',
-      'reorder1': 'reorder1.png',
-      'line_mindist': 'line_mindist.png'
-    };
-    
+    // Parameter image titles mapping
     const parameterTitleMap = {
       'select1-detailed': 'Select1 CHOP Parameters',
       'math3-params': 'Math3 CHOP Parameters',
@@ -207,127 +189,13 @@
       'filter4-params': 'Filter4 CHOP Parameters',
       'filter3-params': 'Filter3 CHOP Parameters',
       'filter2-params': 'Filter2 CHOP Parameters',
-      'vert_rotation': 'Vertex Rotation GLSL',
-      'vert_perspective': 'Vertex Perspective GLSL',
+      'vert_rotation': 'Vertex Rotation GLSL Parameters',
+      'vert_perspective': 'Vertex Perspective GLSL Parameters',
       'transform1': 'Transform1 TOP Parameters',
       'reorder1': 'Reorder1 TOP Parameters',
       'line_mindist': 'Line Min Distance Parameters'
     };
     
-    // Section configuration with your image paths
-    const sectionConfig = {
-      1: { 
-        aspectRatio: "3615:1097", 
-        offset: {x: 1.0, y: 0},
-        image: "tutorials/tesseract/assets/images/network_overview.png",
-        hotspots: []
-      },
-      2: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 1.0, y: 0},
-        image: "tutorials/tesseract/assets/images/chop_network.png",
-        hotspots: []
-      },
-      3: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/mouse_uv_control.png",
-        hotspots: [
-          { top: "35%", left: "17%", type: "select1-detailed" }
-        ]
-      },
-      4: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/mouse_velocity.png",
-        hotspots: [
-          { top: "4%", left: "29%", type: "math3-params" },
-          { top: "4%", left: "52%", type: "filter1-params" }
-        ]
-      },
-      5: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/centering_and_scaling.png",
-        hotspots: [
-          { top: "35%", left: "29%", type: "math1-params" },
-          { top: "35%", left: "41%", type: "speed2-params" }
-        ]
-      },
-      6: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/angular_velocity.png",
-        hotspots: [
-          { top: "30%", left: "65%", type: "math2-params" },
-          { top: "28%", left: "76%", type: "speed3-params" }
-        ]
-      },
-      7: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/mouse_wheel.png",
-        hotspots: [
-          { top: "67%", left: "3%", type: "mousein1-wheel" },
-          { top: "67%", left: "15%", type: "select2-params" },
-          { top: "67%", left: "29%", type: "filter4-params" },
-          { top: "67%", left: "41%", type: "filter3-params" },
-          { top: "67%", left: "53%", type: "filter2-params" }
-        ]
-      },
-      8: { 
-        aspectRatio: "1852:571", 
-        offset: {x: 0.1, y: 0},
-        image: "tutorials/tesseract/assets/images/merging_and_null.png",
-        hotspots: []
-      },
-      9: { 
-        aspectRatio: "1456:478", 
-        offset: {x: 1.0, y: 0},
-        image: "tutorials/tesseract/assets/images/euler_in.png",
-        hotspots: []
-      },
-      10: { 
-        aspectRatio: "1920:571", 
-        offset: {x: 1.0, y: 0},
-        image: "tutorials/tesseract/assets/images/rotate_vertex_glsl.png",
-        hotspots: [
-          { top: "35%", left: "40%", type: "vert_rotation" }
-        ]
-      },
-      11: { 
-        aspectRatio: "1920:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/prespective_glsl.png",
-        hotspots: [
-          { top: "40%", left: "50%", type: "vert_perspective" }
-        ]
-      },
-      12: { 
-        aspectRatio: "1920:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/2d_points_to_2d_lines.png",
-        hotspots: [
-          { top: "45%", left: "35%", type: "transform1" },
-          { top: "45%", left: "65%", type: "reorder1" }
-        ]
-      },
-      13: { 
-        aspectRatio: "1920:571", 
-        offset: {x: 0, y: 0},
-        image: "tutorials/tesseract/assets/images/sdf_uneven_capsule.png",
-        hotspots: [
-          { top: "50%", left: "50%", type: "line_mindist" }
-        ]
-      },
-      14: { 
-        aspectRatio: "1920:571", 
-        offset: {x: 1.0, y: 0},
-        image: "tutorials/tesseract/assets/images/post_processing.png",
-        hotspots: []
-      }
-    };
-
     // Section titles
     const sectionTitles = [
       "TESSERACT Tutorial",
@@ -440,7 +308,7 @@
       }
     }
 
-    // Initialize ContentBlockManager
+    // Initialize ContentBlockManager with correct base path
     function initContentManager() {
       contentManager = new ContentBlockManager({
         basePath: 'tutorials/tesseract/',
@@ -632,16 +500,24 @@
     }
 
     // ==========================================
-    // IMAGE TRANSITIONS & HOTSPOTS - KEEP YOUR EXISTING
+    // IMAGE TRANSITIONS & HOTSPOTS - UPDATED FOR NEW STRUCTURE
     // ==========================================
 
     let currentTransition = null;
     let transitionCounter = 0;
 
     function transitionStaticImage(newSection) {
-      const config = sectionConfig[newSection];
-      if (!config) return;
-    
+      // Get config from TesseractContent instead of old sectionConfig
+      const sectionData = TesseractContent.tutorial.sections.find(s => s.id === newSection);
+      if (!sectionData || !sectionData.background) return;
+
+      const config = {
+        aspectRatio: sectionData.background.aspectRatio,
+        offset: sectionData.background.transition?.offset || { x: 0, y: 0 },
+        image: `tutorials/tesseract/${sectionData.background.image}`, // Add full path
+        hotspots: sectionData.hotspots || []
+      };
+
       const imageContainer = document.getElementById('staticImageContainer');
       if (!imageContainer) return;
     
@@ -744,7 +620,7 @@
       }
     }
 
-    // Keep all your existing hotspot functions
+    // Updated hotspot functions for new structure
     function updateHotspots(hotspots) {
       const hotspotContainer = document.getElementById('hotspotContainer');
       if (!hotspotContainer) return;
@@ -757,21 +633,21 @@
       hotspots.forEach((hotspotConfig, index) => {
         const hotspot = document.createElement('div');
         hotspot.className = 'hotspot';
-        hotspot.style.top = hotspotConfig.top;
-        hotspot.style.left = hotspotConfig.left;
-        hotspot.dataset.type = hotspotConfig.type;
+        hotspot.style.top = (hotspotConfig.position.y * 100) + '%';
+        hotspot.style.left = (hotspotConfig.position.x * 100) + '%';
+        hotspot.dataset.type = hotspotConfig.id;
         hotspot.dataset.index = index;
         
         hotspot.addEventListener('click', (e) => {
           e.stopPropagation();
           const rect = hotspot.getBoundingClientRect();
-          toggleStickyDialog(hotspotConfig.type, hotspot, rect.right + 10, rect.top);
+          toggleStickyDialog(hotspotConfig.id, hotspot, rect.right + 10, rect.top);
         });
         
         hotspot.addEventListener('mouseenter', (e) => {
           if (!stickyHotspots.has(hotspot)) {
             const rect = hotspot.getBoundingClientRect();
-            showParameterDialog(hotspotConfig.type, rect.right + 10, rect.top, hotspot);
+            showParameterDialog(hotspotConfig.id, rect.right + 10, rect.top, hotspot);
           }
         });
         
@@ -786,20 +662,74 @@
     }
     
     function showParameterDialog(type, x, y, sourceHotspot = null) {
-      // Your existing implementation
-      // (Keep all your existing dialog code here)
+      const dialog = document.getElementById('parameterDialog');
+      const title = document.getElementById('parameterTitle');
+      const content = document.getElementById('parameterContent');
+      
+      if (!dialog || !title || !content) return;
+      
+      // Set title from parameterTitleMap
+      title.textContent = parameterTitleMap[type] || type;
+      
+      // Create image with full path using the hotspot's source from content
+      const sectionData = TesseractContent.tutorial.sections.find(s => s.id === currentSection);
+      if (sectionData && sectionData.hotspots) {
+        const hotspotData = sectionData.hotspots.find(h => h.id === type);
+        if (hotspotData && hotspotData.content && hotspotData.content.source) {
+          const fullImagePath = `tutorials/tesseract/${hotspotData.content.source}`;
+          content.innerHTML = `<img src="${fullImagePath}" alt="${type} parameters" style="max-width: 100%; height: auto;">`;
+        } else {
+          content.innerHTML = `<p>Parameter image not found for ${type}</p>`;
+        }
+      } else {
+        content.innerHTML = `<p>Parameter image not found for ${type}</p>`;
+      }
+      
+      // Position dialog
+      dialog.style.left = Math.min(x, window.innerWidth - 350) + 'px';
+      dialog.style.top = Math.max(10, Math.min(y, window.innerHeight - 200)) + 'px';
+      
+      dialog.classList.add('active');
     }
     
     function scheduleHideDialog(sourceHotspot = null) {
-      // Your existing implementation
+      setTimeout(() => {
+        const dialog = document.getElementById('parameterDialog');
+        if (dialog && !stickyHotspots.has(sourceHotspot)) {
+          dialog.classList.remove('active');
+        }
+      }, 100);
     }
     
     function toggleStickyDialog(type, hotspot, x, y) {
-      // Your existing implementation
+      if (stickyHotspots.has(hotspot)) {
+        // Remove from sticky
+        stickyHotspots.delete(hotspot);
+        hotspot.classList.remove('sticky');
+        
+        const dialog = document.getElementById('parameterDialog');
+        if (dialog) {
+          dialog.classList.remove('active');
+        }
+      } else {
+        // Add to sticky
+        stickyHotspots.add(hotspot);
+        hotspot.classList.add('sticky');
+        showParameterDialog(type, x, y, hotspot);
+      }
     }
     
     function hideParameterDialog() {
-      // Your existing implementation
+      const dialog = document.getElementById('parameterDialog');
+      if (dialog) {
+        dialog.classList.remove('active');
+      }
+      
+      // Clear all sticky hotspots
+      stickyHotspots.forEach(hotspot => {
+        hotspot.classList.remove('sticky');
+      });
+      stickyHotspots.clear();
     }
 
     function onWheel(event) {
@@ -828,6 +758,9 @@
     window.goToNextSection = goToNextSection;
     window.goToPrevSection = goToPrevSection;
     window.transitionToSection = transitionToSection;
+    window.goToHero = () => transitionToSection(0);
+    window.goToTutorialsPage = () => window.history.back();
+    window.hideParameterDialog = hideParameterDialog;
 
     // ==========================================
     // INITIALIZATION
@@ -844,7 +777,7 @@
         generateTutorialSections();
         console.log('✅ Tutorial sections generated');
         
-        // Initialize TesseractShader (your existing code)
+        // Initialize TesseractShader
         tesseractShader = new TesseractShader('hypercube-canvas', {
           onTutorialOpen: openTutorial,
           getTutorialState: () => tutorialOpen
@@ -853,7 +786,7 @@
         await tesseractShader.init();
         console.log('✅ TesseractShader initialized');
         
-        // Initialize Enhanced Control Panel (your existing code)
+        // Initialize Enhanced Control Panel
         enhancedControlPanel = new EnhancedControlPanel(tesseractShader);
         window.enhancedControlPanel = enhancedControlPanel;
         console.log('✅ Enhanced Control Panel initialized');
@@ -862,7 +795,7 @@
         updateSectionTitle();
         setupMobileButton();
         
-        // Initialize mobile features (your existing code)
+        // Initialize mobile features
         if (isMobile) {
           try {
             mobileSwipeGestures = new MobileSwipeGestures();
@@ -918,7 +851,7 @@
       init();
     }
 
-    // Keep all your existing event listeners
+    // Event listeners
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.widget-fullscreen.active').forEach(modal => {
