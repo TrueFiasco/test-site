@@ -17,7 +17,6 @@ class ContentBlockManager {
 
   async init() {
     if (this.isInitialized) return;
-    console.log('✅ ContentBlockManager initialized');
     this.isInitialized = true;
   }
 
@@ -28,8 +27,6 @@ class ContentBlockManager {
     if (!section) {
       throw new Error('Section is required');
     }
-
-    console.log(`📄 Rendering section ${section.id}: ${section.title}`);
 
     try {
       const sectionElement = document.createElement('div');
@@ -51,7 +48,6 @@ class ContentBlockManager {
       return sectionElement;
 
     } catch (error) {
-      console.error(`❌ Error rendering section ${section.id}:`, error);
       return this._renderErrorSection(section, error);
     }
   }
@@ -159,7 +155,6 @@ class ContentBlockManager {
           throw new Error(`Unknown content type: ${block.type}`);
       }
     } catch (error) {
-      console.error('❌ Error rendering content block:', error);
       return this._renderErrorBlock(error);
     }
   }
@@ -456,7 +451,6 @@ class ContentBlockManager {
       });
 
     } catch (error) {
-      console.error('❌ Failed to load TSV data:', error);
       const tbody = table.querySelector('tbody');
       tbody.innerHTML = '<tr><td colspan="100%" style="text-align: center; color: #ff6b6b;">Failed to load data</td></tr>';
     }
@@ -471,7 +465,6 @@ class ContentBlockManager {
       codeElement.textContent = codeData;
       codeElement.classList.remove('loading');
     } catch (error) {
-      console.error('❌ Failed to load code data:', error);
       codeElement.textContent = 'Failed to load code';
       codeElement.classList.remove('loading');
       codeElement.classList.add('error');
@@ -561,7 +554,6 @@ class ContentBlockManager {
    */
   clearCache() {
     this.contentCache.clear();
-    console.log('🗑️ Content cache cleared');
   }
 
   /**
