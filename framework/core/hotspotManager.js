@@ -39,25 +39,31 @@ class HotspotManager {
     if (this.isInitialized) return;
     
     console.log('🎯 Initializing HotspotManager...');
+    console.log(`📱 Mobile mode: ${this.isMobile}`);
     
     // Find or create containers
     this.container = document.querySelector(this.options.containerSelector);
     if (!this.container) {
       console.warn('⚠️ Hotspot container not found, creating one...');
       this.container = this.createHotspotContainer();
+    } else {
+      console.log('✅ Hotspot container found');
     }
     
     // Create dialog container for multi-dialog support
     this.createDialogContainer();
+    console.log('✅ Dialog container created');
     
     // Load hotspot data
     await this.loadHotspotData();
     
     // Setup event listeners
     this.setupEventListeners();
+    console.log('✅ Event listeners setup');
     
     this.isInitialized = true;
     console.log('✅ HotspotManager initialized successfully');
+    console.log(`📊 Loaded hotspots for ${this.hotspots.size} sections`);
   }
 
   /**
@@ -187,11 +193,6 @@ class HotspotManager {
    * Update hotspots for a specific section
    */
   updateHotspots(sectionId) {
-    if (this.isMobile) {
-      this.clearHotspots();
-      return;
-    }
-    
     this.currentSection = sectionId;
     this.clearHotspots();
     
@@ -200,11 +201,86 @@ class HotspotManager {
       return;
     }
     
+    if (this.isMobile) {
+      // Mobile: Add parameter images to section content instead of hotspots
+      this.addMobileParameterContent(sectionId, sectionHotspots);
+      return;
+    }
+    
     console.log(`🎯 Updating hotspots for section ${sectionId}: ${sectionHotspots.length} hotspots`);
     
     sectionHotspots.forEach((hotspotConfig, index) => {
       this.createHotspot(hotspotConfig, index);
     });
+  }
+
+  /**
+   * Add parameter images to section content on mobile
+   */
+  addMobileParameterContent(sectionId, hotspots) {
+    const sectionElement = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (!sectionElement) return;
+    
+    // Remove any existing mobile parameters
+    const existingParams = sectionElement.querySelector('.mobile-parameters');
+    if (existingParams) {
+      existingParams.remove();
+    }
+    
+    // Create mobile parameters container
+    const mobileParams = document.createElement('div');
+    mobileParams.className = 'mobile-parameters';
+    mobileParams.style.cssText = `
+      display: block;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      z-index: 25;
+      position: relative;
+      clear: both;
+    `;
+    
+    const title = document.createElement('h4');
+    title.textContent = 'Parameters';
+    title.style.cssText = `
+      color: #00ffff;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    `;
+    mobileParams.appendChild(title);
+    
+    // Add each parameter image
+    hotspots.forEach(hotspot => {
+      if (hotspot.content && hotspot.content.type === 'image' && hotspot.content.source) {
+        const img = document.createElement('img');
+        img.src = `${this.options.basePath}${hotspot.content.source}`;
+        img.alt = hotspot.content.title || hotspot.id;
+        img.style.cssText = `
+          width: 100%;
+          border-radius: 5px;
+          margin-bottom: 1.5rem;
+        `;
+        
+        // Add title above image
+        const imgTitle = document.createElement('p');
+        imgTitle.textContent = hotspot.content.title || hotspot.id;
+        imgTitle.style.cssText = `
+          color: #00ffff;
+          font-weight: bold;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+        `;
+        
+        mobileParams.appendChild(imgTitle);
+        mobileParams.appendChild(img);
+      }
+    });
+    
+    // Add to end of section
+    sectionElement.appendChild(mobileParams);
+    
+    console.log(`📱 Added ${hotspots.length} parameter images to mobile section ${sectionId}`);
   }
 
   /**
@@ -234,26 +310,50 @@ class HotspotManager {
     hotspot.dataset.hotspotId = config.id;
     hotspot.dataset.index = index;
     
-    // Event listeners
+    console.log(`🎯 Creating hotspot ${config.id} at (${config.position.x}, ${config.position.y})`);
+    
+    // Event listeners with debugging
     hotspot.addEventListener('click', (e) => {
       e.stopPropagation();
+      console.log(`🎯 Hotspot ${config.id} clicked`);
       this.toggleStickyDialog(config, hotspot);
     });
     
     hotspot.addEventListener('mouseenter', (e) => {
+      console.log(`🎯 Hotspot ${config.id} mouseenter`);
       if (!this.stickyHotspots.has(hotspot)) {
         this.showDialog(config, hotspot);
       }
     });
     
     hotspot.addEventListener('mouseleave', (e) => {
+      console.log(`🎯 Hotspot ${config.id} mouseleave`);
       if (!this.stickyHotspots.has(hotspot)) {
         this.scheduleHideDialog(config.id, hotspot);
       }
     });
     
+    // Add hover styling via CSS
+    hotspot.addEventListener('mouseenter', () => {
+      hotspot.style.transform = 'translate(-50%, -50%) scale(1.3)';
+      hotspot.style.background = '#ff00ff';
+      hotspot.style.boxShadow = '0 0 35px rgba(255, 0, 255, 0.8)';
+      hotspot.style.animation = 'none';
+    });
+    
+    hotspot.addEventListener('mouseleave', () => {
+      if (!this.stickyHotspots.has(hotspot)) {
+        hotspot.style.transform = 'translate(-50%, -50%) scale(1)';
+        hotspot.style.background = '#00ffff';
+        hotspot.style.boxShadow = '0 0 22px rgba(0, 255, 255, 0.7)';
+        hotspot.style.animation = 'pulse 2s infinite';
+      }
+    });
+    
     this.container.appendChild(hotspot);
     this.activeHotspots.add(hotspot);
+    
+    console.log(`✅ Hotspot ${config.id} created and added to container`);
   }
 
   /**
@@ -264,8 +364,11 @@ class HotspotManager {
     
     // If dialog already exists, don't create another
     if (this.activeDialogs.has(dialogId)) {
+      console.log(`🎯 Dialog ${dialogId} already active`);
       return;
     }
+    
+    console.log(`🎯 Creating dialog for ${dialogId}`);
     
     const dialog = this.createDialog(config, sourceHotspot);
     this.activeDialogs.set(dialogId, {
@@ -282,6 +385,7 @@ class HotspotManager {
     // Show dialog
     setTimeout(() => {
       dialog.classList.add('active');
+      console.log(`✅ Dialog ${dialogId} now visible`);
     }, 10);
   }
 
@@ -308,6 +412,7 @@ class HotspotManager {
       backdrop-filter: blur(10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       transform: scale(0.95);
+      display: block;
     `;
     
     // Create header
@@ -336,7 +441,14 @@ class HotspotManager {
     // Add image
     if (config.content.type === 'image' && config.content.source) {
       const img = document.createElement('img');
-      img.src = `${this.options.basePath}${config.content.source}`;
+      
+      // Fix path resolution - ensure full path
+      let imagePath = config.content.source;
+      if (!imagePath.startsWith('http') && !imagePath.startsWith('/')) {
+        imagePath = `${this.options.basePath}${imagePath}`;
+      }
+      
+      img.src = imagePath;
       img.alt = config.content.title || config.id;
       img.style.cssText = `
         width: 100%;
@@ -346,10 +458,17 @@ class HotspotManager {
         transition: opacity 0.3s ease;
       `;
       
+      console.log(`🖼️ Loading image: ${imagePath}`);
+      
+      img.onload = () => {
+        console.log(`✅ Image loaded successfully: ${imagePath}`);
+      };
+      
       img.onerror = () => {
+        console.error(`❌ Failed to load image: ${imagePath}`);
         content.innerHTML = `
-          <p style="color: #ff6b6b; font-style: italic; text-align: center; padding: 1rem;">
-            Failed to load parameter image: ${config.content.source}
+          <p style="color: #ff6b6b; font-style: italic; text-align: center; padding: 1rem; background: rgba(255, 107, 107, 0.1); border-radius: 5px; border: 1px solid rgba(255, 107, 107, 0.3);">
+            Failed to load parameter image:<br><code>${config.content.source}</code>
           </p>
         `;
       };
@@ -373,6 +492,7 @@ class HotspotManager {
       transition: background 0.3s ease;
     `;
     closeBtn.addEventListener('click', () => {
+      console.log(`🎯 Closing dialog ${config.id} via button`);
       this.hideDialog(config.id);
     });
     closeBtn.addEventListener('mouseenter', () => {
@@ -390,10 +510,15 @@ class HotspotManager {
    * Position dialog with smart collision avoidance
    */
   positionDialog(dialog, sourceHotspot) {
-    if (!sourceHotspot) return;
+    if (!sourceHotspot) {
+      // Fallback positioning if no source hotspot
+      dialog.style.left = '50px';
+      dialog.style.top = '50px';
+      console.log('🎯 Using fallback dialog positioning');
+      return;
+    }
     
     const hotspotRect = sourceHotspot.getBoundingClientRect();
-    const dialogRect = dialog.getBoundingClientRect();
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight
@@ -403,28 +528,42 @@ class HotspotManager {
     let x = hotspotRect.right + this.options.dialogOffset.x;
     let y = hotspotRect.top + this.options.dialogOffset.y;
     
+    // Get dialog dimensions (estimate if not rendered yet)
+    const dialogRect = dialog.getBoundingClientRect();
+    const dialogWidth = dialogRect.width || 300;
+    const dialogHeight = dialogRect.height || 200;
+    
     // Collision avoidance with screen edges
-    if (x + dialogRect.width > viewport.width - 20) {
-      x = hotspotRect.left - dialogRect.width - this.options.dialogOffset.x;
+    if (x + dialogWidth > viewport.width - 20) {
+      x = hotspotRect.left - dialogWidth - this.options.dialogOffset.x;
     }
     
-    if (y + dialogRect.height > viewport.height - 20) {
-      y = viewport.height - dialogRect.height - 20;
+    if (y + dialogHeight > viewport.height - 20) {
+      y = viewport.height - dialogHeight - 20;
     }
     
     if (y < 20) {
       y = 20;
     }
     
+    if (x < 10) {
+      x = 10;
+    }
+    
     // Collision avoidance with other dialogs
     if (this.options.enableCollisionAvoidance) {
-      const adjustment = this.findDialogCollisionAdjustment(x, y, dialogRect.width, dialogRect.height);
+      const adjustment = this.findDialogCollisionAdjustment(x, y, dialogWidth, dialogHeight);
       x += adjustment.x;
       y += adjustment.y;
     }
     
-    dialog.style.left = `${Math.max(10, x)}px`;
-    dialog.style.top = `${Math.max(10, y)}px`;
+    const finalX = Math.max(10, Math.min(x, viewport.width - dialogWidth - 10));
+    const finalY = Math.max(10, Math.min(y, viewport.height - dialogHeight - 10));
+    
+    dialog.style.left = `${finalX}px`;
+    dialog.style.top = `${finalY}px`;
+    
+    console.log(`🎯 Positioned dialog at (${finalX}, ${finalY})`);
   }
 
   /**
@@ -466,15 +605,33 @@ class HotspotManager {
    * Toggle sticky dialog (click-to-pin)
    */
   toggleStickyDialog(config, hotspot) {
+    console.log(`🎯 Toggling sticky dialog for ${config.id}`);
+    
     if (this.stickyHotspots.has(hotspot)) {
       // Remove from sticky
+      console.log(`📌 Removing sticky state from ${config.id}`);
       this.stickyHotspots.delete(hotspot);
       hotspot.classList.remove('sticky');
+      
+      // Reset hotspot styling
+      hotspot.style.transform = 'translate(-50%, -50%) scale(1)';
+      hotspot.style.background = '#00ffff';
+      hotspot.style.boxShadow = '0 0 22px rgba(0, 255, 255, 0.7)';
+      hotspot.style.animation = 'pulse 2s infinite';
+      
       this.hideDialog(config.id);
     } else {
       // Add to sticky
+      console.log(`📌 Adding sticky state to ${config.id}`);
       this.stickyHotspots.add(hotspot);
       hotspot.classList.add('sticky');
+      
+      // Set sticky styling
+      hotspot.style.transform = 'translate(-50%, -50%) scale(1.3)';
+      hotspot.style.background = '#ffff00';
+      hotspot.style.boxShadow = '0 0 35px rgba(255, 255, 0, 0.8)';
+      hotspot.style.animation = 'none';
+      
       this.showDialog(config, hotspot);
     }
   }
@@ -529,11 +686,22 @@ class HotspotManager {
   clearHotspots() {
     this.hideAllDialogs();
     
+    // Clear desktop hotspots
     this.activeHotspots.forEach(hotspot => {
       if (hotspot.parentNode) {
         hotspot.parentNode.removeChild(hotspot);
       }
     });
+    
+    // Clear mobile parameter content
+    if (this.isMobile) {
+      const mobileParams = document.querySelectorAll('.mobile-parameters');
+      mobileParams.forEach(param => {
+        if (param.parentNode) {
+          param.parentNode.removeChild(param);
+        }
+      });
+    }
     
     this.activeHotspots.clear();
     this.stickyHotspots.clear();
@@ -645,15 +813,51 @@ if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
     .parameter-dialog.multi-dialog.active {
-      opacity: 1;
-      transform: scale(1);
+      opacity: 1 !important;
+      transform: scale(1) !important;
+      display: block !important;
+    }
+    
+    .parameter-dialog.multi-dialog {
+      display: block;
+      opacity: 0;
+      transform: scale(0.95);
     }
     
     .hotspot.sticky {
-      transform: translate(-50%, -50%) scale(1.3);
-      background: #ffff00;
-      box-shadow: 0 0 35px rgba(255, 255, 0, 0.8);
-      animation: none;
+      transform: translate(-50%, -50%) scale(1.3) !important;
+      background: #ffff00 !important;
+      box-shadow: 0 0 35px rgba(255, 255, 0, 0.8) !important;
+      animation: none !important;
+    }
+    
+    .mobile-parameters {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .mobile-parameters {
+        display: block !important;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        z-index: 25;
+        position: relative;
+        clear: both;
+      }
+      
+      .mobile-parameters h4 {
+        color: #00ffff;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
+      
+      .mobile-parameters img {
+        width: 100%;
+        border-radius: 5px;
+        margin-bottom: 1.5rem;
+      }
     }
     
     @keyframes pulse {
@@ -665,6 +869,13 @@ if (typeof document !== 'undefined') {
         transform: translate(-50%, -50%) scale(1.2); 
         opacity: 0.7; 
       }
+    }
+    
+    /* Ensure dialogs are always visible when active */
+    .parameter-dialog.multi-dialog.active {
+      z-index: 5000 !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
     }
   `;
   document.head.appendChild(style);
