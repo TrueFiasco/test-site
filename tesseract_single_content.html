@@ -136,19 +136,13 @@
     <!-- Static Image Container - KEEP YOUR EXISTING -->
     <div class="static-image-container">
       <div class="image-transition-container" id="staticImageContainer">
+        <!-- HotspotManager will create and manage hotspots here -->
         <div id="hotspotContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
       </div>
     </div>
 
     <!-- Progress Bar - KEEP YOUR EXISTING -->
     <div class="progress-bar" id="progressBar"></div>
-  </div>
-
-  <!-- Parameter Dialog -->
-  <div class="parameter-dialog" id="parameterDialog">
-    <h4 id="parameterTitle">Parameters</h4>
-    <div id="parameterContent"></div>
-    <button class="widget-btn" onclick="hideParameterDialog()" style="margin-top: 1rem;">Close</button>
   </div>
 
   <!-- Copy Notification -->
@@ -163,9 +157,14 @@
   <script src="shared/components/mobileSwipeGestures.js"></script>
   <script src="shared/components/mobileMotionControl.js"></script>
 
-  <!-- NEW: Content Management System -->
+  <!-- FRAMEWORK MODULES -->
   <script src="framework/core/contentBlockManager.js"></script>
+  <script src="framework/core/hotspotManager.js"></script>
+  
+  <!-- CONTENT AND HOTSPOT DATA -->
   <script src="tutorials/tesseract/content.js"></script>
+  <script src="tutorials/tesseract/hotspots.js"></script>
+  
   <script>
   window.validateContentStructure();
   </script>
@@ -174,27 +173,6 @@
     // ==========================================
     // CONFIGURATION - UPDATED FOR ROOT STRUCTURE
     // ==========================================
-    
-    // Parameter image titles mapping
-    const parameterTitleMap = {
-      'select1-detailed': 'Select1 CHOP Parameters',
-      'math3-params': 'Math3 CHOP Parameters',
-      'filter1-params': 'Filter1 CHOP Parameters',
-      'math1-params': 'Math1 CHOP Parameters',
-      'speed2-params': 'Speed2 CHOP Parameters',
-      'math2-params': 'Math2 CHOP Parameters',
-      'speed3-params': 'Speed3 CHOP Parameters',
-      'mousein1-wheel': 'MouseIn1 CHOP Parameters',
-      'select2-params': 'Select2 CHOP Parameters',
-      'filter4-params': 'Filter4 CHOP Parameters',
-      'filter3-params': 'Filter3 CHOP Parameters',
-      'filter2-params': 'Filter2 CHOP Parameters',
-      'vert_rotation': 'Vertex Rotation GLSL Parameters',
-      'vert_perspective': 'Vertex Perspective GLSL Parameters',
-      'transform1': 'Transform1 TOP Parameters',
-      'reorder1': 'Reorder1 TOP Parameters',
-      'line_mindist': 'Line Min Distance Parameters'
-    };
     
     // Section titles
     const sectionTitles = [
@@ -219,7 +197,6 @@
     let currentSection = 0;
     let tutorialOpen = false;
     let cleanupTimeout = null;
-    let stickyHotspots = new Set();
 
     window.currentSection = currentSection;
     window.tutorialOpen = tutorialOpen;
@@ -232,6 +209,62 @@
     let mobileSwipeGestures = null;
     let mobileMotionControl = null;
     let contentManager = null;
+    let hotspotManager = null; // NEW: HotspotManager instance
+
+    // ==========================================
+    // ENHANCED HOTSPOT SYSTEM INTEGRATION
+    // ==========================================
+
+    // Initialize HotspotManager
+    async function initHotspotManager() {
+      try {
+        console.log('🎯 Initializing HotspotManager...');
+        
+        hotspotManager = await HotspotManager.create({
+          basePath: 'tutorials/tesseract/',
+          containerSelector: '#hotspotContainer',
+          enableCollisionAvoidance: true,
+          enableMultiDialog: true,
+          maxDialogs: 5,
+          dialogOffset: { x: 10, y: 0 }
+        });
+        
+        console.log('✅ HotspotManager initialized successfully');
+        
+        // Update hotspots for current section if tutorial is open
+        if (currentSection > 0) {
+          hotspotManager.updateHotspots(currentSection);
+        }
+        
+        return hotspotManager;
+      } catch (error) {
+        console.error('❌ Failed to initialize HotspotManager:', error);
+        return null;
+      }
+    }
+
+    // Legacy function kept for compatibility - now handled by HotspotManager
+    function updateHotspots(hotspots) {
+      // This function is kept for compatibility but functionality moved to HotspotManager
+      if (hotspotManager) {
+        hotspotManager.updateHotspots(currentSection);
+      } else {
+        console.warn('⚠️ HotspotManager not initialized, skipping hotspot update');
+      }
+    }
+
+    // REMOVED: Old hotspot functions are now handled by HotspotManager
+    // - showParameterDialog() -> hotspotManager.showDialog()
+    // - hideParameterDialog() -> hotspotManager.hideDialog() / hideAllDialogs()
+    // - toggleStickyDialog() -> hotspotManager.toggleStickyDialog()
+    // - scheduleHideDialog() -> hotspotManager.scheduleHideDialog()
+
+    // Legacy function for ESC key (now handled by HotspotManager)
+    function hideParameterDialog() {
+      if (hotspotManager) {
+        hotspotManager.hideAllDialogs();
+      }
+    }
 
     // ==========================================
     // DYNAMIC CONTENT SYSTEM
@@ -349,6 +382,11 @@
         cleanupTimeout = null;
       }
       
+      // Clear hotspots when closing tutorial
+      if (hotspotManager) {
+        hotspotManager.clearHotspots();
+      }
+      
       const mobileBtn = document.getElementById('mobileTutorialBtn');
       if (mobileBtn && isMobile) {
         mobileBtn.style.opacity = '1';
@@ -412,6 +450,11 @@
         
         if (mobileMotionControl && isMobile) {
           mobileMotionControl.enable();
+        }
+        
+        // Clear hotspots when returning to hero
+        if (hotspotManager) {
+          hotspotManager.clearHotspots();
         }
         
         tutorialOpen = false;
@@ -500,7 +543,7 @@
     }
 
     // ==========================================
-    // IMAGE TRANSITIONS & HOTSPOTS - UPDATED FOR NEW STRUCTURE
+    // IMAGE TRANSITIONS & HOTSPOTS - UPDATED FOR HOTSPOTMANAGER
     // ==========================================
 
     let currentTransition = null;
@@ -515,7 +558,6 @@
         aspectRatio: sectionData.background.aspectRatio,
         offset: sectionData.background.transition?.offset || { x: 0, y: 0 },
         image: `tutorials/tesseract/${sectionData.background.image}`, // Add full path
-        hotspots: sectionData.hotspots || []
       };
 
       const imageContainer = document.getElementById('staticImageContainer');
@@ -566,7 +608,10 @@
           return;
         }
         
-        updateHotspots(config.hotspots);
+        // UPDATE HOTSPOTS using HotspotManager
+        if (hotspotManager) {
+          hotspotManager.updateHotspots(newSection);
+        }
 
         setTimeout(() => {
           if (currentTransition.cancelled || currentTransition.id !== transitionId) {
@@ -620,118 +665,6 @@
       }
     }
 
-    // Updated hotspot functions for new structure
-    function updateHotspots(hotspots) {
-      const hotspotContainer = document.getElementById('hotspotContainer');
-      if (!hotspotContainer) return;
-    
-      stickyHotspots.clear();
-      hotspotContainer.innerHTML = '';
-    
-      if (isMobile) return;
-      
-      hotspots.forEach((hotspotConfig, index) => {
-        const hotspot = document.createElement('div');
-        hotspot.className = 'hotspot';
-        hotspot.style.top = (hotspotConfig.position.y * 100) + '%';
-        hotspot.style.left = (hotspotConfig.position.x * 100) + '%';
-        hotspot.dataset.type = hotspotConfig.id;
-        hotspot.dataset.index = index;
-        
-        hotspot.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const rect = hotspot.getBoundingClientRect();
-          toggleStickyDialog(hotspotConfig.id, hotspot, rect.right + 10, rect.top);
-        });
-        
-        hotspot.addEventListener('mouseenter', (e) => {
-          if (!stickyHotspots.has(hotspot)) {
-            const rect = hotspot.getBoundingClientRect();
-            showParameterDialog(hotspotConfig.id, rect.right + 10, rect.top, hotspot);
-          }
-        });
-        
-        hotspot.addEventListener('mouseleave', (e) => {
-          if (!stickyHotspots.has(hotspot)) {
-            scheduleHideDialog(hotspot);
-          }
-        });
-        
-        hotspotContainer.appendChild(hotspot);
-      });
-    }
-    
-    function showParameterDialog(type, x, y, sourceHotspot = null) {
-      const dialog = document.getElementById('parameterDialog');
-      const title = document.getElementById('parameterTitle');
-      const content = document.getElementById('parameterContent');
-      
-      if (!dialog || !title || !content) return;
-      
-      // Set title from parameterTitleMap
-      title.textContent = parameterTitleMap[type] || type;
-      
-      // Create image with full path using the hotspot's source from content
-      const sectionData = TesseractContent.tutorial.sections.find(s => s.id === currentSection);
-      if (sectionData && sectionData.hotspots) {
-        const hotspotData = sectionData.hotspots.find(h => h.id === type);
-        if (hotspotData && hotspotData.content && hotspotData.content.source) {
-          const fullImagePath = `tutorials/tesseract/${hotspotData.content.source}`;
-          content.innerHTML = `<img src="${fullImagePath}" alt="${type} parameters" style="max-width: 100%; height: auto;">`;
-        } else {
-          content.innerHTML = `<p>Parameter image not found for ${type}</p>`;
-        }
-      } else {
-        content.innerHTML = `<p>Parameter image not found for ${type}</p>`;
-      }
-      
-      // Position dialog
-      dialog.style.left = Math.min(x, window.innerWidth - 350) + 'px';
-      dialog.style.top = Math.max(10, Math.min(y, window.innerHeight - 200)) + 'px';
-      
-      dialog.classList.add('active');
-    }
-    
-    function scheduleHideDialog(sourceHotspot = null) {
-      setTimeout(() => {
-        const dialog = document.getElementById('parameterDialog');
-        if (dialog && !stickyHotspots.has(sourceHotspot)) {
-          dialog.classList.remove('active');
-        }
-      }, 100);
-    }
-    
-    function toggleStickyDialog(type, hotspot, x, y) {
-      if (stickyHotspots.has(hotspot)) {
-        // Remove from sticky
-        stickyHotspots.delete(hotspot);
-        hotspot.classList.remove('sticky');
-        
-        const dialog = document.getElementById('parameterDialog');
-        if (dialog) {
-          dialog.classList.remove('active');
-        }
-      } else {
-        // Add to sticky
-        stickyHotspots.add(hotspot);
-        hotspot.classList.add('sticky');
-        showParameterDialog(type, x, y, hotspot);
-      }
-    }
-    
-    function hideParameterDialog() {
-      const dialog = document.getElementById('parameterDialog');
-      if (dialog) {
-        dialog.classList.remove('active');
-      }
-      
-      // Clear all sticky hotspots
-      stickyHotspots.forEach(hotspot => {
-        hotspot.classList.remove('sticky');
-      });
-      stickyHotspots.clear();
-    }
-
     function onWheel(event) {
       const anyModalOpen = document.querySelector('.widget-fullscreen.active');
       
@@ -760,7 +693,7 @@
     window.transitionToSection = transitionToSection;
     window.goToHero = () => transitionToSection(0);
     window.goToTutorialsPage = () => window.history.back();
-    window.hideParameterDialog = hideParameterDialog;
+    window.hideParameterDialog = hideParameterDialog; // Legacy compatibility
 
     // ==========================================
     // INITIALIZATION
@@ -776,6 +709,9 @@
         // Generate tutorial sections from content file
         generateTutorialSections();
         console.log('✅ Tutorial sections generated');
+        
+        // Initialize HotspotManager
+        await initHotspotManager();
         
         // Initialize TesseractShader
         tesseractShader = new TesseractShader('hypercube-canvas', {
@@ -817,8 +753,10 @@
         document.addEventListener('wheel', onWheel, { passive: false });
         
         console.log('🎉 Enhanced tutorial initialization complete!');
-        console.log('📊 ALL 14 sections using ContentBlockManager');
+        console.log('🎯 HotspotManager ready with enhanced collision avoidance and multi-dialog support');
+        console.log('📊 ALL 14 sections using ContentBlockManager + HotspotManager');
         console.log('📝 Edit content in: tutorials/tesseract/content.js');
+        console.log('🎯 Edit hotspots in: tutorials/tesseract/hotspots.js');
         
       } catch (error) {
         console.error('❌ Failed to initialize enhanced tutorial:', error);
@@ -858,9 +796,9 @@
           modal.classList.remove('active');
         });
         
-        const dialog = document.getElementById('parameterDialog');
-        if (dialog) {
-          dialog.classList.remove('active');
+        // Use HotspotManager to close dialogs
+        if (hotspotManager) {
+          hotspotManager.hideAllDialogs();
         }
       }
     });
@@ -877,6 +815,10 @@
       }
       if (contentManager) {
         contentManager.destroy();
+      }
+      // NEW: Cleanup HotspotManager
+      if (hotspotManager) {
+        hotspotManager.destroy();
       }
     });
   </script>
