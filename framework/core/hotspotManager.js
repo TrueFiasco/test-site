@@ -184,19 +184,21 @@ class HotspotManager {
       top: 20px;
       right: 20px;
       background: #1a1a2e;
-      border: 1px solid #444;
+      border: 2px solid #444;
       border-radius: 8px;
       padding: 1rem;
       max-width: 500px;
+      min-width: 300px;
       max-height: 80vh;
       overflow-y: auto;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.9);
       backdrop-filter: blur(10px);
       opacity: 0;
       transform: scale(0.95);
       transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: auto;
       display: none;
+      z-index: 5000;
     `;
     
     // Create header
@@ -225,18 +227,28 @@ class HotspotManager {
       background: #ff4757;
       border: none;
       color: white;
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.3s ease;
     `;
-    closeBtn.addEventListener('click', () => this.closeAllParameters());
+    closeBtn.addEventListener('click', () => {
+      console.log('🎯 Close button clicked');
+      this.closeAllParameters();
+    });
+    closeBtn.addEventListener('mouseenter', () => {
+      closeBtn.style.background = '#ff6b7a';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+      closeBtn.style.background = '#ff4757';
+    });
     
     header.appendChild(title);
     header.appendChild(closeBtn);
@@ -254,6 +266,8 @@ class HotspotManager {
     
     this.dialogContainer.appendChild(this.singleDialog);
     document.body.appendChild(this.dialogContainer);
+    
+    console.log('✅ Single dialog created and added to DOM');
   }
 
   /**
@@ -277,8 +291,8 @@ class HotspotManager {
       return;
     }
     
-    if (this.isMobile) {
-      // Mobile: Add parameter images to section content
+    if (this.isMobile || this.isNarrowDesktop()) {
+      // Mobile OR narrow desktop: Add parameter images to section content
       this.addMobileParameterContent(sectionId, sectionHotspots);
       return;
     }
@@ -288,6 +302,13 @@ class HotspotManager {
     sectionHotspots.forEach((hotspotConfig, index) => {
       this.createHotspot(hotspotConfig, index);
     });
+  }
+
+  /**
+   * Check if we're in narrow desktop view (when columns stack)
+   */
+  isNarrowDesktop() {
+    return window.innerWidth <= 1024; // Adjust this breakpoint as needed
   }
 
   /**
@@ -404,22 +425,32 @@ class HotspotManager {
    */
   updateSingleDialog() {
     const content = document.getElementById('dialogParameterContent');
-    if (!content) return;
+    if (!content) {
+      console.error('❌ Dialog content container not found');
+      return;
+    }
     
     // Clear existing content
     content.innerHTML = '';
     
     if (this.selectedHotspots.size === 0) {
+      console.log('🎯 No hotspots selected, hiding dialog');
       this.singleDialog.style.display = 'none';
       this.singleDialog.style.opacity = '0';
       return;
     }
     
+    console.log(`🎯 Showing dialog with ${this.selectedHotspots.size} parameters`);
+    
     // Show dialog
     this.singleDialog.style.display = 'block';
+    this.singleDialog.style.visibility = 'visible';
+    this.singleDialog.style.zIndex = '5000';
+    
     setTimeout(() => {
       this.singleDialog.style.opacity = '1';
       this.singleDialog.style.transform = 'scale(1)';
+      console.log('✅ Dialog should now be visible');
     }, 10);
     
     // Add selected parameters
@@ -427,6 +458,7 @@ class HotspotManager {
     this.selectedHotspots.forEach(hotspotId => {
       const config = currentSectionHotspots.find(h => h.id === hotspotId);
       if (config) {
+        console.log(`📸 Adding parameter ${hotspotId} to dialog`);
         this.addParameterToDialog(config, content);
       }
     });
@@ -450,19 +482,7 @@ class HotspotManager {
       border: 1px solid rgba(255, 255, 255, 0.1);
     `;
     
-    // Parameter title
-    const title = document.createElement('h5');
-    title.textContent = config.content.title || config.id;
-    title.style.cssText = `
-      color: #00ffff;
-      margin: 0 0 0.5rem 0;
-      font-size: 0.9rem;
-      text-align: center;
-      font-weight: bold;
-    `;
-    paramContainer.appendChild(title);
-    
-    // Parameter image
+    // Parameter image only (no title since it's in the image)
     if (config.content.type === 'image' && config.content.source) {
       const img = document.createElement('img');
       let imagePath = config.content.source;
@@ -480,7 +500,12 @@ class HotspotManager {
         border: 1px solid rgba(255, 255, 255, 0.2);
       `;
       
+      img.onload = () => {
+        console.log(`✅ Parameter image loaded: ${imagePath}`);
+      };
+      
       img.onerror = () => {
+        console.error(`❌ Failed to load parameter image: ${imagePath}`);
         paramContainer.innerHTML = `
           <p style="color: #ff6b6b; text-align: center; padding: 0.5rem; font-size: 0.8rem;">
             Failed to load: ${config.content.source}
@@ -545,7 +570,7 @@ class HotspotManager {
     mobileParams.style.cssText = `
       display: block !important;
       margin: 2rem 0 1rem 0;
-      padding: 1rem;
+      padding: 0.8rem;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -553,38 +578,17 @@ class HotspotManager {
       box-sizing: border-box;
     `;
     
-    const title = document.createElement('h4');
-    title.textContent = 'Parameters';
-    title.style.cssText = `
-      color: #00ffff;
-      margin: 0 0 1rem 0;
-      font-size: 1rem;
-      font-weight: bold;
-      text-align: center;
-    `;
-    mobileParams.appendChild(title);
-    
-    // Add each parameter image
+    // Add each parameter image (no titles since they're in the images)
     hotspots.forEach((hotspot, index) => {
       if (hotspot.content && hotspot.content.type === 'image' && hotspot.content.source) {
         // Individual parameter container
         const paramContainer = document.createElement('div');
         paramContainer.style.cssText = `
-          margin-bottom: 1.5rem;
+          margin-bottom: ${index === hotspots.length - 1 ? '0' : '1rem'};
           text-align: center;
         `;
         
-        // Parameter title
-        const paramTitle = document.createElement('p');
-        paramTitle.textContent = hotspot.content.title || hotspot.id;
-        paramTitle.style.cssText = `
-          color: #00ffff;
-          font-weight: bold;
-          margin: 0 0 0.5rem 0;
-          font-size: 0.9rem;
-        `;
-        
-        // Parameter image
+        // Parameter image only (no title)
         const img = document.createElement('img');
         img.src = `${this.options.basePath}${hotspot.content.source}`;
         img.alt = hotspot.content.title || hotspot.id;
@@ -604,7 +608,6 @@ class HotspotManager {
           `;
         };
         
-        paramContainer.appendChild(paramTitle);
         paramContainer.appendChild(img);
         mobileParams.appendChild(paramContainer);
       }
@@ -644,7 +647,18 @@ class HotspotManager {
    * Handle window resize
    */
   handleWindowResize() {
-    // Dialog is positioned fixed, no need to adjust
+    // Re-evaluate display mode when window resizes
+    if (this.currentSection > 0) {
+      const wasNarrow = this.isNarrowDesktop();
+      // Small delay to let resize complete
+      setTimeout(() => {
+        const isNarrowNow = this.isNarrowDesktop();
+        if (wasNarrow !== isNarrowNow) {
+          // Display mode changed, update hotspots
+          this.updateHotspots(this.currentSection);
+        }
+      }, 100);
+    }
   }
 
   /**
@@ -712,7 +726,39 @@ class HotspotManager {
   static async create(options = {}) {
     const manager = new HotspotManager(options);
     await manager.init();
+    
+    // Make debug function globally accessible
+    window.debugHotspots = () => manager.debugDialog();
+    
     return manager;
+  }
+
+  /**
+   * Debug dialog visibility
+   */
+  debugDialog() {
+    console.log('🔍 Dialog Debug Info:');
+    console.log('- Dialog element:', this.singleDialog);
+    console.log('- Dialog display:', this.singleDialog.style.display);
+    console.log('- Dialog opacity:', this.singleDialog.style.opacity);
+    console.log('- Dialog z-index:', this.singleDialog.style.zIndex);
+    console.log('- Selected hotspots:', this.selectedHotspots.size);
+    console.log('- Current section:', this.currentSection);
+    console.log('- Window width:', window.innerWidth);
+    console.log('- Is mobile:', this.isMobile);
+    console.log('- Is narrow desktop:', this.isNarrowDesktop());
+    
+    // Check if dialog is in DOM
+    const dialogInDOM = document.contains(this.singleDialog);
+    console.log('- Dialog in DOM:', dialogInDOM);
+    
+    // Check computed styles
+    if (dialogInDOM) {
+      const computed = window.getComputedStyle(this.singleDialog);
+      console.log('- Computed display:', computed.display);
+      console.log('- Computed visibility:', computed.visibility);
+      console.log('- Computed z-index:', computed.zIndex);
+    }
   }
 
   // Legacy compatibility methods
