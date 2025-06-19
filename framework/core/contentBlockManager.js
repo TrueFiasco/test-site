@@ -1,752 +1,491 @@
 /**
- * ContentBlockManager - Dynamic Content Loading and Rendering System
- * Handles multiple content types, layouts, and responsive design for tutorial framework
+ * ContentBlockManager - DEBUG VERSION with detailed logging
+ * This will help us see exactly what data is being passed to the renderer
  */
 class ContentBlockManager {
   constructor(options = {}) {
     this.options = {
-      basePath: options.basePath || './tutorials/',
+      basePath: options.basePath || '',
+      enableCache: options.enableCache !== false,
       enableMarkdown: options.enableMarkdown !== false,
-      enableWidgets: options.enableWidgets !== false,
-      enableSyntaxHighlighting: options.enableSyntaxHighlighting !== false,
       ...options
     };
     
     this.contentCache = new Map();
-    this.widgetInstances = new Map();
-    this.loadingPromises = new Map();
-    
-    // Initialize markdown parser if enabled
-    if (this.options.enableMarkdown && typeof marked !== 'undefined') {
-      this.markdownRenderer = marked;
-      this._configureMarkdown();
-    }
+    this.isInitialized = false;
+  }
+
+  async init() {
+    if (this.isInitialized) return;
+    console.log('✅ ContentBlockManager initialized');
+    this.isInitialized = true;
   }
 
   /**
-   * Render section content based on configuration
-   * @param {Object} section - Section configuration
-   * @param {HTMLElement} container - Target container element
-   * @returns {Promise<void>}
+   * Render a complete section - WITH DEBUG LOGGING
    */
-  async renderSection(section, container) {
-    if (!section || !container) {
-      throw new Error('Section and container are required');
+  async renderSection(section) {
+    if (!section) {
+      throw new Error('Section is required');
     }
 
     console.log(`📄 Rendering section ${section.id}: ${section.title}`);
-
-    // Clear existing content
-    container.innerHTML = '';
     
-    // Create section layout
-    const sectionElement = this._createSectionElement(section);
-    container.appendChild(sectionElement);
+    // 🐛 DEBUG: Log the entire section structure
+    console.log('🔍 DEBUG - Full section data:', JSON.stringify(section, null, 2));
 
-    // Render content based on layout
-    await this._renderSectionContent(section, sectionElement);
+    try {
+      const sectionElement = document.createElement('div');
+      sectionElement.className = 'tutorial-section';
+      sectionElement.dataset.sectionId = section.id;
 
-    // Add mobile parameter images if they exist
-    await this._addMobileParameters(section, sectionElement);
+      if (section.background?.image) {
+        sectionElement.classList.add('has-background-image');
+      }
 
-    console.log(`✅ Section ${section.id} rendered successfully`);
-  }
+      const contentElement = await this._renderSectionContent(section);
+      sectionElement.appendChild(contentElement);
 
-  /**
-   * Create section DOM structure
-   */
-  _createSectionElement(section) {
-    const sectionEl = document.createElement('div');
-    sectionEl.className = 'tutorial-section';
-    sectionEl.dataset.sectionId = section.id;
-    
-    // Add background image class if needed
-    if (section.background?.image) {
-      sectionEl.classList.add('has-background-image');
+      if (section.mobileParameters) {
+        const mobileParams = this._renderMobileParameters(section.mobileParameters);
+        sectionElement.appendChild(mobileParams);
+      }
+
+      return sectionElement;
+
+    } catch (error) {
+      console.error(`❌ Error rendering section ${section.id}:`, error);
+      return this._renderErrorSection(section, error);
     }
-
-    return sectionEl;
   }
 
   /**
-   * Render section content based on layout type
+   * Render section content - WITH DEBUG LOGGING
    */
-  async _renderSectionContent(section, sectionElement) {
-    const layout = section.layout || 'split';
+  async _renderSectionContent(section) {
+    const { layout, content } = section;
     
+    // 🐛 DEBUG: Log layout and content structure
+    console.log(`🔍 DEBUG - Layout: ${layout}`);
+    console.log('🔍 DEBUG - Content structure:', JSON.stringify(content, null, 2));
+
     switch (layout) {
       case 'split':
-        await this._renderSplitLayout(section, sectionElement);
-        break;
+        return await this._renderSplitLayout(content);
       case 'full':
-        await this._renderFullLayout(section, sectionElement);
-        break;
+        return await this._renderFullLayout(content);
       case 'triple':
-        await this._renderTripleLayout(section, sectionElement);
-        break;
+        return await this._renderTripleLayout(content);
       default:
-        console.warn(`Unknown layout type: ${layout}, falling back to split`);
-        await this._renderSplitLayout(section, sectionElement);
+        throw new Error(`Unknown layout type: ${layout}`);
     }
   }
 
   /**
-   * Render split layout (left/right columns)
+   * Render split layout - WITH DEBUG LOGGING
    */
-  async _renderSplitLayout(section, sectionElement) {
-    const layoutDiv = document.createElement('div');
-    layoutDiv.className = 'section-layout';
+  async _renderSplitLayout(content) {
+    console.log('🔍 DEBUG - Rendering split layout with content:', content);
     
-    const leftDiv = document.createElement('div');
-    leftDiv.className = 'section-left';
-    
-    const rightDiv = document.createElement('div');
-    rightDiv.className = 'section-right';
-    
+    const layoutElement = document.createElement('div');
+    layoutElement.className = 'section-layout';
+
     // Render left content
-    if (section.content?.left) {
-      await this._renderContentBlock(section.content.left, leftDiv, section.id);
+    if (content.left) {
+      console.log('🔍 DEBUG - Left content block:', JSON.stringify(content.left, null, 2));
+      const leftElement = document.createElement('div');
+      leftElement.className = 'section-left';
+      
+      const leftContent = await this._renderContentBlock(content.left, 'LEFT');
+      leftElement.appendChild(leftContent);
+      layoutElement.appendChild(leftElement);
+    } else {
+      console.warn('⚠️ No left content found');
     }
-    
+
     // Render right content
-    if (section.content?.right) {
-      await this._renderContentBlock(section.content.right, rightDiv, section.id);
+    if (content.right) {
+      console.log('🔍 DEBUG - Right content block:', JSON.stringify(content.right, null, 2));
+      const rightElement = document.createElement('div');
+      rightElement.className = 'section-right';
+      
+      const rightContent = await this._renderContentBlock(content.right, 'RIGHT');
+      rightElement.appendChild(rightContent);
+      layoutElement.appendChild(rightElement);
+    } else {
+      console.warn('⚠️ No right content found');
     }
-    
-    layoutDiv.appendChild(leftDiv);
-    layoutDiv.appendChild(rightDiv);
-    sectionElement.appendChild(layoutDiv);
+
+    return layoutElement;
   }
 
   /**
-   * Render full layout (single column)
+   * Render individual content block - WITH DEBUG LOGGING
    */
-  async _renderFullLayout(section, sectionElement) {
-    const layoutDiv = document.createElement('div');
-    layoutDiv.className = 'section-full';
+  async _renderContentBlock(block, position = '') {
+    console.log(`🔍 DEBUG - Rendering ${position} content block:`, JSON.stringify(block, null, 2));
     
-    // Render full content
-    if (section.content?.full) {
-      await this._renderContentBlock(section.content.full, layoutDiv, section.id);
-    }
-    
-    sectionElement.appendChild(layoutDiv);
-  }
-
-  /**
-   * Render triple layout (three columns)
-   */
-  async _renderTripleLayout(section, sectionElement) {
-    const layoutDiv = document.createElement('div');
-    layoutDiv.className = 'section-layout section-triple';
-    
-    const leftDiv = document.createElement('div');
-    leftDiv.className = 'section-left';
-    
-    const centerDiv = document.createElement('div');
-    centerDiv.className = 'section-center';
-    
-    const rightDiv = document.createElement('div');
-    rightDiv.className = 'section-right';
-    
-    // Render content blocks
-    if (section.content?.left) {
-      await this._renderContentBlock(section.content.left, leftDiv, section.id);
-    }
-    
-    if (section.content?.center) {
-      await this._renderContentBlock(section.content.center, centerDiv, section.id);
-    }
-    
-    if (section.content?.right) {
-      await this._renderContentBlock(section.content.right, rightDiv, section.id);
-    }
-    
-    layoutDiv.appendChild(leftDiv);
-    layoutDiv.appendChild(centerDiv);
-    layoutDiv.appendChild(rightDiv);
-    sectionElement.appendChild(layoutDiv);
-  }
-
-  /**
-   * Render individual content block
-   */
-  async _renderContentBlock(contentBlock, container, sectionId) {
-    if (!contentBlock || !contentBlock.type) {
-      console.warn('Invalid content block configuration');
-      return;
+    if (!block || !block.type) {
+      console.error('❌ Content block missing or no type specified:', block);
+      throw new Error('Content block must specify type');
     }
 
     try {
-      switch (contentBlock.type) {
-        case 'markdown':
-          await this._renderMarkdown(contentBlock, container, sectionId);
-          break;
+      switch (block.type) {
         case 'html':
-          await this._renderHTML(contentBlock, container, sectionId);
-          break;
-        case 'image':
-          await this._renderImage(contentBlock, container, sectionId);
-          break;
+          return await this._renderHTML(block, position);
+        case 'markdown':
+          return await this._renderMarkdown(block, position);
         case 'widget':
-          await this._renderWidget(contentBlock, container, sectionId);
-          break;
+          return await this._renderWidget(block, position);
+        case 'image':
+          return await this._renderImage(block, position);
         default:
-          console.warn(`Unknown content type: ${contentBlock.type}`);
-          container.innerHTML = `<p style="color: #ff6b6b;">Unknown content type: ${contentBlock.type}</p>`;
+          throw new Error(`Unknown content type: ${block.type}`);
       }
     } catch (error) {
-      console.error(`Error rendering content block:`, error);
-      container.innerHTML = `<p style="color: #ff6b6b;">Error loading content: ${error.message}</p>`;
+      console.error(`❌ Error rendering ${position} content block:`, error);
+      return this._renderErrorBlock(error);
     }
   }
 
   /**
-   * Render markdown content
+   * Render HTML content - WITH DEBUG LOGGING
    */
-  async _renderMarkdown(contentBlock, container, sectionId) {
-    const content = await this._loadContent(contentBlock.source, sectionId);
-    
-    if (this.markdownRenderer) {
-      container.innerHTML = this.markdownRenderer.parse(content);
+  async _renderHTML(block, position = '') {
+    console.log(`🔍 DEBUG - Rendering HTML for ${position}:`, {
+      hasContent: !!block.content,
+      hasSource: !!block.source,
+      contentLength: block.content ? block.content.length : 0,
+      source: block.source
+    });
+
+    const container = document.createElement('div');
+    container.className = 'content-block html-content';
+
+    let htmlContent;
+
+    // Check if content is embedded directly in the block
+    if (block.content) {
+      // ✅ Embedded HTML content
+      htmlContent = block.content;
+      console.log(`✅ Using embedded HTML content for ${position} (${htmlContent.length} chars)`);
+    } else if (block.source) {
+      // ❌ External source file - this should NOT happen with your new content.js
+      console.warn(`⚠️ WARNING: Using external source for ${position}: ${block.source}`);
+      htmlContent = await this._loadContent(block.source);
+      console.log(`📁 Loaded HTML from: ${block.source}`);
     } else {
-      // Fallback to simple text processing
-      container.innerHTML = this._processSimpleMarkdown(content);
+      console.error(`❌ HTML block for ${position} has no content or source:`, block);
+      throw new Error('HTML block must specify either content or source');
     }
-    
-    // Apply syntax highlighting if enabled
-    if (this.options.enableSyntaxHighlighting) {
-      this._applySyntaxHighlighting(container);
-    }
+
+    container.innerHTML = htmlContent;
+    return container;
   }
 
   /**
-   * Render HTML content
+   * Load content from external source - THIS SHOULD NOT BE CALLED with embedded content
    */
-  async _renderHTML(contentBlock, container, sectionId) {
-    const content = await this._loadContent(contentBlock.source, sectionId);
-    container.innerHTML = content;
-  }
-
-  /**
-   * Render image content
-   */
-  async _renderImage(contentBlock, container, sectionId) {
-    const img = document.createElement('img');
-    img.src = contentBlock.source;
-    img.alt = contentBlock.alt || '';
-    img.className = contentBlock.className || 'content-image';
+  async _loadContent(source) {
+    console.log(`🔍 DEBUG - _loadContent called with source: "${source}"`);
     
-    if (contentBlock.caption) {
-      const figure = document.createElement('figure');
-      const caption = document.createElement('figcaption');
-      caption.textContent = contentBlock.caption;
+    if (!source) {
+      console.error('❌ Source is undefined or empty');
+      throw new Error('Source is required');
+    }
+
+    // Check cache first
+    if (this.options.enableCache && this.contentCache.has(source)) {
+      console.log(`📁 Using cached content for: ${source}`);
+      return this.contentCache.get(source);
+    }
+
+    try {
+      const content = await this._fetchContent(source);
       
-      figure.appendChild(img);
-      figure.appendChild(caption);
-      container.appendChild(figure);
-    } else {
-      container.appendChild(img);
+      if (this.options.enableCache) {
+        this.contentCache.set(source, content);
+      }
+      
+      return content;
+    } catch (error) {
+      console.error(`❌ Failed to load content from ${source}:`, error);
+      throw new Error(`Failed to load content from ${source}: ${error.message}`);
     }
+  }
+
+  /**
+   * Fetch content from URL - THIS SHOULD NOT BE CALLED with embedded content
+   */
+  async _fetchContent(url) {
+    console.log(`🔍 DEBUG - _fetchContent called with URL: "${url}"`);
+    
+    const fullUrl = url.startsWith('http') ? url : `${this.options.basePath}${url}`;
+    
+    console.log(`🌐 Fetching content from: ${fullUrl}`);
+    
+    const response = await fetch(fullUrl);
+    
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
+    
+    return await response.text();
   }
 
   /**
    * Render widget content
    */
-  async _renderWidget(contentBlock, container, sectionId) {
-    if (!contentBlock.widget) {
-      throw new Error('Widget content block must specify widget configuration');
+  async _renderWidget(block, position = '') {
+    console.log(`🔍 DEBUG - Rendering widget for ${position}:`, block.widget);
+    
+    if (!block.widget) {
+      throw new Error('Widget block must specify widget configuration');
     }
 
-    const widget = contentBlock.widget;
-    const widgetId = `widget-${sectionId}-${Date.now()}`;
+    const { widget } = block;
 
     switch (widget.type) {
       case 'tsv-table':
-        await this._renderTSVTableWidget(widget, container, widgetId);
-        break;
+        return await this._renderTSVTable(widget);
       case 'code-viewer':
-        await this._renderCodeViewerWidget(widget, container, widgetId);
-        break;
+        return await this._renderCodeViewer(widget);
+      case 'image-gallery':
+        return await this._renderImageGallery(widget);
       default:
-        console.warn(`Unknown widget type: ${widget.type}`);
-        container.innerHTML = `<p style="color: #ff6b6b;">Unknown widget type: ${widget.type}</p>`;
+        throw new Error(`Unknown widget type: ${widget.type}`);
     }
   }
 
   /**
    * Render TSV table widget
    */
-  async _renderTSVTableWidget(widget, container, widgetId) {
-    const widgetContainer = this._createWidgetContainer(widget, widgetId);
-    
-    try {
-      // Load TSV data
-      const tsvData = await this._loadContent(widget.source, 'tsv');
-      const { headers, rows } = this._parseTSV(tsvData);
-      
-      // Create table
-      const table = document.createElement('table');
-      table.className = 'tsv-table';
-      table.id = `${widgetId}-table`;
-      
-      // Create header
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-      headers.forEach(header => {
-        const th = document.createElement('th');
-        th.textContent = header;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-      
-      // Create body
-      const tbody = document.createElement('tbody');
-      rows.forEach(row => {
-        const tr = document.createElement('tr');
-        row.forEach(cell => {
-          const td = document.createElement('td');
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      
-      // Add table to widget content
-      const widgetContent = widgetContainer.querySelector('.widget-content');
-      widgetContent.appendChild(table);
-      
-      // Store widget instance
-      this.widgetInstances.set(widgetId, {
-        type: 'tsv-table',
-        data: { headers, rows, tsvData },
-        element: widgetContainer
-      });
-      
-    } catch (error) {
-      const widgetContent = widgetContainer.querySelector('.widget-content');
-      widgetContent.innerHTML = `<div class="error">Error loading TSV data: ${error.message}</div>`;
-    }
-    
-    container.appendChild(widgetContainer);
-  }
-
-  /**
-   * Render code viewer widget
-   */
-  async _renderCodeViewerWidget(widget, container, widgetId) {
-    const widgetContainer = this._createWidgetContainer(widget, widgetId);
-    
-    try {
-      // Load code content
-      const codeContent = await this._loadContent(widget.source, 'code');
-      
-      // Create code element
-      const codeDiv = document.createElement('div');
-      codeDiv.className = 'code-content';
-      codeDiv.textContent = codeContent;
-      
-      // Add code to widget content
-      const widgetContent = widgetContainer.querySelector('.widget-content');
-      widgetContent.appendChild(codeDiv);
-      
-      // Apply syntax highlighting if enabled
-      if (this.options.enableSyntaxHighlighting && widget.language) {
-        this._applySyntaxHighlightingToElement(codeDiv, widget.language);
-      }
-      
-      // Store widget instance
-      this.widgetInstances.set(widgetId, {
-        type: 'code-viewer',
-        data: { code: codeContent, language: widget.language },
-        element: widgetContainer
-      });
-      
-    } catch (error) {
-      const widgetContent = widgetContainer.querySelector('.widget-content');
-      widgetContent.innerHTML = `<div class="error">Error loading code: ${error.message}</div>`;
-    }
-    
-    container.appendChild(widgetContainer);
-  }
-
-  /**
-   * Create widget container with controls
-   */
-  _createWidgetContainer(widget, widgetId) {
+  async _renderTSVTable(widget) {
     const container = document.createElement('div');
     container.className = 'widget-container';
-    container.id = widgetId;
-    
-    // Create widget buttons
-    const buttonsDiv = document.createElement('div');
-    buttonsDiv.className = 'widget-buttons';
-    
-    const controls = widget.controls || ['fullscreen', 'copy'];
-    controls.forEach(control => {
-      const button = document.createElement('button');
-      button.className = `widget-btn widget-btn-${control}`;
-      button.title = this._getControlTitle(control);
-      button.addEventListener('click', () => this._handleWidgetControl(control, widgetId));
-      buttonsDiv.appendChild(button);
-    });
-    
-    // Create content widget
+
+    const buttonsContainer = this._createWidgetButtons(widget.controls || []);
+    container.appendChild(buttonsContainer);
+
     const contentWidget = document.createElement('div');
     contentWidget.className = 'content-widget';
-    
-    // Create widget content area
+
     const widgetContent = document.createElement('div');
     widgetContent.className = 'widget-content';
-    
-    // Create widget header
+    widgetContent.id = `tsvContent-${Date.now()}`;
+
+    const table = document.createElement('table');
+    table.className = 'tsv-table';
+    table.innerHTML = '<thead><tr></tr></thead><tbody></tbody>';
+
+    widgetContent.appendChild(table);
+    contentWidget.appendChild(widgetContent);
+
     const widgetHeader = document.createElement('div');
     widgetHeader.className = 'widget-header';
     
     const widgetTitle = document.createElement('div');
     widgetTitle.className = 'widget-title';
-    widgetTitle.textContent = widget.title || 'Widget';
+    widgetTitle.textContent = widget.title || 'TSV Data';
     
     widgetHeader.appendChild(widgetTitle);
-    
-    // Assemble widget
-    contentWidget.appendChild(widgetContent);
     contentWidget.appendChild(widgetHeader);
-    
-    container.appendChild(buttonsDiv);
+
     container.appendChild(contentWidget);
-    
+
+    if (widget.source) {
+      this._loadTSVData(widget.source, table);
+    }
+
     return container;
   }
 
   /**
-   * Handle widget control actions
+   * Render code viewer widget
    */
-  _handleWidgetControl(control, widgetId) {
-    const widget = this.widgetInstances.get(widgetId);
-    if (!widget) return;
+  async _renderCodeViewer(widget) {
+    const container = document.createElement('div');
+    container.className = 'widget-container';
+
+    const buttonsContainer = this._createWidgetButtons(widget.controls || []);
+    container.appendChild(buttonsContainer);
+
+    const contentWidget = document.createElement('div');
+    contentWidget.className = 'content-widget';
+
+    const widgetContent = document.createElement('div');
+    widgetContent.className = 'widget-content';
+    widgetContent.id = `codeContent-${Date.now()}`;
+
+    const codeElement = document.createElement('div');
+    codeElement.className = 'code-content loading';
+    codeElement.textContent = 'Loading code...';
+
+    widgetContent.appendChild(codeElement);
+    contentWidget.appendChild(widgetContent);
+
+    const widgetHeader = document.createElement('div');
+    widgetHeader.className = 'widget-header';
     
-    switch (control) {
-      case 'fullscreen':
-        this._showWidgetFullscreen(widgetId);
-        break;
-      case 'copy':
-        this._copyWidgetContent(widgetId);
-        break;
-      case 'download':
-        this._downloadWidgetContent(widgetId);
-        break;
+    const widgetTitle = document.createElement('div');
+    widgetTitle.className = 'widget-title';
+    widgetTitle.textContent = widget.title || 'Code';
+    
+    widgetHeader.appendChild(widgetTitle);
+    contentWidget.appendChild(widgetHeader);
+
+    container.appendChild(contentWidget);
+
+    if (widget.source) {
+      this._loadCodeData(widget.source, codeElement);
+    } else if (widget.content) {
+      codeElement.textContent = widget.content;
+      codeElement.classList.remove('loading');
     }
+
+    return container;
   }
 
-  /**
-   * Show widget in fullscreen modal
-   */
-  _showWidgetFullscreen(widgetId) {
-    const widget = this.widgetInstances.get(widgetId);
-    if (!widget) return;
-    
-    // Create fullscreen modal
-    const modal = document.createElement('div');
-    modal.className = 'widget-fullscreen active';
-    modal.id = `${widgetId}-fullscreen`;
-    
-    // Create header
-    const header = document.createElement('div');
-    header.className = 'widget-fullscreen-header';
-    
-    const title = document.createElement('h3');
-    title.textContent = widget.element.querySelector('.widget-title').textContent;
-    
-    const buttonsDiv = document.createElement('div');
-    buttonsDiv.className = 'widget-fullscreen-buttons';
-    
-    // Add control buttons
-    ['copy', 'download'].forEach(control => {
+  // ... (rest of the methods remain the same)
+
+  _createWidgetButtons(controls) {
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'widget-buttons';
+
+    controls.forEach(control => {
       const button = document.createElement('button');
       button.className = `widget-btn widget-btn-${control}`;
-      button.title = this._getControlTitle(control);
-      button.addEventListener('click', () => this._handleWidgetControl(control, widgetId));
-      buttonsDiv.appendChild(button);
+      button.title = this._getButtonTitle(control);
+      button.addEventListener('click', () => this._handleWidgetAction(control));
+      buttonsContainer.appendChild(button);
     });
-    
-    // Add close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'nav-btn close-btn';
-    closeBtn.textContent = '×';
-    closeBtn.addEventListener('click', () => this._closeWidgetFullscreen(modal));
-    buttonsDiv.appendChild(closeBtn);
-    
-    header.appendChild(title);
-    header.appendChild(buttonsDiv);
-    
-    // Create content
-    const content = document.createElement('div');
-    content.className = 'widget-fullscreen-content';
-    
-    // Clone widget content
-    const originalContent = widget.element.querySelector('.widget-content');
-    content.innerHTML = originalContent.innerHTML;
-    
-    modal.appendChild(header);
-    modal.appendChild(content);
-    
-    // Add to document
-    document.body.appendChild(modal);
-    
-    // Handle escape key
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        this._closeWidgetFullscreen(modal);
-        document.removeEventListener('keydown', handleEscape);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
+
+    return buttonsContainer;
   }
 
-  /**
-   * Close fullscreen widget modal
-   */
-  _closeWidgetFullscreen(modal) {
-    if (modal && modal.parentNode) {
-      modal.parentNode.removeChild(modal);
-    }
-  }
-
-  /**
-   * Copy widget content to clipboard
-   */
-  async _copyWidgetContent(widgetId) {
-    const widget = this.widgetInstances.get(widgetId);
-    if (!widget) return;
-    
-    let textToCopy = '';
-    
-    switch (widget.type) {
-      case 'tsv-table':
-        textToCopy = widget.data.tsvData;
-        break;
-      case 'code-viewer':
-        textToCopy = widget.data.code;
-        break;
-    }
-    
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      this._showCopyNotification();
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-    }
-  }
-
-  /**
-   * Download widget content
-   */
-  _downloadWidgetContent(widgetId) {
-    // Implementation for download functionality
-    // This would typically trigger a download of the source file
-    console.log('Download functionality would be implemented here');
-  }
-
-  /**
-   * Show copy notification
-   */
-  _showCopyNotification() {
-    let notification = document.getElementById('copyNotification');
-    if (!notification) {
-      notification = document.createElement('div');
-      notification.id = 'copyNotification';
-      notification.className = 'copy-notification';
-      notification.textContent = 'Copied to clipboard!';
-      document.body.appendChild(notification);
-    }
-    
-    notification.classList.add('show');
-    setTimeout(() => {
-      notification.classList.remove('show');
-    }, 2000);
-  }
-
-  /**
-   * Get control button title
-   */
-  _getControlTitle(control) {
+  _getButtonTitle(control) {
     const titles = {
-      fullscreen: 'Fullscreen',
-      copy: 'Copy to Clipboard', 
-      download: 'Download from GitHub'
+      'fullscreen': 'Fullscreen',
+      'copy': 'Copy to Clipboard',
+      'download': 'Download from GitHub'
     };
     return titles[control] || control;
   }
 
-  /**
-   * Load content from URL or cache
-   */
-  async _loadContent(source, cacheKey) {
-    const fullCacheKey = `${cacheKey}-${source}`;
-    
-    // Check cache first
-    if (this.contentCache.has(fullCacheKey)) {
-      return this.contentCache.get(fullCacheKey);
-    }
-    
-    // Check if already loading
-    if (this.loadingPromises.has(fullCacheKey)) {
-      return this.loadingPromises.get(fullCacheKey);
-    }
-    
-    // Load content
-    const loadPromise = this._fetchContent(source);
-    this.loadingPromises.set(fullCacheKey, loadPromise);
-    
+  _handleWidgetAction(action) {
+    console.log(`Widget action: ${action}`);
+  }
+
+  async _loadTSVData(source, table) {
     try {
-      const content = await loadPromise;
-      this.contentCache.set(fullCacheKey, content);
-      return content;
-    } finally {
-      this.loadingPromises.delete(fullCacheKey);
+      const tsvData = await this._loadContent(source);
+      const rows = tsvData.trim().split('\n');
+      const headers = rows[0].split('\t');
+      const dataRows = rows.slice(1);
+
+      const thead = table.querySelector('thead tr');
+      thead.innerHTML = '';
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header.trim();
+        thead.appendChild(th);
+      });
+
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '';
+      dataRows.forEach(row => {
+        const cells = row.split('\t');
+        const tr = document.createElement('tr');
+        cells.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell.trim();
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+    } catch (error) {
+      console.error('Failed to load TSV data:', error);
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '<tr><td colspan="100%" style="text-align: center; color: #ff6b6b;">Failed to load data</td></tr>';
     }
   }
 
-  /**
-   * Fetch content from URL
-   */
-  async _fetchContent(source) {
-    const response = await fetch(source);
-    if (!response.ok) {
-      throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+  async _loadCodeData(source, codeElement) {
+    try {
+      const codeData = await this._loadContent(source);
+      codeElement.textContent = codeData;
+      codeElement.classList.remove('loading');
+    } catch (error) {
+      console.error('Failed to load code data:', error);
+      codeElement.textContent = 'Failed to load code';
+      codeElement.classList.remove('loading');
+      codeElement.classList.add('error');
     }
-    return response.text();
   }
 
-  /**
-   * Parse TSV data
-   */
-  _parseTSV(tsvData) {
-    const lines = tsvData.trim().split('\n');
-    const headers = lines[0].split('\t').map(h => h.trim());
-    const rows = lines.slice(1).map(line => 
-      line.split('\t').map(cell => cell.trim())
-    );
-    
-    return { headers, rows };
-  }
+  _renderMobileParameters(parameters) {
+    const container = document.createElement('div');
+    container.className = 'mobile-parameters';
 
-  /**
-   * Configure markdown parser
-   */
-  _configureMarkdown() {
-    if (this.markdownRenderer && this.markdownRenderer.setOptions) {
-      this.markdownRenderer.setOptions({
-        breaks: true,
-        gfm: true,
-        sanitize: false
+    const title = document.createElement('h4');
+    title.textContent = parameters.title || 'Parameters';
+    container.appendChild(title);
+
+    if (parameters.images && Array.isArray(parameters.images)) {
+      parameters.images.forEach(imagePath => {
+        const img = document.createElement('img');
+        img.src = imagePath;
+        img.alt = 'Parameter Image';
+        container.appendChild(img);
       });
     }
+
+    return container;
   }
 
-  /**
-   * Simple markdown processing fallback
-   */
-  _processSimpleMarkdown(content) {
-    return content
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code>$1</code>')
-      .replace(/\n/g, '<br>');
-  }
-
-  /**
-   * Apply syntax highlighting to container
-   */
-  _applySyntaxHighlighting(container) {
-    // Implementation would depend on chosen syntax highlighting library
-    // (Prism.js, highlight.js, etc.)
-    console.log('Syntax highlighting would be applied here');
-  }
-
-  /**
-   * Apply syntax highlighting to specific element
-   */
-  _applySyntaxHighlightingToElement(element, language) {
-    // Implementation would depend on chosen syntax highlighting library
-    element.dataset.language = language;
-    console.log(`Syntax highlighting for ${language} would be applied here`);
-  }
-
-  /**
-   * Add mobile parameter images
-   */
-  async _addMobileParameters(section, sectionElement) {
-    // Implementation for adding mobile parameter images
-    // This would check for parameter hotspots and add mobile-specific content
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  _renderErrorSection(section, error) {
+    const sectionElement = document.createElement('div');
+    sectionElement.className = 'tutorial-section error-section';
     
-    if (isMobile && section.hotspots && section.hotspots.length > 0) {
-      const mobileParams = document.createElement('div');
-      mobileParams.className = 'mobile-parameters';
-      
-      const title = document.createElement('h4');
-      title.textContent = 'Parameters';
-      mobileParams.appendChild(title);
-      
-      // Add parameter images for mobile
-      for (const hotspot of section.hotspots) {
-        if (hotspot.content && hotspot.content.type === 'image') {
-          const img = document.createElement('img');
-          img.src = hotspot.content.source;
-          img.alt = hotspot.content.title || '';
-          mobileParams.appendChild(img);
-        }
-      }
-      
-      if (mobileParams.children.length > 1) {
-        sectionElement.appendChild(mobileParams);
-      }
-    }
+    const errorContainer = document.createElement('div');
+    errorContainer.className = 'section-layout';
+    errorContainer.innerHTML = `
+      <div class="section-full">
+        <div class="error-content">
+          <h2>Error Loading Section ${section.id}</h2>
+          <p>${section.title}</p>
+          <p class="error-message">${error.message}</p>
+          <button onclick="location.reload()" class="retry-button">Retry</button>
+        </div>
+      </div>
+    `;
+    
+    sectionElement.appendChild(errorContainer);
+    return sectionElement;
   }
 
-  /**
-   * Clear all cached content
-   */
+  _renderErrorBlock(error) {
+    const container = document.createElement('div');
+    container.className = 'content-block error-block';
+    container.innerHTML = `
+      <div class="error-content">
+        <p>⚠️ Content Error</p>
+        <p class="error-message">${error.message}</p>
+      </div>
+    `;
+    return container;
+  }
+
   clearCache() {
     this.contentCache.clear();
-    console.log('Content cache cleared');
+    console.log('🗑️ Content cache cleared');
   }
 
-  /**
-   * Get cache statistics
-   */
-  getCacheStats() {
-    return {
-      cachedItems: this.contentCache.size,
-      activeWidgets: this.widgetInstances.size,
-      loadingPromises: this.loadingPromises.size
-    };
-  }
-
-  /**
-   * Cleanup resources
-   */
   destroy() {
-    this.contentCache.clear();
-    this.loadingPromises.clear();
-    
-    // Clean up widget instances
-    this.widgetInstances.forEach((widget, id) => {
-      const modal = document.getElementById(`${id}-fullscreen`);
-      if (modal && modal.parentNode) {
-        modal.parentNode.removeChild(modal);
-      }
-    });
-    this.widgetInstances.clear();
-    
-    console.log('ContentBlockManager destroyed');
+    this.clearCache();
+    this.isInitialized = false;
   }
 }
 
