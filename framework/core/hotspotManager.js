@@ -227,55 +227,93 @@ class HotspotManager {
       existingParams.remove();
     }
     
-    // Create mobile parameters container
+    // Create mobile parameters container - fit content size
     const mobileParams = document.createElement('div');
     mobileParams.className = 'mobile-parameters';
     mobileParams.style.cssText = `
       display: block;
-      margin: 2rem 0;
-      padding: 1.5rem;
+      margin: 1.5rem 0 0 0;
+      padding: 1rem;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      z-index: 25;
-      position: relative;
-      clear: both;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: fit-content;
+      max-width: 100%;
+      box-sizing: border-box;
     `;
     
     const title = document.createElement('h4');
     title.textContent = 'Parameters';
     title.style.cssText = `
       color: #00ffff;
-      margin-bottom: 1rem;
+      margin: 0 0 1rem 0;
       font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
     `;
     mobileParams.appendChild(title);
     
+    // Create images container for column layout
+    const imagesContainer = document.createElement('div');
+    imagesContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    `;
+    
     // Add each parameter image
-    hotspots.forEach(hotspot => {
+    hotspots.forEach((hotspot, index) => {
       if (hotspot.content && hotspot.content.type === 'image' && hotspot.content.source) {
-        const img = document.createElement('img');
-        img.src = `${this.options.basePath}${hotspot.content.source}`;
-        img.alt = hotspot.content.title || hotspot.id;
-        img.style.cssText = `
+        // Individual image container
+        const imageContainer = document.createElement('div');
+        imageContainer.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           width: 100%;
-          border-radius: 5px;
-          margin-bottom: 1.5rem;
+          max-width: 400px;
         `;
         
-        // Add title above image
+        // Image title
         const imgTitle = document.createElement('p');
         imgTitle.textContent = hotspot.content.title || hotspot.id;
         imgTitle.style.cssText = `
           color: #00ffff;
           font-weight: bold;
-          margin-bottom: 0.5rem;
+          margin: 0 0 0.5rem 0;
           font-size: 0.9rem;
+          text-align: center;
         `;
         
-        mobileParams.appendChild(imgTitle);
-        mobileParams.appendChild(img);
+        // Image element
+        const img = document.createElement('img');
+        img.src = `${this.options.basePath}${hotspot.content.source}`;
+        img.alt = hotspot.content.title || hotspot.id;
+        img.style.cssText = `
+          width: 100%;
+          max-width: 100%;
+          height: auto;
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+        
+        // Error handling
+        img.onerror = () => {
+          imageContainer.innerHTML = `
+            <p style="color: #ff6b6b; font-style: italic; text-align: center; padding: 0.5rem; font-size: 0.8rem;">
+              Failed to load: ${hotspot.content.source}
+            </p>
+          `;
+        };
+        
+        imageContainer.appendChild(imgTitle);
+        imageContainer.appendChild(img);
+        imagesContainer.appendChild(imageContainer);
       }
     });
+    
+    mobileParams.appendChild(imagesContainer);
     
     // Add to end of section
     sectionElement.appendChild(mobileParams);
@@ -287,71 +325,88 @@ class HotspotManager {
    * Create individual hotspot element
    */
   createHotspot(config, index) {
+    // Create click area (larger, invisible)
+    const clickArea = document.createElement('div');
+    clickArea.className = 'hotspot-click-area';
+    clickArea.style.cssText = `
+      position: absolute;
+      top: ${config.position.y * 100}%;
+      left: ${config.position.x * 100}%;
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+      z-index: 6000;
+      border-radius: 50%;
+    `;
+    
+    // Create visual hotspot (smaller, visible)
     const hotspot = document.createElement('div');
     hotspot.className = 'hotspot';
     hotspot.style.cssText = `
       position: absolute;
-      top: ${config.position.y * 100}%;
-      left: ${config.position.x * 100}%;
-      width: 30px;
-      height: 30px;
+      top: 50%;
+      left: 50%;
+      width: 15px;
+      height: 15px;
       background: #00ffff;
       border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 0 22px rgba(0, 255, 255, 0.7);
-      animation: pulse 2s infinite;
-      border: 3px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+      animation: pulse-small 2s infinite;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      z-index: 50;
-      pointer-events: auto;
+      pointer-events: none;
       transform: translate(-50%, -50%);
     `;
     
-    hotspot.dataset.hotspotId = config.id;
-    hotspot.dataset.index = index;
+    clickArea.appendChild(hotspot);
+    
+    clickArea.dataset.hotspotId = config.id;
+    clickArea.dataset.index = index;
     
     console.log(`🎯 Creating hotspot ${config.id} at (${config.position.x}, ${config.position.y})`);
     
-    // Event listeners with debugging
-    hotspot.addEventListener('click', (e) => {
+    // Event listeners with debugging - on click area
+    clickArea.addEventListener('click', (e) => {
       e.stopPropagation();
       console.log(`🎯 Hotspot ${config.id} clicked`);
-      this.toggleStickyDialog(config, hotspot);
+      this.toggleStickyDialog(config, clickArea, hotspot);
     });
     
-    hotspot.addEventListener('mouseenter', (e) => {
+    clickArea.addEventListener('mouseenter', (e) => {
       console.log(`🎯 Hotspot ${config.id} mouseenter`);
-      if (!this.stickyHotspots.has(hotspot)) {
-        this.showDialog(config, hotspot);
+      if (!this.stickyHotspots.has(clickArea)) {
+        this.showDialog(config, clickArea);
       }
     });
     
-    hotspot.addEventListener('mouseleave', (e) => {
+    clickArea.addEventListener('mouseleave', (e) => {
       console.log(`🎯 Hotspot ${config.id} mouseleave`);
-      if (!this.stickyHotspots.has(hotspot)) {
-        this.scheduleHideDialog(config.id, hotspot);
+      if (!this.stickyHotspots.has(clickArea)) {
+        this.scheduleHideDialog(config.id, clickArea);
       }
     });
     
-    // Add hover styling via CSS
-    hotspot.addEventListener('mouseenter', () => {
-      hotspot.style.transform = 'translate(-50%, -50%) scale(1.3)';
+    // Add hover styling via CSS - style the visual hotspot
+    clickArea.addEventListener('mouseenter', () => {
+      hotspot.style.transform = 'translate(-50%, -50%) scale(1.5)';
       hotspot.style.background = '#ff00ff';
-      hotspot.style.boxShadow = '0 0 35px rgba(255, 0, 255, 0.8)';
+      hotspot.style.boxShadow = '0 0 20px rgba(255, 0, 255, 0.8)';
       hotspot.style.animation = 'none';
     });
     
-    hotspot.addEventListener('mouseleave', () => {
-      if (!this.stickyHotspots.has(hotspot)) {
+    clickArea.addEventListener('mouseleave', () => {
+      if (!this.stickyHotspots.has(clickArea)) {
         hotspot.style.transform = 'translate(-50%, -50%) scale(1)';
         hotspot.style.background = '#00ffff';
-        hotspot.style.boxShadow = '0 0 22px rgba(0, 255, 255, 0.7)';
-        hotspot.style.animation = 'pulse 2s infinite';
+        hotspot.style.boxShadow = '0 0 15px rgba(0, 255, 255, 0.7)';
+        hotspot.style.animation = 'pulse-small 2s infinite';
       }
     });
     
-    this.container.appendChild(hotspot);
-    this.activeHotspots.add(hotspot);
+    this.container.appendChild(clickArea);
+    this.activeHotspots.add(clickArea);
     
     console.log(`✅ Hotspot ${config.id} created and added to container`);
   }
@@ -359,7 +414,7 @@ class HotspotManager {
   /**
    * Show parameter dialog with smart positioning
    */
-  showDialog(config, sourceHotspot = null) {
+  showDialog(config, sourceClickArea = null) {
     const dialogId = config.id;
     
     // If dialog already exists, don't create another
@@ -370,17 +425,17 @@ class HotspotManager {
     
     console.log(`🎯 Creating dialog for ${dialogId}`);
     
-    const dialog = this.createDialog(config, sourceHotspot);
+    const dialog = this.createDialog(config, sourceClickArea);
     this.activeDialogs.set(dialogId, {
       element: dialog,
       config: config,
-      sourceHotspot: sourceHotspot
+      sourceHotspot: sourceClickArea // Store the clickArea as sourceHotspot for compatibility
     });
     
     this.dialogContainer.appendChild(dialog);
     
     // Position dialog with collision avoidance
-    this.positionDialog(dialog, sourceHotspot);
+    this.positionDialog(dialog, sourceClickArea);
     
     // Show dialog
     setTimeout(() => {
@@ -392,7 +447,7 @@ class HotspotManager {
   /**
    * Create dialog element
    */
-  createDialog(config, sourceHotspot) {
+  createDialog(config, sourceClickArea) {
     const dialog = document.createElement('div');
     dialog.className = 'parameter-dialog multi-dialog';
     dialog.dataset.dialogId = config.id;
@@ -509,24 +564,24 @@ class HotspotManager {
   /**
    * Position dialog with smart collision avoidance
    */
-  positionDialog(dialog, sourceHotspot) {
-    if (!sourceHotspot) {
-      // Fallback positioning if no source hotspot
+  positionDialog(dialog, sourceClickArea) {
+    if (!sourceClickArea) {
+      // Fallback positioning if no source click area
       dialog.style.left = '50px';
       dialog.style.top = '50px';
       console.log('🎯 Using fallback dialog positioning');
       return;
     }
     
-    const hotspotRect = sourceHotspot.getBoundingClientRect();
+    const clickAreaRect = sourceClickArea.getBoundingClientRect();
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight
     };
     
-    // Calculate base position (to the right of hotspot)
-    let x = hotspotRect.right + this.options.dialogOffset.x;
-    let y = hotspotRect.top + this.options.dialogOffset.y;
+    // Calculate base position (to the right of click area)
+    let x = clickAreaRect.right + this.options.dialogOffset.x;
+    let y = clickAreaRect.top + this.options.dialogOffset.y;
     
     // Get dialog dimensions (estimate if not rendered yet)
     const dialogRect = dialog.getBoundingClientRect();
@@ -535,7 +590,7 @@ class HotspotManager {
     
     // Collision avoidance with screen edges
     if (x + dialogWidth > viewport.width - 20) {
-      x = hotspotRect.left - dialogWidth - this.options.dialogOffset.x;
+      x = clickAreaRect.left - dialogWidth - this.options.dialogOffset.x;
     }
     
     if (y + dialogHeight > viewport.height - 20) {
@@ -604,44 +659,44 @@ class HotspotManager {
   /**
    * Toggle sticky dialog (click-to-pin)
    */
-  toggleStickyDialog(config, hotspot) {
+  toggleStickyDialog(config, clickArea, visualHotspot) {
     console.log(`🎯 Toggling sticky dialog for ${config.id}`);
     
-    if (this.stickyHotspots.has(hotspot)) {
+    if (this.stickyHotspots.has(clickArea)) {
       // Remove from sticky
       console.log(`📌 Removing sticky state from ${config.id}`);
-      this.stickyHotspots.delete(hotspot);
-      hotspot.classList.remove('sticky');
+      this.stickyHotspots.delete(clickArea);
+      clickArea.classList.remove('sticky');
       
-      // Reset hotspot styling
-      hotspot.style.transform = 'translate(-50%, -50%) scale(1)';
-      hotspot.style.background = '#00ffff';
-      hotspot.style.boxShadow = '0 0 22px rgba(0, 255, 255, 0.7)';
-      hotspot.style.animation = 'pulse 2s infinite';
+      // Reset visual hotspot styling
+      visualHotspot.style.transform = 'translate(-50%, -50%) scale(1)';
+      visualHotspot.style.background = '#00ffff';
+      visualHotspot.style.boxShadow = '0 0 15px rgba(0, 255, 255, 0.7)';
+      visualHotspot.style.animation = 'pulse-small 2s infinite';
       
       this.hideDialog(config.id);
     } else {
       // Add to sticky
       console.log(`📌 Adding sticky state to ${config.id}`);
-      this.stickyHotspots.add(hotspot);
-      hotspot.classList.add('sticky');
+      this.stickyHotspots.add(clickArea);
+      clickArea.classList.add('sticky');
       
-      // Set sticky styling
-      hotspot.style.transform = 'translate(-50%, -50%) scale(1.3)';
-      hotspot.style.background = '#ffff00';
-      hotspot.style.boxShadow = '0 0 35px rgba(255, 255, 0, 0.8)';
-      hotspot.style.animation = 'none';
+      // Set sticky styling on visual hotspot
+      visualHotspot.style.transform = 'translate(-50%, -50%) scale(1.8)';
+      visualHotspot.style.background = '#ffff00';
+      visualHotspot.style.boxShadow = '0 0 25px rgba(255, 255, 0, 0.8)';
+      visualHotspot.style.animation = 'none';
       
-      this.showDialog(config, hotspot);
+      this.showDialog(config, clickArea);
     }
   }
 
   /**
    * Schedule dialog hide with delay
    */
-  scheduleHideDialog(dialogId, sourceHotspot = null) {
+  scheduleHideDialog(dialogId, sourceClickArea = null) {
     setTimeout(() => {
-      if (!this.stickyHotspots.has(sourceHotspot)) {
+      if (!this.stickyHotspots.has(sourceClickArea)) {
         this.hideDialog(dialogId);
       }
     }, 100);
@@ -686,10 +741,10 @@ class HotspotManager {
   clearHotspots() {
     this.hideAllDialogs();
     
-    // Clear desktop hotspots
-    this.activeHotspots.forEach(hotspot => {
-      if (hotspot.parentNode) {
-        hotspot.parentNode.removeChild(hotspot);
+    // Clear desktop hotspots (click areas)
+    this.activeHotspots.forEach(clickArea => {
+      if (clickArea.parentNode) {
+        clickArea.parentNode.removeChild(clickArea);
       }
     });
     
@@ -723,8 +778,8 @@ class HotspotManager {
    * Handle document click (close non-sticky dialogs)
    */
   handleDocumentClick(event) {
-    // Don't close if clicking on a hotspot or dialog
-    if (event.target.closest('.hotspot') || event.target.closest('.parameter-dialog')) {
+    // Don't close if clicking on a hotspot click area or dialog
+    if (event.target.closest('.hotspot-click-area') || event.target.closest('.parameter-dialog')) {
       return;
     }
     
@@ -812,25 +867,35 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
+    /* Dialog styling - LOWER z-index than hotspots */
     .parameter-dialog.multi-dialog.active {
       opacity: 1 !important;
       transform: scale(1) !important;
       display: block !important;
+      z-index: 4000 !important;
     }
     
     .parameter-dialog.multi-dialog {
       display: block;
       opacity: 0;
       transform: scale(0.95);
+      z-index: 4000;
     }
     
-    .hotspot.sticky {
-      transform: translate(-50%, -50%) scale(1.3) !important;
+    /* Hotspot click areas - HIGHER z-index than dialogs */
+    .hotspot-click-area {
+      z-index: 6000 !important;
+      pointer-events: auto !important;
+    }
+    
+    .hotspot-click-area.sticky .hotspot {
+      transform: translate(-50%, -50%) scale(1.8) !important;
       background: #ffff00 !important;
-      box-shadow: 0 0 35px rgba(255, 255, 0, 0.8) !important;
+      box-shadow: 0 0 25px rgba(255, 255, 0, 0.8) !important;
       animation: none !important;
     }
     
+    /* Mobile parameters - compact, content-fitted */
     .mobile-parameters {
       display: none;
     }
@@ -838,28 +903,43 @@ if (typeof document !== 'undefined') {
     @media (max-width: 768px) {
       .mobile-parameters {
         display: block !important;
-        margin: 2rem 0;
-        padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        z-index: 25;
-        position: relative;
-        clear: both;
+        margin: 1.5rem 0 0 0 !important;
+        padding: 1rem !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        width: fit-content !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       
       .mobile-parameters h4 {
-        color: #00ffff;
-        margin-bottom: 1rem;
-        font-size: 1rem;
+        color: #00ffff !important;
+        margin: 0 0 1rem 0 !important;
+        font-size: 1rem !important;
+        font-weight: bold !important;
+        text-align: center !important;
       }
       
-      .mobile-parameters img {
-        width: 100%;
-        border-radius: 5px;
-        margin-bottom: 1.5rem;
+      /* Hide desktop hotspots completely on mobile */
+      .hotspot-click-area {
+        display: none !important;
       }
     }
     
+    /* Small hotspot animations */
+    @keyframes pulse-small {
+      0%, 100% { 
+        transform: translate(-50%, -50%) scale(1); 
+        opacity: 1; 
+      }
+      50% { 
+        transform: translate(-50%, -50%) scale(1.3); 
+        opacity: 0.7; 
+      }
+    }
+    
+    /* Original pulse for compatibility */
     @keyframes pulse {
       0%, 100% { 
         transform: translate(-50%, -50%) scale(1); 
@@ -871,11 +951,17 @@ if (typeof document !== 'undefined') {
       }
     }
     
-    /* Ensure dialogs are always visible when active */
+    /* Ensure dialogs don't interfere with hotspots */
     .parameter-dialog.multi-dialog.active {
-      z-index: 5000 !important;
+      z-index: 4000 !important;
       pointer-events: auto !important;
       visibility: visible !important;
+    }
+    
+    /* Force hotspots to always be on top */
+    .hotspot-click-area:hover,
+    .hotspot-click-area.sticky {
+      z-index: 6500 !important;
     }
   `;
   document.head.appendChild(style);
