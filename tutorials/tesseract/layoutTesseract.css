@@ -6,7 +6,7 @@
 /* === FONT FACES === */
 @font-face {
   font-family: 'Spy Agency';
-  src: url('../../fonts/spyagencycond.ttf') format('truetype');
+  src: url('../../fonts/spyagencycond.ttf');
   font-weight: normal;
   font-display: swap;
 }
