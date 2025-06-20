@@ -1,6 +1,7 @@
 /**
- * HotspotManager - Single Dialog Multi-Parameter System
- * Desktop: Single dialog showing all active hotspots
+ * HotspotManager - Generic Single Dialog Multi-Parameter System with Enhanced Positioning
+ * Framework component - works with any tutorial that provides hotspot data
+ * Desktop: Single dialog showing all active hotspots with image-relative positioning
  * Mobile: Simple parameter display at end of sections
  */
 class HotspotManager {
@@ -18,6 +19,10 @@ class HotspotManager {
     this.selectedHotspots = new Set(); // Selected hotspot IDs for dialog
     this.currentSection = 0;
     this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Tutorial-specific data (loaded from external files)
+    this.imageDimensions = new Map(); // Map of section ID to {width, height}
+    this.hotspotData = null;
     
     this.container = null;
     this.singleDialog = null;
@@ -109,12 +114,22 @@ class HotspotManager {
       throw new Error('Invalid hotspot data structure');
     }
     
+    this.hotspotData = hotspotData;
+    
     // Convert array to Map for efficient lookup
     hotspotData.sections.forEach(section => {
       if (section.hotspots && section.hotspots.length > 0) {
         this.hotspots.set(section.sectionId, section.hotspots);
       }
     });
+    
+    // Load image dimensions if provided
+    if (hotspotData.imageDimensions) {
+      Object.entries(hotspotData.imageDimensions).forEach(([sectionId, dimensions]) => {
+        this.imageDimensions.set(parseInt(sectionId), dimensions);
+      });
+      console.log(`📐 Loaded image dimensions for ${this.imageDimensions.size} sections`);
+    }
     
     console.log(`📍 Loaded hotspots for ${this.hotspots.size} sections`);
   }
@@ -173,7 +188,7 @@ class HotspotManager {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 50;
+      z-index: 9999;
     `;
     
     this.singleDialog = document.createElement('div');
@@ -198,7 +213,7 @@ class HotspotManager {
       transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: auto;
       display: none;
-      z-index: 5000;
+      z-index: 9999;
     `;
     
     // Create header
@@ -310,11 +325,14 @@ class HotspotManager {
     if (isWideDesktopView) {
       console.log(`🎯 Creating interactive hotspots for section ${sectionId}: ${sectionHotspots.length} hotspots`);
       
-      sectionHotspots.forEach((hotspotConfig, index) => {
-        this.createHotspot(hotspotConfig, index);
-      });
-      
-      console.log(`✅ Created ${this.activeHotspots.size} hotspots`);
+      // Wait for image to load before positioning hotspots
+      setTimeout(() => {
+        sectionHotspots.forEach((hotspotConfig, index) => {
+          this.createHotspot(hotspotConfig, index);
+        });
+        
+        console.log(`✅ Created ${this.activeHotspots.size} hotspots`);
+      }, 100);
     }
   }
 
@@ -329,15 +347,30 @@ class HotspotManager {
   }
 
   /**
-   * Create individual hotspot element
+   * Create individual hotspot element with image-relative positioning
    */
   createHotspot(config, index) {
     const clickArea = document.createElement('div');
     clickArea.className = 'hotspot-click-area';
+    clickArea.dataset.hotspotId = config.id;
+    clickArea.dataset.index = index;
+    
+    // Get the current background image and its dimensions
+    const imageContainer = document.getElementById('staticImageContainer');
+    const currentImage = imageContainer.querySelector('.tutorial-image');
+    
+    if (!currentImage) {
+      console.warn('No background image found for hotspot positioning');
+      return;
+    }
+    
+    // Calculate image-relative position
+    const position = this.calculateImageRelativePosition(config.position, currentImage, imageContainer);
+    
     clickArea.style.cssText = `
       position: absolute;
-      top: ${config.position.y * 100}%;
-      left: ${config.position.x * 100}%;
+      top: ${position.y}px;
+      left: ${position.x}px;
       width: 45px;
       height: 45px;
       cursor: pointer;
@@ -369,10 +402,7 @@ class HotspotManager {
     
     clickArea.appendChild(hotspot);
     
-    clickArea.dataset.hotspotId = config.id;
-    clickArea.dataset.index = index;
-    
-    console.log(`🎯 Creating hotspot ${config.id} at (${config.position.x * 100}%, ${config.position.y * 100}%)`);
+    console.log(`🎯 Creating hotspot ${config.id} at image-relative position (${position.x}px, ${position.y}px)`);
     
     // Event listeners
     clickArea.addEventListener('click', (e) => {
@@ -410,6 +440,95 @@ class HotspotManager {
     console.log(`✅ Hotspot ${config.id} created and added to container`);
     console.log(`📊 Container children count: ${this.container.children.length}`);
     console.log(`📊 Active hotspots count: ${this.activeHotspots.size}`);
+  }
+
+  /**
+   * Calculate hotspot position relative to actual image bounds
+   */
+  calculateImageRelativePosition(relativePos, imageElement, containerElement) {
+    const containerRect = containerElement.getBoundingClientRect();
+    
+    // Try to get dimensions from loaded tutorial data first
+    const sectionDimensions = this.imageDimensions.get(this.currentSection);
+    let naturalWidth, naturalHeight;
+    
+    if (sectionDimensions) {
+      naturalWidth = sectionDimensions.width;
+      naturalHeight = sectionDimensions.height;
+      console.log(`📐 Using provided dimensions for section ${this.currentSection}: ${naturalWidth}x${naturalHeight}`);
+    } else {
+      // Fallback to image natural dimensions
+      naturalWidth = imageElement.naturalWidth || 1920;
+      naturalHeight = imageElement.naturalHeight || 571;
+      console.log(`📐 Using fallback dimensions: ${naturalWidth}x${naturalHeight}`);
+    }
+    
+    const imageAspectRatio = naturalWidth / naturalHeight;
+    
+    // Get container dimensions
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
+    const containerAspectRatio = containerWidth / containerHeight;
+    
+    let imageDisplayWidth, imageDisplayHeight;
+    let imageOffsetX, imageOffsetY;
+    
+    // Calculate actual displayed image size (object-fit: contain logic)
+    if (imageAspectRatio > containerAspectRatio) {
+      // Image is wider - fit to width
+      imageDisplayWidth = containerWidth;
+      imageDisplayHeight = containerWidth / imageAspectRatio;
+      imageOffsetX = 0;
+      imageOffsetY = (containerHeight - imageDisplayHeight) / 2;
+    } else {
+      // Image is taller - fit to height
+      imageDisplayWidth = containerHeight * imageAspectRatio;
+      imageDisplayHeight = containerHeight;
+      imageOffsetX = (containerWidth - imageDisplayWidth) / 2;
+      imageOffsetY = 0;
+    }
+    
+    // Convert relative position (0-1) to absolute position within the image
+    const hotspotX = imageOffsetX + (relativePos.x * imageDisplayWidth);
+    const hotspotY = imageOffsetY + (relativePos.y * imageDisplayHeight);
+    
+    console.log(`📐 Image positioning:`, {
+      container: { width: containerWidth, height: containerHeight },
+      imageDisplay: { width: imageDisplayWidth, height: imageDisplayHeight },
+      imageOffset: { x: imageOffsetX, y: imageOffsetY },
+      hotspotRelative: relativePos,
+      hotspotAbsolute: { x: hotspotX, y: hotspotY }
+    });
+    
+    return { x: hotspotX, y: hotspotY };
+  }
+
+  /**
+   * Update hotspots when window resizes
+   */
+  repositionHotspots() {
+    if (this.activeHotspots.size === 0) return;
+    
+    const imageContainer = document.getElementById('staticImageContainer');
+    const currentImage = imageContainer.querySelector('.tutorial-image');
+    
+    if (!currentImage) return;
+    
+    // Get current section hotspots
+    const sectionHotspots = this.hotspots.get(this.currentSection);
+    if (!sectionHotspots) return;
+    
+    // Reposition each hotspot
+    this.activeHotspots.forEach(clickArea => {
+      const hotspotId = clickArea.dataset.hotspotId;
+      const config = sectionHotspots.find(h => h.id === hotspotId);
+      
+      if (config) {
+        const position = this.calculateImageRelativePosition(config.position, currentImage, imageContainer);
+        clickArea.style.top = `${position.y}px`;
+        clickArea.style.left = `${position.x}px`;
+      }
+    });
   }
 
   /**
@@ -472,7 +591,7 @@ class HotspotManager {
     // Show dialog
     this.singleDialog.style.display = 'block';
     this.singleDialog.style.visibility = 'visible';
-    this.singleDialog.style.zIndex = '5000';
+    this.singleDialog.style.zIndex = '9999';
     
     setTimeout(() => {
       this.singleDialog.style.opacity = '1';
@@ -596,8 +715,8 @@ class HotspotManager {
     mobileParams.className = 'mobile-parameters';
     mobileParams.style.cssText = `
       display: block !important;
-      margin: 2rem 0 1rem 0;
-      padding: 0.8rem;
+      margin: 0.5rem 0 2.5rem 0;
+      padding: 1rem;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -683,6 +802,9 @@ class HotspotManager {
         if (wasNarrow !== isNarrowNow) {
           // Display mode changed, update hotspots
           this.updateHotspots(this.currentSection);
+        } else {
+          // Just reposition existing hotspots
+          this.repositionHotspots();
         }
       }, 100);
     }
@@ -850,7 +972,7 @@ if (typeof document !== 'undefined') {
   style.textContent = `
     /* Single dialog styling */
     .single-parameter-dialog {
-      z-index: 50 !important;
+      z-index: 9999 !important;
     }
     
     .single-parameter-dialog.active {
@@ -860,7 +982,7 @@ if (typeof document !== 'undefined') {
     
     /* Hotspot styling - always on top */
     .hotspot-click-area {
-      z-index: 100 !important;
+      z-index: 6000 !important;
       pointer-events: auto !important;
     }
     
@@ -877,7 +999,7 @@ if (typeof document !== 'undefined') {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
-        margin: 2rem 0 1rem 0 !important;
+        margin: 0.5rem 0 2.5rem 0 !important;
         padding: 1rem !important;
         background: rgba(255, 255, 255, 0.05) !important;
         border-radius: 8px !important;
