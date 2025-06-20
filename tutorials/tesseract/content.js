@@ -391,12 +391,6 @@ const TesseractContent = {
                 <li><strong>Zig-Zag Result:</strong> Instead of clean wrapping, we get oscillation back and forth</li>
                 <li><strong>Solution:</strong> Accept the clean wrap and don't filter past this point</li>
               </ul>
-
-              <div style="background: rgba(255, 255, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
-                <strong>Visual Example:</strong><br>
-                Clean Wrap: 6.28 → 0.00 → 0.01 → 0.02<br>
-                Filtered Wrap: 6.28 → 3.14 → 0.00 → 3.14 → 0.01 (zig-zag!)
-              </div>
             `
           }
         },
@@ -526,31 +520,7 @@ const TesseractContent = {
             type: "html",
             content: `
               <h4>Euler Cycle Solution:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Single continuous line</strong> that traces the entire hypercube structure</li>
-                <li><strong>One draw call</strong> - much more efficient</li>
-                <li><strong>Guaranteed completeness</strong> - every edge of the hypercube gets drawn</li>
-                <li><strong>Clean loops</strong> - perfect for continuous animation</li>
-              </ul>
-
-              <h3>My Manual Calculation Process</h3>
-              
-              <h4>The Pen and Paper Method:</h4>
-              <ol style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Drew the 16 vertices</strong> of a hypercube with their 4D coordinates</li>
-                <li><strong>Mapped all 32 edges</strong> - which vertices connect to which</li>
-                <li><strong>Found valid path</strong> that visits each edge exactly once</li>
-                <li><strong>Verified the cycle</strong> - checked that it returns to start</li>
-                <li><strong>Saved as TSV</strong> - recorded the sequence of vertices</li>
-              </ol>
-
-              <h4>Why This Was Challenging:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>4D visualization</strong> is mentally difficult</li>
-                <li><strong>32 edges</strong> to track - easy to miss connections</li>
-                <li><strong>Must be continuous</strong> - can't have gaps in the path</li>
-                <li><strong>Must close</strong> - last vertex must connect back to first</li>
-              </ul>
+             
 
               <h3>Previous Laser Project Context</h3>
               <p><strong>The Original Use Case:</strong> Laser Projectors need continuous paths for efficiency. I created reactive hypercubes with audio-responsive 4D visualizations for real-time performance. The same Euler cycle works for any hypercube visualization - that's why I could reuse this data.</p>
