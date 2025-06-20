@@ -1,6 +1,6 @@
 /**
- * ContentBlockManager - Production Version with Working Widget Buttons
- * Handles embedded HTML content and external file loading for tutorial framework
+ * ContentBlockManager - GitHub-Optimized Version
+ * Handles GitHub raw URLs for loading and GitHub blob URLs for downloads
  */
 class ContentBlockManager {
   constructor(options = {}) {
@@ -8,6 +8,9 @@ class ContentBlockManager {
       basePath: options.basePath || '',
       enableCache: options.enableCache !== false,
       enableMarkdown: options.enableMarkdown !== false,
+      githubUser: options.githubUser || 'TrueFiasco',
+      githubRepo: options.githubRepo || 'TouchDesigner-Tutorials',
+      githubBranch: options.githubBranch || 'main',
       ...options
     };
     
@@ -19,6 +22,36 @@ class ContentBlockManager {
   async init() {
     if (this.isInitialized) return;
     this.isInitialized = true;
+  }
+
+  /**
+   * Convert raw GitHub URL to GitHub blob URL for viewing
+   */
+  _convertToGitHubBlobURL(rawUrl, githubPath = null) {
+    if (githubPath) {
+      // Use the provided GitHub path
+      return `https://github.com/${this.options.githubUser}/${this.options.githubRepo}/blob/${this.options.githubBranch}/${githubPath}`;
+    }
+    
+    // Convert from raw URL pattern
+    if (rawUrl.includes('raw.githubusercontent.com')) {
+      const match = rawUrl.match(/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/([^\/]+)\/(.+)/);
+      if (match) {
+        const [, user, repo, branch, path] = match;
+        return `https://github.com/${user}/${repo}/blob/${branch}/${path}`;
+      }
+    }
+    
+    // Fallback to original URL
+    return rawUrl;
+  }
+
+  /**
+   * Get GitHub repository root URL
+   */
+  _getGitHubRepoURL(subPath = '') {
+    const baseUrl = `https://github.com/${this.options.githubUser}/${this.options.githubRepo}`;
+    return subPath ? `${baseUrl}/tree/${this.options.githubBranch}/${subPath}` : baseUrl;
   }
 
   /**
@@ -281,7 +314,7 @@ class ContentBlockManager {
   }
 
   /**
-   * Render TSV table widget
+   * Render TSV table widget with GitHub integration
    */
   async _renderTSVTable(widget) {
     const widgetId = `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -318,14 +351,16 @@ class ContentBlockManager {
 
     container.appendChild(contentWidget);
 
-    // Store widget data for button actions
+    // Store widget data with GitHub information
     this.activeWidgets.set(widgetId, {
       type: 'tsv-table',
       widget: widget,
       table: table,
       container: container,
       contentElement: widgetContent,
-      title: widget.title || 'TSV Data'
+      title: widget.title || 'TSV Data',
+      githubPath: widget.githubPath,
+      githubURL: widget.githubPath ? this._convertToGitHubBlobURL(widget.source, widget.githubPath) : this._convertToGitHubBlobURL(widget.source)
     });
 
     if (widget.source) {
@@ -336,7 +371,7 @@ class ContentBlockManager {
   }
 
   /**
-   * Render code viewer widget
+   * Render code viewer widget with GitHub integration
    */
   async _renderCodeViewer(widget) {
     const widgetId = `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -373,14 +408,17 @@ class ContentBlockManager {
 
     container.appendChild(contentWidget);
 
-    // Store widget data for button actions
+    // Store widget data with GitHub information
     this.activeWidgets.set(widgetId, {
       type: 'code-viewer',
       widget: widget,
       codeElement: codeElement,
       container: container,
       contentElement: widgetContent,
-      title: widget.title || 'Code'
+      title: widget.title || 'Code',
+      language: widget.language || 'txt',
+      githubPath: widget.githubPath,
+      githubURL: widget.githubPath ? this._convertToGitHubBlobURL(widget.source, widget.githubPath) : this._convertToGitHubBlobURL(widget.source)
     });
 
     if (widget.source) {
@@ -422,13 +460,13 @@ class ContentBlockManager {
     const titles = {
       'fullscreen': 'Fullscreen',
       'copy': 'Copy to Clipboard',
-      'download': 'Download from GitHub'
+      'download': 'View on GitHub'
     };
     return titles[control] || control;
   }
 
   /**
-   * Handle widget button actions - NOW WITH ACTUAL FUNCTIONALITY!
+   * Handle widget button actions - GitHub-optimized
    */
   _handleWidgetAction(action, widgetId) {
     console.log(`🎛️ Widget action: ${action} for widget: ${widgetId}`);
@@ -447,10 +485,28 @@ class ContentBlockManager {
         this._copyWidgetContent(widgetData);
         break;
       case 'download':
-        this._downloadWidgetContent(widgetData);
+        this._openGitHubFile(widgetData);
         break;
       default:
         console.warn(`⚠️ Unknown widget action: ${action}`);
+    }
+  }
+
+  /**
+   * Open GitHub file in new tab
+   */
+  _openGitHubFile(widgetData) {
+    console.log('🐙 Opening GitHub file:', widgetData.githubURL);
+    
+    if (widgetData.githubURL) {
+      window.open(widgetData.githubURL, '_blank', 'noopener,noreferrer');
+    } else if (widgetData.widget.source) {
+      // Fallback to converted URL
+      const githubUrl = this._convertToGitHubBlobURL(widgetData.widget.source);
+      window.open(githubUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      console.warn('⚠️ No GitHub URL available for widget');
+      this._showCopyNotification('No GitHub URL available', true);
     }
   }
 
@@ -481,13 +537,13 @@ class ContentBlockManager {
     copyBtn.textContent = '📋 Copy';
     copyBtn.addEventListener('click', () => this._copyWidgetContent(widgetData));
     
-    // Download button in fullscreen
-    if (widgetData.widget.source) {
-      const downloadBtn = document.createElement('button');
-      downloadBtn.className = 'nav-btn';
-      downloadBtn.textContent = '⬇ Download';
-      downloadBtn.addEventListener('click', () => this._downloadWidgetContent(widgetData));
-      buttonContainer.appendChild(downloadBtn);
+    // GitHub button in fullscreen
+    if (widgetData.githubURL) {
+      const githubBtn = document.createElement('button');
+      githubBtn.className = 'nav-btn';
+      githubBtn.innerHTML = '🐙 GitHub';
+      githubBtn.addEventListener('click', () => this._openGitHubFile(widgetData));
+      buttonContainer.appendChild(githubBtn);
     }
     
     // Close button
@@ -575,35 +631,7 @@ class ContentBlockManager {
   }
 
   /**
-   * Download widget content or open GitHub link
-   */
-  _downloadWidgetContent(widgetData) {
-    console.log('⬇️ Downloading content for:', widgetData.title);
-    
-    if (widgetData.widget.source && widgetData.widget.source.startsWith('http')) {
-      // Open external link in new tab
-      window.open(widgetData.widget.source, '_blank');
-    } else if (widgetData.type === 'tsv-table') {
-      // Download as TSV file
-      const table = widgetData.table;
-      const rows = table.querySelectorAll('tr');
-      const tsvRows = Array.from(rows).map(row => {
-        const cells = row.querySelectorAll('th, td');
-        return Array.from(cells).map(cell => cell.textContent.trim()).join('\t');
-      });
-      const tsvContent = tsvRows.join('\n');
-      
-      this._downloadFile(tsvContent, `${widgetData.title}.tsv`, 'text/tab-separated-values');
-    } else if (widgetData.type === 'code-viewer') {
-      // Download as code file
-      const content = widgetData.content || widgetData.codeElement.textContent;
-      const extension = widgetData.widget.language || 'txt';
-      this._downloadFile(content, `${widgetData.title}.${extension}`, 'text/plain');
-    }
-  }
-
-  /**
-   * Helper to download file
+   * Helper to download file (for local content)
    */
   _downloadFile(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
@@ -747,7 +775,7 @@ class ContentBlockManager {
       codeElement.textContent = codeData;
       codeElement.classList.remove('loading');
       
-      // Store content for copy/download functionality
+      // Store content for copy functionality
       if (this.activeWidgets.has(widgetId)) {
         this.activeWidgets.get(widgetId).content = codeData;
       }
