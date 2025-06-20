@@ -420,7 +420,7 @@ const TesseractContent = {
             type: "widget",
             widget: {
               type: "code-viewer",
-              source: "https://raw.githubusercontent.com/TrueFiasco/website/main/Tesseract%20Tutorial%20Pictures/code/vert_rotation_pixel.frag",
+              source: "https://raw.githubusercontent.com/TrueFiasco/TouchDesigner-Tutorials/main/Tesseract/vert_rotation_pixel.frag",
               title: "Vertex Rotation GLSL",
               language: "glsl",
               controls: ["fullscreen", "copy", "download"]
