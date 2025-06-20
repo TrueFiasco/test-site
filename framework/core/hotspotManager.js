@@ -309,8 +309,8 @@ class HotspotManager {
     
     const windowWidth = window.innerWidth;
     const isMobileView = windowWidth <= 768;
-    const isNarrowDesktopView = windowWidth > 768 && windowWidth <= 1024;
-    const isWideDesktopView = windowWidth > 1024;
+    const isNarrowDesktopView = windowWidth > 768 && windowWidth <= 770;
+    const isWideDesktopView = windowWidth > 770;
     
     console.log(`📏 Window width: ${windowWidth}px`);
     console.log(`📱 Mobile: ${isMobileView}, Narrow: ${isNarrowDesktopView}, Wide: ${isWideDesktopView}`);
