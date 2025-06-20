@@ -176,7 +176,7 @@ class HotspotManager {
   }
 
   /**
-   * Create single dialog for all parameters
+   * Create single dialog for all parameters with enhanced animations
    */
   createSingleDialog() {
     this.dialogContainer = document.createElement('div');
@@ -196,24 +196,25 @@ class HotspotManager {
     this.singleDialog.className = 'single-parameter-dialog';
     this.singleDialog.style.cssText = `
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 80px;
+      right: 0px;
       background: #1a1a2e;
-      border: 2px solid #444;
-      border-radius: 8px;
-      padding: 1rem;
+      border: 3px solid #444;
+      border-radius: 8px 0 0 8px;
+      border-right: none;
+      padding: 3px;
       max-width: 500px;
-      min-width: 300px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.9);
+      min-width: 8px;
+      width: 8px;
+      max-height: calc(100vh - 100px);
+      overflow: hidden;
+      box-shadow: -5px 0 20px rgba(0,0,0,0.9);
       backdrop-filter: blur(10px);
       opacity: 0;
-      transform: scale(0.95);
-      transition: opacity 0.3s ease, transform 0.3s ease;
       pointer-events: auto;
       display: none;
       z-index: 9999;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     `;
     
     // Create header
@@ -222,9 +223,11 @@ class HotspotManager {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
+      margin-bottom: 3px;
+      padding-bottom: 3px;
       border-bottom: 1px solid #333;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.2s;
     `;
     
     const title = document.createElement('h4');
@@ -232,7 +235,7 @@ class HotspotManager {
     title.style.cssText = `
       color: #00ffff;
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: bold;
     `;
     
@@ -242,17 +245,18 @@ class HotspotManager {
       background: #ff4757;
       border: none;
       color: white;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: background 0.3s ease;
+      flex-shrink: 0;
     `;
     closeBtn.addEventListener('click', () => {
       console.log('🎯 Close button clicked');
@@ -275,7 +279,9 @@ class HotspotManager {
     content.style.cssText = `
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0px;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.3s;
     `;
     this.singleDialog.appendChild(content);
     
@@ -309,8 +315,8 @@ class HotspotManager {
     
     const windowWidth = window.innerWidth;
     const isMobileView = windowWidth <= 768;
-    const isNarrowDesktopView = windowWidth > 768 && windowWidth <= 770;
-    const isWideDesktopView = windowWidth > 770;
+    const isNarrowDesktopView = windowWidth > 768 && windowWidth <= 1024;
+    const isWideDesktopView = windowWidth > 1024;
     
     console.log(`📏 Window width: ${windowWidth}px`);
     console.log(`📱 Mobile: ${isMobileView}, Narrow: ${isNarrowDesktopView}, Wide: ${isWideDesktopView}`);
@@ -341,7 +347,7 @@ class HotspotManager {
    */
   isNarrowDesktop() {
     const width = window.innerWidth;
-    const isNarrow = width > 768 && width <= 770;
+    const isNarrow = width > 768 && width <= 1024;
     console.log(`📏 isNarrowDesktop check: ${width}px = ${isNarrow}`);
     return isNarrow;
   }
@@ -567,45 +573,71 @@ class HotspotManager {
   }
 
   /**
-   * Update the single dialog with selected parameters
+   * Update the single dialog with selected parameters and enhanced animations
    */
   updateSingleDialog() {
     const content = document.getElementById('dialogParameterContent');
+    const header = this.singleDialog.querySelector('div'); // Header element
+    
     if (!content) {
       console.error('❌ Dialog content container not found');
       return;
     }
     
-    // Clear existing content
-    content.innerHTML = '';
-    
     if (this.selectedHotspots.size === 0) {
       console.log('🎯 No hotspots selected, hiding dialog');
-      this.singleDialog.style.display = 'none';
-      this.singleDialog.style.opacity = '0';
+      this.closeAllParameters();
       return;
     }
     
     console.log(`🎯 Showing dialog with ${this.selectedHotspots.size} parameters`);
     
-    // Show dialog
+    // Show dialog with right-to-left animation
     this.singleDialog.style.display = 'block';
     this.singleDialog.style.visibility = 'visible';
     this.singleDialog.style.zIndex = '9999';
+    this.singleDialog.style.opacity = '1';
     
+    // Animate from thin line to full width
     setTimeout(() => {
-      this.singleDialog.style.opacity = '1';
-      this.singleDialog.style.transform = 'scale(1)';
-      console.log('✅ Dialog should now be visible');
-    }, 10);
+      this.singleDialog.style.width = '320px';
+      this.singleDialog.style.minWidth = '320px';
+      this.singleDialog.style.overflow = 'visible';
+      
+      // Show header after width animation
+      setTimeout(() => {
+        if (header) header.style.opacity = '1';
+        content.style.opacity = '1';
+      }, 200);
+    }, 50);
     
-    // Add selected parameters
+    // Get current parameters to determine what's new
+    const currentParameterIds = Array.from(content.children).map(child => child.dataset.parameterId);
+    const selectedParameterIds = Array.from(this.selectedHotspots);
+    
+    // Remove parameters that are no longer selected
+    currentParameterIds.forEach(paramId => {
+      if (!selectedParameterIds.includes(paramId)) {
+        const paramElement = content.querySelector(`[data-parameter-id="${paramId}"]`);
+        if (paramElement) {
+          paramElement.style.transform = 'translateX(100%) scale(0.8)';
+          paramElement.style.opacity = '0';
+          setTimeout(() => {
+            if (paramElement.parentNode) {
+              paramElement.parentNode.removeChild(paramElement);
+            }
+          }, 300);
+        }
+      }
+    });
+    
+    // Add new parameters with slide-down animation
     const currentSectionHotspots = this.hotspots.get(this.currentSection) || [];
-    this.selectedHotspots.forEach(hotspotId => {
+    selectedParameterIds.forEach((hotspotId, index) => {
       const config = currentSectionHotspots.find(h => h.id === hotspotId);
-      if (config) {
+      if (config && !currentParameterIds.includes(hotspotId)) {
         console.log(`📸 Adding parameter ${hotspotId} to dialog`);
-        this.addParameterToDialog(config, content);
+        this.addParameterToDialog(config, content, index);
       }
     });
     
@@ -613,19 +645,24 @@ class HotspotManager {
   }
 
   /**
-   * Add parameter image to dialog
+   * Add parameter image to dialog with slide-down stacking animation
    */
-  addParameterToDialog(config, container) {
+  addParameterToDialog(config, container, index = 0) {
     const paramContainer = document.createElement('div');
+    paramContainer.dataset.parameterId = config.id;
     paramContainer.style.cssText = `
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 0px;
+      padding: 0px;
+      background: transparent;
+      border-radius: 3px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transform: translateY(-100%) scale(0.9);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      overflow: hidden;
     `;
     
     // Parameter image only (no title since it's in the image)
@@ -640,23 +677,36 @@ class HotspotManager {
       img.alt = config.content.title || config.id;
       img.style.cssText = `
         width: 100%;
-        max-width: 400px;
+        max-width: 100%;
         height: auto;
-        border-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0px;
+        border: none;
+        display: block;
+        margin: 0;
+        padding: 0;
       `;
       
       img.onload = () => {
         console.log(`✅ Parameter image loaded: ${imagePath}`);
+        // Trigger slide-down animation after image loads
+        setTimeout(() => {
+          paramContainer.style.transform = 'translateY(0) scale(1)';
+          paramContainer.style.opacity = '1';
+        }, index * 100); // Stagger animation based on index
       };
       
       img.onerror = () => {
         console.error(`❌ Failed to load parameter image: ${imagePath}`);
         paramContainer.innerHTML = `
-          <p style="color: #ff6b6b; text-align: center; padding: 0.5rem; font-size: 0.8rem;">
+          <p style="color: #ff6b6b; text-align: center; padding: 0.5rem; font-size: 0.8rem; margin: 0;">
             Failed to load: ${config.content.source}
           </p>
         `;
+        // Still animate even on error
+        setTimeout(() => {
+          paramContainer.style.transform = 'translateY(0) scale(1)';
+          paramContainer.style.opacity = '1';
+        }, index * 100);
       };
       
       paramContainer.appendChild(img);
