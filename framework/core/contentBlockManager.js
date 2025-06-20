@@ -1,5 +1,5 @@
 /**
- * ContentBlockManager - Production Version
+ * ContentBlockManager - Production Version with Working Widget Buttons
  * Handles embedded HTML content and external file loading for tutorial framework
  */
 class ContentBlockManager {
@@ -13,6 +13,7 @@ class ContentBlockManager {
     
     this.contentCache = new Map();
     this.isInitialized = false;
+    this.activeWidgets = new Map(); // Track active widgets for button actions
   }
 
   async init() {
@@ -283,10 +284,12 @@ class ContentBlockManager {
    * Render TSV table widget
    */
   async _renderTSVTable(widget) {
+    const widgetId = `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const container = document.createElement('div');
     container.className = 'widget-container';
+    container.dataset.widgetId = widgetId;
 
-    const buttonsContainer = this._createWidgetButtons(widget.controls || []);
+    const buttonsContainer = this._createWidgetButtons(widget.controls || [], widgetId);
     container.appendChild(buttonsContainer);
 
     const contentWidget = document.createElement('div');
@@ -294,7 +297,7 @@ class ContentBlockManager {
 
     const widgetContent = document.createElement('div');
     widgetContent.className = 'widget-content';
-    widgetContent.id = `tsvContent-${Date.now()}`;
+    widgetContent.id = `tsvContent-${widgetId}`;
 
     const table = document.createElement('table');
     table.className = 'tsv-table';
@@ -315,6 +318,16 @@ class ContentBlockManager {
 
     container.appendChild(contentWidget);
 
+    // Store widget data for button actions
+    this.activeWidgets.set(widgetId, {
+      type: 'tsv-table',
+      widget: widget,
+      table: table,
+      container: container,
+      contentElement: widgetContent,
+      title: widget.title || 'TSV Data'
+    });
+
     if (widget.source) {
       this._loadTSVData(widget.source, table);
     }
@@ -326,10 +339,12 @@ class ContentBlockManager {
    * Render code viewer widget
    */
   async _renderCodeViewer(widget) {
+    const widgetId = `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const container = document.createElement('div');
     container.className = 'widget-container';
+    container.dataset.widgetId = widgetId;
 
-    const buttonsContainer = this._createWidgetButtons(widget.controls || []);
+    const buttonsContainer = this._createWidgetButtons(widget.controls || [], widgetId);
     container.appendChild(buttonsContainer);
 
     const contentWidget = document.createElement('div');
@@ -337,7 +352,7 @@ class ContentBlockManager {
 
     const widgetContent = document.createElement('div');
     widgetContent.className = 'widget-content';
-    widgetContent.id = `codeContent-${Date.now()}`;
+    widgetContent.id = `codeContent-${widgetId}`;
 
     const codeElement = document.createElement('div');
     codeElement.className = 'code-content loading';
@@ -358,20 +373,34 @@ class ContentBlockManager {
 
     container.appendChild(contentWidget);
 
+    // Store widget data for button actions
+    this.activeWidgets.set(widgetId, {
+      type: 'code-viewer',
+      widget: widget,
+      codeElement: codeElement,
+      container: container,
+      contentElement: widgetContent,
+      title: widget.title || 'Code'
+    });
+
     if (widget.source) {
-      this._loadCodeData(widget.source, codeElement);
+      this._loadCodeData(widget.source, codeElement, widgetId);
     } else if (widget.content) {
       codeElement.textContent = widget.content;
       codeElement.classList.remove('loading');
+      // Update stored content
+      if (this.activeWidgets.has(widgetId)) {
+        this.activeWidgets.get(widgetId).content = widget.content;
+      }
     }
 
     return container;
   }
 
   /**
-   * Create widget control buttons
+   * Create widget control buttons with working functionality
    */
-  _createWidgetButtons(controls) {
+  _createWidgetButtons(controls, widgetId) {
     const buttonsContainer = document.createElement('div');
     buttonsContainer.className = 'widget-buttons';
 
@@ -379,7 +408,10 @@ class ContentBlockManager {
       const button = document.createElement('button');
       button.className = `widget-btn widget-btn-${control}`;
       button.title = this._getButtonTitle(control);
-      button.addEventListener('click', () => this._handleWidgetAction(control));
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this._handleWidgetAction(control, widgetId);
+      });
       buttonsContainer.appendChild(button);
     });
 
@@ -395,9 +427,218 @@ class ContentBlockManager {
     return titles[control] || control;
   }
 
-  _handleWidgetAction(action) {
-    // These can be implemented based on your existing widget functionality
-    console.log(`Widget action: ${action}`);
+  /**
+   * Handle widget button actions - NOW WITH ACTUAL FUNCTIONALITY!
+   */
+  _handleWidgetAction(action, widgetId) {
+    console.log(`🎛️ Widget action: ${action} for widget: ${widgetId}`);
+    
+    const widgetData = this.activeWidgets.get(widgetId);
+    if (!widgetData) {
+      console.error('❌ Widget data not found for ID:', widgetId);
+      return;
+    }
+
+    switch (action) {
+      case 'fullscreen':
+        this._openFullscreenModal(widgetData);
+        break;
+      case 'copy':
+        this._copyWidgetContent(widgetData);
+        break;
+      case 'download':
+        this._downloadWidgetContent(widgetData);
+        break;
+      default:
+        console.warn(`⚠️ Unknown widget action: ${action}`);
+    }
+  }
+
+  /**
+   * Open widget content in fullscreen modal
+   */
+  _openFullscreenModal(widgetData) {
+    console.log('🖥️ Opening fullscreen modal for:', widgetData.title);
+    
+    // Create fullscreen modal
+    const modal = document.createElement('div');
+    modal.className = 'widget-fullscreen active';
+    modal.style.display = 'flex';
+    
+    // Modal header
+    const header = document.createElement('div');
+    header.className = 'widget-fullscreen-header';
+    
+    const title = document.createElement('h3');
+    title.textContent = widgetData.title;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'widget-fullscreen-buttons';
+    
+    // Copy button in fullscreen
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'nav-btn';
+    copyBtn.textContent = '📋 Copy';
+    copyBtn.addEventListener('click', () => this._copyWidgetContent(widgetData));
+    
+    // Download button in fullscreen
+    if (widgetData.widget.source) {
+      const downloadBtn = document.createElement('button');
+      downloadBtn.className = 'nav-btn';
+      downloadBtn.textContent = '⬇ Download';
+      downloadBtn.addEventListener('click', () => this._downloadWidgetContent(widgetData));
+      buttonContainer.appendChild(downloadBtn);
+    }
+    
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'nav-btn close-btn';
+    closeBtn.textContent = '×';
+    closeBtn.addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    buttonContainer.appendChild(copyBtn);
+    buttonContainer.appendChild(closeBtn);
+    header.appendChild(title);
+    header.appendChild(buttonContainer);
+    
+    // Modal content
+    const content = document.createElement('div');
+    content.className = 'widget-fullscreen-content';
+    
+    // Clone the widget content
+    if (widgetData.type === 'tsv-table') {
+      const tableClone = widgetData.table.cloneNode(true);
+      content.appendChild(tableClone);
+    } else if (widgetData.type === 'code-viewer') {
+      const codeClone = widgetData.codeElement.cloneNode(true);
+      codeClone.className = 'code-content'; // Remove loading class
+      content.appendChild(codeClone);
+    }
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // Close on ESC key
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') {
+        document.body.removeChild(modal);
+        document.removeEventListener('keydown', handleKeyPress);
+      }
+    };
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Close on click outside content
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+        document.removeEventListener('keydown', handleKeyPress);
+      }
+    });
+  }
+
+  /**
+   * Copy widget content to clipboard
+   */
+  async _copyWidgetContent(widgetData) {
+    console.log('📋 Copying content for:', widgetData.title);
+    
+    let textToCopy = '';
+    
+    try {
+      if (widgetData.type === 'tsv-table') {
+        // Convert table to TSV format
+        const table = widgetData.table;
+        const rows = table.querySelectorAll('tr');
+        const tsvRows = Array.from(rows).map(row => {
+          const cells = row.querySelectorAll('th, td');
+          return Array.from(cells).map(cell => cell.textContent.trim()).join('\t');
+        });
+        textToCopy = tsvRows.join('\n');
+      } else if (widgetData.type === 'code-viewer') {
+        // Get code content
+        textToCopy = widgetData.content || widgetData.codeElement.textContent;
+      }
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(textToCopy);
+      
+      // Show notification
+      this._showCopyNotification('Copied to clipboard!');
+      
+    } catch (error) {
+      console.error('❌ Failed to copy content:', error);
+      this._showCopyNotification('Failed to copy content', true);
+    }
+  }
+
+  /**
+   * Download widget content or open GitHub link
+   */
+  _downloadWidgetContent(widgetData) {
+    console.log('⬇️ Downloading content for:', widgetData.title);
+    
+    if (widgetData.widget.source && widgetData.widget.source.startsWith('http')) {
+      // Open external link in new tab
+      window.open(widgetData.widget.source, '_blank');
+    } else if (widgetData.type === 'tsv-table') {
+      // Download as TSV file
+      const table = widgetData.table;
+      const rows = table.querySelectorAll('tr');
+      const tsvRows = Array.from(rows).map(row => {
+        const cells = row.querySelectorAll('th, td');
+        return Array.from(cells).map(cell => cell.textContent.trim()).join('\t');
+      });
+      const tsvContent = tsvRows.join('\n');
+      
+      this._downloadFile(tsvContent, `${widgetData.title}.tsv`, 'text/tab-separated-values');
+    } else if (widgetData.type === 'code-viewer') {
+      // Download as code file
+      const content = widgetData.content || widgetData.codeElement.textContent;
+      const extension = widgetData.widget.language || 'txt';
+      this._downloadFile(content, `${widgetData.title}.${extension}`, 'text/plain');
+    }
+  }
+
+  /**
+   * Helper to download file
+   */
+  _downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Show copy notification
+   */
+  _showCopyNotification(message, isError = false) {
+    // Look for existing notification element
+    let notification = document.getElementById('copyNotification');
+    
+    if (!notification) {
+      notification = document.createElement('div');
+      notification.id = 'copyNotification';
+      notification.className = 'copy-notification';
+      document.body.appendChild(notification);
+    }
+    
+    notification.textContent = message;
+    notification.style.background = isError ? 'rgba(255, 107, 107, 0.9)' : 'rgba(0, 255, 255, 0.9)';
+    notification.style.color = isError ? '#fff' : '#000';
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 2000);
   }
 
   /**
@@ -500,11 +741,16 @@ class ContentBlockManager {
   /**
    * Load code data into code element
    */
-  async _loadCodeData(source, codeElement) {
+  async _loadCodeData(source, codeElement, widgetId) {
     try {
       const codeData = await this._loadContent(source);
       codeElement.textContent = codeData;
       codeElement.classList.remove('loading');
+      
+      // Store content for copy/download functionality
+      if (this.activeWidgets.has(widgetId)) {
+        this.activeWidgets.get(widgetId).content = codeData;
+      }
     } catch (error) {
       codeElement.textContent = 'Failed to load code';
       codeElement.classList.remove('loading');
@@ -605,6 +851,7 @@ class ContentBlockManager {
    */
   destroy() {
     this.clearCache();
+    this.activeWidgets.clear();
     this.isInitialized = false;
   }
 }
