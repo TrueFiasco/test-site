@@ -592,24 +592,90 @@ class HotspotManager {
     
     console.log(`🎯 Showing dialog with ${this.selectedHotspots.size} parameters`);
     
-    // Show dialog with right-to-left animation
-    this.singleDialog.style.display = 'block';
-    this.singleDialog.style.visibility = 'visible';
-    this.singleDialog.style.zIndex = '9999';
-    this.singleDialog.style.opacity = '1';
+    // Check if this is a fresh opening (dialog is completely hidden)
+    const isDialogHidden = this.singleDialog.style.display === 'none' || 
+                          this.singleDialog.style.visibility === 'hidden' ||
+                          this.singleDialog.style.opacity === '0';
     
-    // Animate from thin line to full width
-    setTimeout(() => {
-      this.singleDialog.style.width = '640px';
-      this.singleDialog.style.minWidth = '5px';
-      this.singleDialog.style.overflow = 'visible';
+    if (isDialogHidden) {
+      console.log('🎯 Fresh dialog opening - clearing content and starting clean animation');
       
-      // Show header after width animation
+      // Clear any existing content first
+      content.innerHTML = '';
+      content.style.opacity = '0';
+      if (header) header.style.opacity = '0';
+      
+      // Reset dialog to collapsed state
+      this.singleDialog.style.width = '8px';
+      this.singleDialog.style.minWidth = '8px';
+      this.singleDialog.style.overflow = 'hidden';
+      
+      // Show dialog container
+      this.singleDialog.style.display = 'block';
+      this.singleDialog.style.visibility = 'visible';
+      this.singleDialog.style.zIndex = '9999';
+      this.singleDialog.style.opacity = '1';
+      
+      // Add all new parameters immediately (but hidden)
+      const currentSectionHotspots = this.hotspots.get(this.currentSection) || [];
+      Array.from(this.selectedHotspots).forEach((hotspotId, index) => {
+        const config = currentSectionHotspots.find(h => h.id === hotspotId);
+        if (config) {
+          console.log(`📸 Adding parameter ${hotspotId} to fresh dialog`);
+          this.addParameterToDialog(config, content, index);
+        }
+      });
+      
+      // Start the slide-out animation after content is added
       setTimeout(() => {
-        if (header) header.style.opacity = '1';
-        content.style.opacity = '1';
-      }, 200);
-    }, 50);
+        this.singleDialog.style.width = '640px';
+        this.singleDialog.style.minWidth = '5px';
+        this.singleDialog.style.overflow = 'visible';
+        
+        // Show header and content after width animation
+        setTimeout(() => {
+          if (header) header.style.opacity = '1';
+          content.style.opacity = '1';
+        }, 200);
+      }, 50);
+      
+    } else {
+      // Dialog is already open - handle parameter changes
+      console.log('🎯 Dialog already open - updating parameters');
+      
+      // Get current parameters to determine what's new
+      const currentParameterIds = Array.from(content.children).map(child => child.dataset.parameterId);
+      const selectedParameterIds = Array.from(this.selectedHotspots);
+      
+      // Remove parameters that are no longer selected
+      currentParameterIds.forEach(paramId => {
+        if (!selectedParameterIds.includes(paramId)) {
+          const paramElement = content.querySelector(`[data-parameter-id="${paramId}"]`);
+          if (paramElement) {
+            paramElement.style.transform = 'translateX(100%) scale(0.8)';
+            paramElement.style.opacity = '0';
+            setTimeout(() => {
+              if (paramElement.parentNode) {
+                paramElement.parentNode.removeChild(paramElement);
+              }
+            }, 300);
+          }
+        }
+      });
+      
+      // Add new parameters with slide-down animation
+      const currentSectionHotspots = this.hotspots.get(this.currentSection) || [];
+      selectedParameterIds.forEach((hotspotId, index) => {
+        const config = currentSectionHotspots.find(h => h.id === hotspotId);
+        if (config && !currentParameterIds.includes(hotspotId)) {
+          console.log(`📸 Adding parameter ${hotspotId} to existing dialog`);
+          this.addParameterToDialog(config, content, index);
+        }
+      });
+    }
+    
+    console.log(`📊 Dialog updated with ${this.selectedHotspots.size} parameters`);
+  }
     
     // Get current parameters to determine what's new
     const currentParameterIds = Array.from(content.children).map(child => child.dataset.parameterId);
@@ -736,12 +802,34 @@ class HotspotManager {
       }
     });
     
-    // Hide dialog
+    // Reset dialog to initial state completely
+    this.resetDialogToInitialState();
+  }
+
+  resetDialogToInitialState() {
+    console.log('🎯 Resetting dialog to initial state');
+    
+    // Clear all content immediately
+    const content = document.getElementById('dialogParameterContent');
+    const header = this.singleDialog.querySelector('div'); // Header element
+    
+    if (content) {
+      content.innerHTML = '';
+      content.style.opacity = '0';
+    }
+    
+    if (header) {
+      header.style.opacity = '0';
+    }
+    
+    // Reset dialog to collapsed state immediately
+    this.singleDialog.style.display = 'none';
+    this.singleDialog.style.visibility = 'hidden';
     this.singleDialog.style.opacity = '0';
-    this.singleDialog.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-      this.singleDialog.style.display = 'none';
-    }, 300);
+    this.singleDialog.style.width = '8px';
+    this.singleDialog.style.minWidth = '8px';
+    this.singleDialog.style.overflow = 'hidden';
+    this.singleDialog.style.transform = 'scale(1)';
   }
 
   /**
@@ -819,8 +907,9 @@ class HotspotManager {
    * Clear all hotspots and mobile content
    */
   clearHotspots() {
-    // Close dialog and clear selections
-    this.closeAllParameters();
+    // Close dialog and clear selections - use reset for clean state
+    this.selectedHotspots.clear();
+    this.resetDialogToInitialState();
     
     // Clear desktop hotspots
     this.activeHotspots.forEach(clickArea => {
@@ -837,6 +926,8 @@ class HotspotManager {
         param.parentNode.removeChild(param);
       }
     });
+    
+    console.log('🎯 All hotspots cleared and dialog reset to initial state');
   }
 
   /**
