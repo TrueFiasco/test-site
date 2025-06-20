@@ -600,8 +600,8 @@ class HotspotManager {
     
     // Animate from thin line to full width
     setTimeout(() => {
-      this.singleDialog.style.width = '512px';
-      this.singleDialog.style.minWidth = '51px';
+      this.singleDialog.style.width = '640px';
+      this.singleDialog.style.minWidth = '5px';
       this.singleDialog.style.overflow = 'visible';
       
       // Show header after width animation
