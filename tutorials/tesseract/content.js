@@ -31,7 +31,6 @@ const TesseractContent = {
                 <li><strong>Interactive Controls:</strong> Real-time parameter manipulation</li>
               </ul>
               
-              <!-- GitHub Download Button -->
               <a href="https://github.com/TrueFiasco/TouchDesigner-Tutorials/tree/main/Tesseract" target="_blank" class="github-download-btn">
                 <svg class="github-logo" viewBox="0 0 24 24">
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -68,7 +67,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 2: The CHOP Network (Expanded)
+      // Section 2: The CHOP Network
       {
         id: 2,
         title: "The CHOP Network",
@@ -130,7 +129,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 3: Input Data 1: Mouse UV Control (Expanded)
+      // Section 3: Input Data 1: Mouse UV Control
       {
         id: 3,
         title: "Input Data 1: Mouse UV Control",
@@ -197,7 +196,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 4: Rangeling CHOPs 1: Mouse Velocity (Expanded)
+      // Section 4: Rangeling CHOPs 1: Mouse Velocity
       {
         id: 4,
         title: "Rangeling CHOPs 1: Mouse Velocity",
@@ -265,7 +264,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 5: Rangeling CHOPs 2: Centering and Scaling (Expanded)
+      // Section 5: Rangeling CHOPs 2: Centering and Scaling
       {
         id: 5,
         title: "Rangeling CHOPs 2: Centering and Scaling",
@@ -319,23 +318,7 @@ const TesseractContent = {
                 Frame 100: Velocity = 10.0 (spinning uncontrollably!)
               </div>
 
-              <h4>The Physics Problem:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li>Constant force creates constant <strong>acceleration</strong></li>
-                <li>Acceleration means velocity keeps <strong>increasing every frame</strong></li>
-                <li>Without limits, velocity approaches infinity</li>
-                <li>Result: Uncontrollable spinning hypercube</li>
-              </ul>
-
-              <h4>Our Simple Solution:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Speed CHOP with Maximum:</strong> Clamps velocity to reasonable range</li>
-                <li><strong>No Complex Physics:</strong> We chose simplicity over realism</li>
-                <li><strong>Could Use Damping:</strong> Advanced approach would add friction/resistance</li>
-                <li><strong>Our Choice:</strong> Simple clamping was sufficient for this project</li>
-              </ul>
-
-              <p><strong>Why Simple Works:</strong> Easier to understand and debug, predictable behavior, less computational overhead, sufficient for our artistic goals.</p>
+              <p><strong>The Physics Problem:</strong> Constant force creates constant <strong>acceleration</strong>, which means velocity keeps <strong>increasing every frame</strong> - without limits, velocity approaches infinity resulting in an uncontrollable spinning hypercube. <strong>Our Simple Solution:</strong> We use a <strong>Speed CHOP with Maximum</strong> to clamp velocity to a reasonable range rather than implementing complex physics. We chose simplicity over realism - while we could use damping or friction/resistance, simple clamping was sufficient for this project. This approach is easier to understand and debug, provides predictable behavior, requires less computational overhead, and meets our artistic goals perfectly.</p>
             `
           }
         },
@@ -346,7 +329,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 6: Rangeling CHOPs 3: Angular Velocity (Expanded)
+      // Section 6: Rangeling CHOPs 3: Angular Velocity
       {
         id: 6,
         title: "Rangeling CHOPs 3: Angular Velocity",
@@ -494,7 +477,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 9: Input Data 2: Saved Data from TSV (Expanded)
+      // Section 9: Input Data 2: Saved Data from TSV
       {
         id: 9,
         title: "Input Data 2: Saved Data from TSV",
@@ -590,7 +573,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 10: Rotation Vertex GLSL (Expanded)
+      // Section 10: Rotation Vertex GLSL
       {
         id: 10,
         title: "Rotation Vertex GLSL",
@@ -642,7 +625,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 11: Perspective GLSL (Expanded)
+      // Section 11: Perspective GLSL
       {
         id: 11,
         title: "Perspective GLSL",
@@ -744,7 +727,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 13: SDF Uneven Capsule (Expanded)
+      // Section 13: SDF Uneven Capsule
       {
         id: 13,
         title: "SDF Uneven Capsule",
@@ -778,7 +761,6 @@ const TesseractContent = {
               <p><strong>vUV.st</strong> = texture coordinates, <strong>sTD2DInputs[0]</strong> = input texture, <strong>textureSize()</strong> = how many line segments, <strong>texelFetch()</strong> = exact line data, <strong>minDist = min(minDist, d)</strong> = keep shortest distance to any line.</p>
 
               <p><strong>Why SDF:</strong> Smooth anti-aliasing, GPU efficient parallel calculation, flexible for effects, mathematically precise curves.</p>
-            `
             `
           },
           right: {
