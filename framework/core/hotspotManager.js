@@ -302,8 +302,16 @@ class HotspotManager {
 
   /**
    * Update hotspots for a specific section
+   * UPDATED: Always closes dialog when changing sections
    */
   updateHotspots(sectionId) {
+    // Close dialog immediately when changing sections
+    if (this.currentSection !== sectionId) {
+      console.log(`🎯 Section changing from ${this.currentSection} to ${sectionId} - closing dialog`);
+      this.resetDialogToInitialState();
+      this.selectedHotspots.clear();
+    }
+    
     this.currentSection = sectionId;
     this.clearHotspots();
     
@@ -878,9 +886,11 @@ class HotspotManager {
 
   /**
    * Clear all hotspots and mobile content
-   * UPDATED: Uses reset method for clean state
+   * UPDATED: Always closes dialog when changing sections
    */
   clearHotspots() {
+    console.log('🎯 Clearing hotspots and closing dialog (section change)');
+    
     // Clear selections and reset dialog to initial state
     this.selectedHotspots.clear();
     this.resetDialogToInitialState();
@@ -901,7 +911,7 @@ class HotspotManager {
       }
     });
     
-    console.log('🎯 All hotspots cleared and dialog reset to initial state');
+    console.log('🎯 All hotspots cleared and dialog closed due to section change');
   }
 
   /**
@@ -927,18 +937,17 @@ class HotspotManager {
 
   /**
    * Handle document click
+   * UPDATED: No auto-close on page clicks - dialog only closes on section change, deactivate last hotspot, close button, or ESC key
    */
   handleDocumentClick(event) {
-    // Don't close if clicking on hotspots or dialog
-    if (event.target.closest('.hotspot-click-area') || 
-        event.target.closest('.single-parameter-dialog')) {
-      return;
-    }
+    // Only prevent event bubbling, don't auto-close dialog
+    // Dialog will only close when:
+    // 1. Going to another section (handled in updateHotspots/clearHotspots)
+    // 2. Deactivating the last hotspot (handled in updateSingleDialog)
+    // 3. Clicking the close button (handled in button event)
+    // 4. ESC key (handled in handleKeyPress)
     
-    // Close dialog when clicking outside
-    if (this.selectedHotspots.size > 0) {
-      this.closeAllParameters();
-    }
+    // No auto-close behavior - user can click anywhere on page without closing dialog
   }
 
   /**
