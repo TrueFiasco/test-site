@@ -1,8 +1,27 @@
 /**
  * Tesseract Tutorial Hotspot Configuration
- * Extracted hotspot data for enhanced hotspot management system
+ * Complete hotspot data including positions, content, and image dimensions
  */
 const TesseractHotspots = {
+  // Image dimensions for accurate hotspot positioning
+  imageDimensions: {
+    1: { width: 3615, height: 1097 },
+    2: { width: 1852, height: 571 },
+    3: { width: 1852, height: 571 },
+    4: { width: 1852, height: 571 },
+    5: { width: 1852, height: 571 },
+    6: { width: 1852, height: 571 },
+    7: { width: 1852, height: 571 },
+    8: { width: 1852, height: 571 },
+    9: { width: 1456, height: 478 },
+    10: { width: 1920, height: 571 },
+    11: { width: 1920, height: 571 },
+    12: { width: 1920, height: 571 },
+    13: { width: 1920, height: 571 },
+    14: { width: 1920, height: 571 }
+  },
+
+  // Hotspot data by section
   sections: [
     // Section 3: Input Data 1: Mouse UV Control
     {
@@ -247,7 +266,7 @@ const TesseractHotspots = {
     }
   ],
 
-  // Global hotspot configuration
+  // Global hotspot configuration for this tutorial
   config: {
     enableCollisionAvoidance: true,
     enableMultiDialog: true,
@@ -258,6 +277,15 @@ const TesseractHotspots = {
       trigger: "hover",
       sticky: true,
       mobileHidden: true
+    },
+    // Tutorial-specific styling
+    styling: {
+      hotspotColor: "#00ffff",
+      hotspotHoverColor: "#ff00ff",
+      hotspotSelectedColor: "#ffff00",
+      dialogBackground: "#1a1a2e",
+      dialogBorder: "#444",
+      dialogAccentColor: "#00ffff"
     }
   }
 };
