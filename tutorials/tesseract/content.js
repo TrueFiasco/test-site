@@ -1,5 +1,5 @@
 /**
- * Tesseract Tutorial Content Configuration - Updated for GitHub Repository
+ * Tesseract Tutorial Content Configuration - Updated with Expanded Sections
  * Content-only configuration - hotspots now managed separately in hotspots.js
  */
 const TesseractContent = {
@@ -68,7 +68,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 2: The CHOP Network
+      // Section 2: The CHOP Network (Expanded)
       {
         id: 2,
         title: "The CHOP Network",
@@ -78,18 +78,39 @@ const TesseractContent = {
             type: "html",
             content: `
               <h1>The CHOP Network</h1>
-              <p>Our CHOP network processes mouse input to control the hypercube rotation. We can use any input device to control any axis or parameter - the flexibility of TouchDesigner shines here.</p>
               
-              <h3>Input Sources:</h3>
-              <p>We take mouse position from either <span class="highlight">mousein</span> or <span class="highlight">panel</span> CHOPs, and scroll increment from mousein to control our hypercube rotation.</p>
-              
-              <h3>Network Flow:</h3>
-              <p>The network processes raw input → applies velocity calculations → converts to angular position → feeds rotation matrices.</p>
+              <h3>Understanding Our Input Strategy</h3>
+              <p>Our CHOP network processes mouse input using a <strong>dual-input approach</strong> that creates natural, responsive interaction:</p>
+
+              <h4>1. Mouse Position as Gentle Force</h4>
+              <p>We use the mouse position as a constant, gentle force. Think of it like holding a steering wheel - the further you turn it, the more constant pressure is applied. This creates <strong>acceleration</strong> rather than direct movement. When you hold the mouse in one position, it continuously applies a small rotational force.</p>
+
+              <h4>2. Mouse Velocity for Quick Changes</h4>
+              <p>We capture how fast you're moving the mouse using the Slope CHOP. This gives us <strong>immediate responsiveness</strong> when you want to quickly change direction. Velocity input provides the "snap" while position provides the "drift".</p>
+
+              <h4>3. Combining Both Inputs</h4>
+              <p>We add velocity + position-based acceleration together. This gives us both immediate response AND continuous gentle movement. Result: Natural physics-like interaction that feels intuitive.</p>
             `
           },
           right: {
             type: "html",
             content: `
+              <h3>Why This Approach Works</h3>
+              
+              <h4>Traditional Direct Mapping Problems:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li>Direct mouse position → rotation angle feels robotic</li>
+                <li>No momentum or natural feel</li>
+                <li>Difficult to make fine adjustments</li>
+              </ul>
+
+              <h4>Our Physics-Based Approach:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li>Feels like you're "pushing" the hypercube through 4D space</li>
+                <li>Natural momentum and inertia</li>
+                <li>Both quick gestures and precise control possible</li>
+              </ul>
+
               <h3>Input Device Flexibility</h3>
               <p>We didn't have to use the mouse as our input - we could have used any input devices like:</p>
               <ul style="margin-left: 1rem; line-height: 1.8;">
@@ -109,7 +130,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 3: Input Data 1: Mouse UV Control
+      // Section 3: Input Data 1: Mouse UV Control (Expanded)
       {
         id: 3,
         title: "Input Data 1: Mouse UV Control",
@@ -128,6 +149,17 @@ const TesseractContent = {
                 <li><strong>select1:</strong> Filters specific channels</li>
               </ul>
 
+              <h3>The Coordinate Flip Explained</h3>
+              <p><strong>Why U controls Y-axis and V controls X-axis:</strong></p>
+              
+              <p>This might seem backwards at first, but it's actually the standard in computer graphics:</p>
+
+              <div style="background: rgba(0, 255, 255, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                <strong>Mouse Movement vs Rotation Mapping:</strong><br>
+                Mouse U (horizontal movement) → Y-axis rotation (yaw)<br>
+                Mouse V (vertical movement) → X-axis rotation (pitch)
+              </div>
+
               <div class="tip">
                 <strong>Remember:</strong> UV coordinates give us normalized 0-1 values, perfect for controlling rotations!
               </div>
@@ -136,11 +168,25 @@ const TesseractContent = {
           right: {
             type: "html",
             content: `
-              <h3>Mouse vs Panel Monitoring:</h3>
-              <p><strong>MouseIn CHOP:</strong> Monitors mouse position across the entire monitor/desktop space.</p>
-              <p><strong>Panel CHOP:</strong> Monitors mouse position only within a specific TouchDesigner window or panel.</p>
+              <h3>Think Like a Flight Simulator:</h3>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li>Moving mouse <strong>left/right</strong> (U) makes object <strong>yaw</strong> around Y-axis</li>
+                <li>Moving mouse <strong>up/down</strong> (V) makes object <strong>pitch</strong> around X-axis</li>
+                <li>This matches how we intuitively expect 3D objects to respond to mouse input</li>
+              </ul>
+
+              <h3>UV Coordinate System:</h3>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li>U = 0 to 1 (left to right across screen)</li>
+                <li>V = 0 to 1 (top to bottom down screen)</li>
+                <li>These normalized coordinates are perfect for rotation control</li>
+              </ul>
+
+              <h3>Panel vs MouseIn CHOP Choice:</h3>
+              <p><strong>Panel CHOP:</strong> Only tracks mouse within specific TouchDesigner panel - gives us contained interaction within our interface.</p>
+              <p><strong>MouseIn CHOP:</strong> Tracks mouse across entire desktop/monitor - useful for global control.</p>
               
-              <p>This gives us the flexibility to choose our input monitoring scope based on the project requirements.</p>
+              <p>For this project, Panel gives us contained interaction within our interface.</p>
             `
           }
         },
@@ -151,7 +197,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 4: Rangeling CHOPs 1: Mouse Velocity
+      // Section 4: Rangeling CHOPs 1: Mouse Velocity (Expanded)
       {
         id: 4,
         title: "Rangeling CHOPs 1: Mouse Velocity",
@@ -163,11 +209,22 @@ const TesseractContent = {
               <h1>Rangeling CHOPs 1: Mouse Velocity</h1>
               <p>I increase the responsive part of the interaction, which is driven by mouse velocity. We use a <span class="highlight">slope</span> CHOP to get velocity and a <span class="highlight">filter</span> to give this a more natural feel when you stop moving the mouse.</p>
 
-              <h3>Processing Chain:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li><strong>math3:</strong> Mathematical operations on input</li>
-                <li><strong>slope1:</strong> Calculates velocity from position changes</li>
-                <li><strong>filter1:</strong> Smooths the velocity for natural feel</li>
+              <h3>The Math→Slope→Filter Chain</h3>
+
+              <h4>1. Math3 CHOP (Pre-amplification):</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Purpose:</strong> Increase the effect of mouse movement before calculating velocity</li>
+                <li><strong>Why First:</strong> We want to amplify the position changes, not the velocity itself</li>
+                <li><strong>Example:</strong> If we multiply by 3, a small mouse movement becomes a larger position change</li>
+                <li><strong>Result:</strong> The Slope CHOP then calculates velocity from these amplified position changes</li>
+              </ul>
+
+              <h4>2. Slope1 CHOP (Velocity Calculation):</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Process:</strong> Takes position data and calculates change per frame</li>
+                <li><strong>Formula:</strong> velocity = current_position - previous_position</li>
+                <li><strong>Frame-Rate Dependent:</strong> Calculated every frame for smooth motion</li>
+                <li><strong>Output:</strong> Raw velocity data that can be quite jittery</li>
               </ul>
 
               <div class="tip">
@@ -178,6 +235,14 @@ const TesseractContent = {
           right: {
             type: "html",
             content: `
+              <h4>3. Filter1 CHOP (Smoothing):</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Purpose:</strong> Smooth out the jittery velocity data</li>
+                <li><strong>Why Necessary:</strong> Raw velocity can have sudden spikes and drops</li>
+                <li><strong>Natural Feel:</strong> Creates momentum-like behavior</li>
+                <li><strong>When You Stop Moving:</strong> Velocity gradually decreases rather than instantly stopping</li>
+              </ul>
+
               <h3>How Slope CHOP Works</h3>
               <p>The <strong>Slope CHOP</strong> is a powerful tool for converting position data into velocity data:</p>
               
@@ -200,7 +265,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 5: Rangeling CHOPs 2: Centering and Scaling
+      // Section 5: Rangeling CHOPs 2: Centering and Scaling (Expanded)
       {
         id: 5,
         title: "Rangeling CHOPs 2: Centering and Scaling",
@@ -212,12 +277,26 @@ const TesseractContent = {
               <h1>Rangeling CHOPs 2: Centering and Scaling</h1>
               <p>I use a <span class="highlight">math</span> CHOP to center the pre-normalized mouse UV from 0-1 to -0.5 to 0.5 with -0.5 pre-add, then make it a small value to create gentle interaction using this input as a gentle constant force rather than sudden bursts from mouse velocity.</p>
 
-              <h3>Process:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li>Add -0.5 to center the UV coordinates</li>
-                <li>Scale down for gentle interaction</li>
-                <li>Use as constant force rather than velocity burst</li>
-                <li>Convert acceleration to velocity with speed2</li>
+              <h3>Converting UV to Centered Force</h3>
+              
+              <h4>Step 1: Centering the UV Coordinates</h4>
+              <div style="background: rgba(0, 255, 255, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                Original UV: 0 to 1 (mouse across screen)<br>
+                Add -0.5: -0.5 to 0.5 (centered around zero)
+              </div>
+
+              <h4>Why Center Around Zero:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Zero Position = No Force:</strong> When mouse is in center, no rotation force applied</li>
+                <li><strong>Positive/Negative Forces:</strong> Left/up creates negative force, right/down creates positive</li>
+                <li><strong>Intuitive Control:</strong> Push away from center to rotate in that direction</li>
+              </ul>
+
+              <h4>Step 2: Scaling Down for Gentle Interaction</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Small Values:</strong> We scale the centered values down (multiply by small number like 0.1)</li>
+                <li><strong>Gentle Constant Force:</strong> Creates subtle, continuous pressure rather than aggressive movement</li>
+                <li><strong>Fine Control:</strong> Allows for precise adjustments</li>
               </ul>
 
               <p>Since it's a force, I use <span class="highlight">speed2</span> to convert acceleration into velocity.</p>
@@ -226,18 +305,37 @@ const TesseractContent = {
           right: {
             type: "html",
             content: `
-              <h3>Position as Constant Force</h3>
-              <p>We're using the mouse position as a <strong>constant force</strong> rather than direct position mapping:</p>
+              <h3>The Critical Speed Limiting Problem</h3>
               
-              <h4>Force-Based Interaction:</h4>
+              <h4>Why We MUST Clamp the Speed:</h4>
+              
+              <p><strong>Without Speed Limiting:</strong></p>
+              <div style="background: rgba(255, 100, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                Frame 1: Velocity = 0.1<br>
+                Frame 2: Velocity = 0.2 (acceleration added)<br>
+                Frame 3: Velocity = 0.3 (acceleration added again)<br>
+                Frame 4: Velocity = 0.4 (keeps growing...)<br>
+                ...<br>
+                Frame 100: Velocity = 10.0 (spinning uncontrollably!)
+              </div>
+
+              <h4>The Physics Problem:</h4>
               <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Acceleration Input:</strong> Mouse position becomes acceleration force</li>
-                <li><strong>Speed CHOP Integration:</strong> Converts acceleration into velocity over time</li>
-                <li><strong>Velocity Accumulation:</strong> Velocity builds up gradually rather than instant jumps</li>
-                <li><strong>Speed Limiting:</strong> Without limits, velocity would increase infinitely</li>
+                <li>Constant force creates constant <strong>acceleration</strong></li>
+                <li>Acceleration means velocity keeps <strong>increasing every frame</strong></li>
+                <li>Without limits, velocity approaches infinity</li>
+                <li>Result: Uncontrollable spinning hypercube</li>
               </ul>
-              
-              <p><strong>Why This Matters:</strong> If we didn't limit the speed, our velocity would keep increasing indefinitely, making the interaction uncontrollable. The Speed CHOP acts like friction, giving us natural, physics-based movement.</p>
+
+              <h4>Our Simple Solution:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Speed CHOP with Maximum:</strong> Clamps velocity to reasonable range</li>
+                <li><strong>No Complex Physics:</strong> We chose simplicity over realism</li>
+                <li><strong>Could Use Damping:</strong> Advanced approach would add friction/resistance</li>
+                <li><strong>Our Choice:</strong> Simple clamping was sufficient for this project</li>
+              </ul>
+
+              <p><strong>Why Simple Works:</strong> Easier to understand and debug, predictable behavior, less computational overhead, sufficient for our artistic goals.</p>
             `
           }
         },
@@ -248,7 +346,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 6: Rangeling CHOPs 3: Angular Velocity
+      // Section 6: Rangeling CHOPs 3: Angular Velocity (Expanded)
       {
         id: 6,
         title: "Rangeling CHOPs 3: Angular Velocity",
@@ -260,22 +358,56 @@ const TesseractContent = {
               <h1>Rangeling CHOPs 3: Angular Velocity</h1>
               <p>Adding the velocity from mouse movement and position, we get the current total angular velocity which we give to the <span class="highlight">speed3</span> CHOP. This updates every frame to give us the current angular position for our rotation matrix.</p>
 
-              <h3>Key CHOPs:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li><strong>math2:</strong> Combines velocity and position inputs</li>
-                <li><strong>speed3:</strong> Integrates angular velocity to position</li>
+              <h3>Combining Our Two Input Sources</h3>
+              
+              <h4>Math2 CHOP - The Velocity Combiner:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Input 1:</strong> Velocity from mouse movement (immediate response)</li>
+                <li><strong>Input 2:</strong> Acceleration from mouse position (gentle constant force)</li>
+                <li><strong>Operation:</strong> Simple addition - combines both influences</li>
+                <li><strong>Result:</strong> Total angular velocity that has both snap and drift</li>
               </ul>
 
-              <p>This gives us smooth, continuous rotation that responds to both mouse movement and position.</p>
+              <h4>Speed3 CHOP - The Position Integrator:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Purpose:</strong> Convert angular velocity into angular position</li>
+                <li><strong>Process:</strong> Accumulates velocity over time to get total rotation</li>
+                <li><strong>Integration:</strong> position += velocity * time_delta each frame</li>
+                <li><strong>Output:</strong> Actual rotation angles for our 4D rotation matrices</li>
+              </ul>
             `
           },
           right: {
             type: "html",
             content: `
-              <h3>Integration Process</h3>
-              <p>The Speed CHOP acts as an integrator, converting our angular velocity into angular position over time. This creates the smooth, continuous rotation we see in the final result.</p>
+              <h3>The Critical 2π Limitation</h3>
               
-              <p>The combination of velocity-based and position-based inputs gives us both immediate responsiveness and gentle, continuous movement when the mouse is stationary.</p>
+              <h4>Why Limit to 2π (360 degrees):</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Mathematical Reason:</strong> Rotations are cyclical - 2π radians = 360° = full circle</li>
+                <li><strong>Prevents Overflow:</strong> Without limits, values could grow to thousands of radians</li>
+                <li><strong>Clean Wrapping:</strong> When we reach 2π, we wrap back to 0</li>
+              </ul>
+
+              <h4>The Filter Problem After Speed3:</h4>
+              <div style="background: rgba(255, 100, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                Without Wrapping: ... 6.1, 6.2, 6.3, 6.4 ... (smooth)<br>
+                With Wrapping: ... 6.1, 6.2, 0.1, 0.2 ... (sudden jump!)
+              </div>
+
+              <h4>Why No Filters After This Point:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>The Jump Problem:</strong> When 6.28 wraps to 0, filters see this as a huge negative change</li>
+                <li><strong>Filter Response:</strong> Tries to "smooth" this by creating intermediate values</li>
+                <li><strong>Zig-Zag Result:</strong> Instead of clean wrapping, we get oscillation back and forth</li>
+                <li><strong>Solution:</strong> Accept the clean wrap and don't filter past this point</li>
+              </ul>
+
+              <div style="background: rgba(255, 255, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                <strong>Visual Example:</strong><br>
+                Clean Wrap: 6.28 → 0.00 → 0.01 → 0.02<br>
+                Filtered Wrap: 6.28 → 3.14 → 0.00 → 3.14 → 0.01 (zig-zag!)
+              </div>
             `
           }
         },
@@ -362,7 +494,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 9: Input Data 2: Saved Data from TSV
+      // Section 9: Input Data 2: Saved Data from TSV (Expanded)
       {
         id: 9,
         title: "Input Data 2: Saved Data from TSV",
@@ -374,15 +506,27 @@ const TesseractContent = {
               <h1>Input Data 2: Saved Data from TSV</h1>
               <p>In TouchDesigner we can input saved data in loads of ways. Here I've used a TSV file saved from a previous project in 2021 and loaded with a <span class="highlight">table DAT</span>, but equally it could have been saved as a waveform and opened with the <span class="highlight">filein CHOP</span>, or as a texture where tx, ty, tz, tw are stored as RGBA.</p>
 
-              <h3>Data Storage Options:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li><strong>TSV/CSV files:</strong> Table DAT for structured data</li>
-                <li><strong>Waveforms:</strong> Filein CHOP for time-based data</li>
-                <li><strong>Textures:</strong> RGBA channels for 4D coordinates</li>
-                <li><strong>GLSL sampling:</strong> Direct access from shaders</li>
+              <h3>Understanding Euler Cycles</h3>
+              
+              <h4>What is an Euler Cycle?</h4>
+              <p>An Euler cycle is a path through a graph that visits every <strong>edge</strong> exactly once and returns to the starting point.</p>
+
+              <h4>For Our Hypercube:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>16 vertices</strong> in 4D space</li>
+                <li><strong>32 edges</strong> connecting these vertices</li>
+                <li><strong>One continuous path</strong> that traces every edge exactly once</li>
+                <li><strong>Returns to start</strong> creating a closed loop</li>
               </ul>
 
-              <p>You can also sample data in a GLSL TOP from DATs, CHOPs or TOPs. Each row in the DAT, sample in the CHOP, and pixel in TOP all store the same 4 channels of data over 33 samples.</p>
+              <h3>Why Euler Cycles Are Perfect for Hypercubes</h3>
+              
+              <h4>Traditional Wireframe Problems:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>32 separate line segments</strong> - inefficient to render</li>
+                <li><strong>Complex connectivity</strong> - hard to manage which lines connect where</li>
+                <li><strong>GPU Inefficiency</strong> - many separate draw calls</li>
+              </ul>
 
               <div class="tip">
                 <strong>Important:</strong> Save as TSV so it will open as a table in TouchDesigner!
@@ -390,14 +534,47 @@ const TesseractContent = {
             `
           },
           right: {
-            type: "widget",
-            widget: {
-              type: "tsv-table",
-              source: "https://raw.githubusercontent.com/TrueFiasco/TouchDesigner-Tutorials/main/Tesseract/euler_cycle.tsv",
-              title: "Euler Cycle TSV Data",
-              controls: ["fullscreen", "copy", "download"],
-              githubPath: "Tesseract/euler_cycle.tsv"
-            }
+            type: "html",
+            content: `
+              <h4>Euler Cycle Solution:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Single continuous line</strong> that traces the entire hypercube structure</li>
+                <li><strong>One draw call</strong> - much more efficient</li>
+                <li><strong>Guaranteed completeness</strong> - every edge of the hypercube gets drawn</li>
+                <li><strong>Clean loops</strong> - perfect for continuous animation</li>
+              </ul>
+
+              <h3>My Manual Calculation Process</h3>
+              
+              <h4>The Pen and Paper Method:</h4>
+              <ol style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Drew the 16 vertices</strong> of a hypercube with their 4D coordinates</li>
+                <li><strong>Mapped all 32 edges</strong> - which vertices connect to which</li>
+                <li><strong>Found valid path</strong> that visits each edge exactly once</li>
+                <li><strong>Verified the cycle</strong> - checked that it returns to start</li>
+                <li><strong>Saved as TSV</strong> - recorded the sequence of vertices</li>
+              </ol>
+
+              <h4>Why This Was Challenging:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>4D visualization</strong> is mentally difficult</li>
+                <li><strong>32 edges</strong> to track - easy to miss connections</li>
+                <li><strong>Must be continuous</strong> - can't have gaps in the path</li>
+                <li><strong>Must close</strong> - last vertex must connect back to first</li>
+              </ul>
+
+              <h3>Previous Laser Project Context</h3>
+              <p><strong>The Original Use Case:</strong> Laser Projectors need continuous paths for efficiency. I created reactive hypercubes with audio-responsive 4D visualizations for real-time performance. The same Euler cycle works for any hypercube visualization - that's why I could reuse this data.</p>
+
+              <div type="widget">
+                <div class="widget">
+                  <div class="tsv-table">
+                    <h4>Euler Cycle TSV Data</h4>
+                    <p>This TSV contains the 33 vertices that form our continuous Euler cycle path through the 4D hypercube.</p>
+                  </div>
+                </div>
+              </div>
+            `
           }
         },
         background: {
@@ -407,7 +584,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 10: Rotation Vertex GLSL
+      // Section 10: Rotation Vertex GLSL (Expanded)
       {
         id: 10,
         title: "Rotation Vertex GLSL",
@@ -417,17 +594,27 @@ const TesseractContent = {
             type: "html",
             content: `
               <h1>Rotation Vertex GLSL</h1>
-              <p>We're using RWY, RY and RX from the null in our CHOP network. In our uniforms we need to assign them at the start of the shader and add them to our vector parameter.</p>
+              <p>We're using rotations from our CHOP network. In our uniforms we need to assign them at the start of the shader and add them to our vector parameter.</p>
 
-              <h3>GLSL Components:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li>3 rotation matrices as helper functions</li>
-                <li>Individual rotations (order dependent)</li>
-                <li>4D point multiplication</li>
-                <li>Rotated point output</li>
+              <h3>Complete GLSL Breakdown</h3>
+              
+              <h4>UNIFORMS - Data passed from TouchDesigner</h4>
+              <div style="background: rgba(0, 255, 255, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                uniform vec3 rotWXYZ;    // 4D rotations: W-X, W-Y, W-Z planes<br>
+                uniform vec3 rotXYZ;     // 3D rotations: X, Y, Z axes<br>
+                // sTD2DInputs[0] is automatically available - our vertex texture
+              </div>
+
+              <h4>Uniform Explanation:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>rotWXYZ:</strong> Three 4D rotation angles for W-X, W-Y, and W-Z planes</li>
+                <li><strong>rotXYZ:</strong> Three standard 3D rotation angles for X, Y, and Z axes</li>
+                <li><strong>sTD2DInputs[0]:</strong> TouchDesigner automatically provides input textures</li>
+                <li><strong>Total of 6 rotations:</strong> 3 for 4D space + 3 for 3D space = full 4D control</li>
               </ul>
 
-              <p>We multiply the individual rotations (order dependent), then multiply our rotation matrix with our 4D points and output our rotated points.</p>
+              <h3>The Six 4D Rotation Functions</h3>
+              <p>We have 6 rotation matrices as helper functions - 3 for 4D rotations and 3 for standard 3D rotations embedded in 4D space.</p>
             `
           },
           right: {
@@ -449,7 +636,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 11: Perspective GLSL
+      // Section 11: Perspective GLSL (Expanded)
       {
         id: 11,
         title: "Perspective GLSL",
@@ -461,12 +648,33 @@ const TesseractContent = {
               <h1>Perspective GLSL</h1>
               <p>We have a few float uniforms in the perspective GLSL to give control on the 4D perspective and 3D perspective, to flatten it to 2D.</p>
 
-              <h3>Perspective Pipeline:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li><strong>4D to 3D:</strong> Project from 4D space to 3D</li>
-                <li><strong>3D to 2D:</strong> Standard perspective projection</li>
-                <li><strong>Camera controls:</strong> FOV, position, and depth</li>
+              <h3>Complete Perspective Pipeline</h3>
+              
+              <h4>UNIFORMS - Perspective Controls</h4>
+              <div style="background: rgba(0, 255, 255, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                uniform float fov;          // Field of view in degrees (suggested: 60)<br>
+                uniform vec2 resolution;    // Output resolution (suggested: 33x1)<br>
+                uniform float uPerspective; // 4D perspective strength (suggested: 2.3)<br>
+                uniform float cameraZ;      // Camera Z position (suggested: -30)
+              </div>
+
+              <h4>Perspective Control Uniforms:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>fov:</strong> Field of view angle for 3D perspective projection</li>
+                <li><strong>resolution:</strong> Our texture resolution (33 pixels wide for 33 vertices)</li>
+                <li><strong>uPerspective:</strong> Controls how strongly 4D depth affects 3D projection</li>
+                <li><strong>cameraZ:</strong> Virtual camera position along Z axis</li>
               </ul>
+
+              <h3>The Projection Pipeline Summary</h3>
+              <p><strong>Complete 4D → 2D Transformation:</strong></p>
+              <ol style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>4D Rotation:</strong> Previous shader rotated our 4D vertices</li>
+                <li><strong>4D → 3D:</strong> Multiply XYZ by (W + perspective_strength)</li>
+                <li><strong>3D Camera:</strong> Translate relative to virtual camera position</li>
+                <li><strong>3D → 2D:</strong> Divide X,Y by Z with focal length scaling</li>
+                <li><strong>Screen Mapping:</strong> Normalize to 0-1 range for final display</li>
+              </ol>
             `
           },
           right: {
@@ -530,7 +738,7 @@ const TesseractContent = {
         }
       },
 
-      // Section 13: SDF Uneven Capsule
+      // Section 13: SDF Uneven Capsule (Expanded)
       {
         id: 13,
         title: "SDF Uneven Capsule",
@@ -542,20 +750,28 @@ const TesseractContent = {
               <h1>SDF Uneven Capsule</h1>
               <p>Again I was able to reuse a component I made in 2022 which would take in a texture where each pixel represents a capsule with two 2D points to be rendered in the SDF.</p>
 
-              <p>This uses <a href="https://iquilezles.org/articles/distfunctions2d/" target="_blank" style="color: #00ffff;">Inigo Quilez's SDF functions</a> for uneven capsules. No uniforms needed!</p>
+              <p>This uses <a href="https://iquilezles.org/articles/distfunctions2d/" target="_blank" style="color: #00ffff;">Inigo Quilez's SDF functions</a> for uneven capsules.</p>
 
-              <h3>SDF Rendering:</h3>
-              <ul style="margin-left: 2rem; line-height: 1.8;">
-                <li>Distance field calculation</li>
-                <li>Variable capsule radius</li>
-                <li>Efficient GPU rendering</li>
-                <li>Smooth antialiasing</li>
+              <h3>Understanding Signed Distance Fields (SDF)</h3>
+              
+              <h4>What is an SDF?</h4>
+              <p>A Signed Distance Field is a function that tells you the shortest distance from any point in space to the surface of a shape. For our lines, we want to know: "How far is this pixel from the nearest line?"</p>
+
+              <h4>Key SDF Concepts:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Test Point:</strong> The current pixel we're evaluating (where we are)</li>
+                <li><strong>Shape:</strong> Our line segment (what we're measuring distance to)</li>
+                <li><strong>Distance:</strong> How many pixels away the test point is from the line</li>
+                <li><strong>Result:</strong> Distance = 0 means "on the line", Distance > 0 means "away from line"</li>
               </ul>
 
-              <h3>Why Uneven Capsule vs Line SDF?</h3>
-              <p>I could have used a standard line SDF instead, but I wanted to use the 4D value to help drive the width of the uneven capsule.</p>
-              
-              <p>This gives us variable line thickness that responds to the 4th dimension, creating a more dynamic visual representation of the 4D structure. The capsule approach allows for organic, flowing line weights that enhance the perception of depth and dimension.</p>
+              <h3>Why Use SDF Instead of Direct Line Drawing:</h3>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Smooth Anti-aliasing:</strong> Natural edge softening without jagged pixels</li>
+                <li><strong>GPU Efficient:</strong> Parallel calculation for every pixel simultaneously</li>
+                <li><strong>Flexible Effects:</strong> Easy to add glows, outlines, or other effects later</li>
+                <li><strong>Mathematical Precision:</strong> Exact distance calculations for perfect curves</li>
+              </ul>
             `
           },
           right: {
