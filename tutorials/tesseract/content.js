@@ -309,6 +309,17 @@ const TesseractContent = {
               
               <h4>Why We MUST Clamp the Speed:</h4>
               
+              <p><strong>Without Speed Limiting:</strong></p>
+              <div style="background: rgba(255, 100, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                Frame 1: Velocity = 0.1<br>
+                Frame 2: Velocity = 0.2 (acceleration added)<br>
+                Frame 3: Velocity = 0.3 (acceleration added again)<br>
+                Frame 4: Velocity = 0.4 (keeps growing...)<br>
+                ...<br>
+                Frame 100: Velocity = 10.0 (spinning uncontrollably!)
+              </div>
+
+              <h4>The Physics Problem:</h4>
               <ul style="margin-left: 1rem; line-height: 1.8;">
                 <li>Constant force creates constant <strong>acceleration</strong></li>
                 <li>Acceleration means velocity keeps <strong>increasing every frame</strong></li>
@@ -391,6 +402,12 @@ const TesseractContent = {
                 <li><strong>Zig-Zag Result:</strong> Instead of clean wrapping, we get oscillation back and forth</li>
                 <li><strong>Solution:</strong> Accept the clean wrap and don't filter past this point</li>
               </ul>
+
+              <div style="background: rgba(255, 255, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
+                <strong>Visual Example:</strong><br>
+                Clean Wrap: 6.28 → 0.00 → 0.01 → 0.02<br>
+                Filtered Wrap: 6.28 → 3.14 → 0.00 → 3.14 → 0.01 (zig-zag!)
+              </div>
             `
           }
         },
@@ -520,20 +537,50 @@ const TesseractContent = {
             type: "html",
             content: `
               <h4>Euler Cycle Solution:</h4>
-             
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Single continuous line</strong> that traces the entire hypercube structure</li>
+                <li><strong>One draw call</strong> - much more efficient</li>
+                <li><strong>Guaranteed completeness</strong> - every edge of the hypercube gets drawn</li>
+                <li><strong>Clean loops</strong> - perfect for continuous animation</li>
+              </ul>
+
+              <h3>My Manual Calculation Process</h3>
+              
+              <h4>The Pen and Paper Method:</h4>
+              <ol style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>Drew the 16 vertices</strong> of a hypercube with their 4D coordinates</li>
+                <li><strong>Mapped all 32 edges</strong> - which vertices connect to which</li>
+                <li><strong>Found valid path</strong> that visits each edge exactly once</li>
+                <li><strong>Verified the cycle</strong> - checked that it returns to start</li>
+                <li><strong>Saved as TSV</strong> - recorded the sequence of vertices</li>
+              </ol>
+
+              <h4>Why This Was Challenging:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>4D visualization</strong> is mentally difficult</li>
+                <li><strong>32 edges</strong> to track - easy to miss connections</li>
+                <li><strong>Must be continuous</strong> - can't have gaps in the path</li>
+                <li><strong>Must close</strong> - last vertex must connect back to first</li>
+              </ul>
 
               <h3>Previous Laser Project Context</h3>
               <p><strong>The Original Use Case:</strong> Laser Projectors need continuous paths for efficiency. I created reactive hypercubes with audio-responsive 4D visualizations for real-time performance. The same Euler cycle works for any hypercube visualization - that's why I could reuse this data.</p>
 
-              <div type="widget">
-                <div class="widget">
-                  <div class="tsv-table">
-                    <h4>Euler Cycle TSV Data</h4>
-                    <p>This TSV contains the 33 vertices that form our continuous Euler cycle path through the 4D hypercube.</p>
-                  </div>
-                </div>
-              </div>
+              <h3>Alternative Data Storage Methods</h3>
+              <p><strong>TSV File (Our Choice):</strong> Table DAT for easy inspection and debugging, human readable vertex sequence, easy export from any spreadsheet program.</p>
+              
+              <p><strong>Other Options We Could Use:</strong> Filein CHOP for waveform data, Texture Storage with RGBA channels as 4D coordinates, Direct GLSL with hardcoded vertices, or DAT to CHOP conversion for processing.</p>
             `
+          },
+          right: {
+            type: "widget",
+            widget: {
+              type: "tsv-table",
+              source: "https://raw.githubusercontent.com/TrueFiasco/TouchDesigner-Tutorials/main/Tesseract/euler_cycle.tsv",
+              title: "Euler Cycle TSV Data",
+              controls: ["fullscreen", "copy", "download"],
+              githubPath: "Tesseract/euler_cycle.tsv"
+            }
           }
         },
         background: {
