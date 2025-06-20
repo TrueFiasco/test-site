@@ -365,32 +365,14 @@ const TesseractContent = {
             content: `
               <h3>The Critical 2π Limitation</h3>
               
-              <h4>Why Limit to 2π (360 degrees):</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Mathematical Reason:</strong> Rotations are cyclical - 2π radians = 360° = full circle</li>
-                <li><strong>Prevents Overflow:</strong> Without limits, values could grow to thousands of radians</li>
-                <li><strong>Clean Wrapping:</strong> When we reach 2π, we wrap back to 0</li>
-              </ul>
+              <p><strong>Why Limit to 2π (360 degrees):</strong> Rotations are cyclical - 2π radians = 360° = full circle. Without limits, values could grow to thousands of radians. When we reach 2π, we wrap back to 0 for clean cycling.</p>
 
-              <h4>The Filter Problem After Speed3:</h4>
               <div style="background: rgba(255, 100, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
                 Without Wrapping: ... 6.1, 6.2, 6.3, 6.4 ... (smooth)<br>
                 With Wrapping: ... 6.1, 6.2, 0.1, 0.2 ... (sudden jump!)
               </div>
 
-              <h4>Why No Filters After This Point:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>The Jump Problem:</strong> When 6.28 wraps to 0, filters see this as a huge negative change</li>
-                <li><strong>Filter Response:</strong> Tries to "smooth" this by creating intermediate values</li>
-                <li><strong>Zig-Zag Result:</strong> Instead of clean wrapping, we get oscillation back and forth</li>
-                <li><strong>Solution:</strong> Accept the clean wrap and don't filter past this point</li>
-              </ul>
-
-              <div style="background: rgba(255, 255, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
-                <strong>Visual Example:</strong><br>
-                Clean Wrap: 6.28 → 0.00 → 0.01 → 0.02<br>
-                Filtered Wrap: 6.28 → 3.14 → 0.00 → 3.14 → 0.01 (zig-zag!)
-              </div>
+              <p><strong>Why No Filters After This Point:</strong> When 6.28 wraps to 0, filters see this as a huge negative change and try to "smooth" it by creating intermediate values. This creates zig-zag oscillation instead of clean wrapping. Solution: Accept the clean wrap and don't filter past this point.</p>
             `
           }
         },
