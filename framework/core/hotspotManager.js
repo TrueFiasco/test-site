@@ -642,36 +642,37 @@ class HotspotManager {
     } else {
       // Dialog is already open - handle parameter changes
       console.log('🎯 Dialog already open - updating parameters');
-    
-    // Get current parameters to determine what's new
-    const currentParameterIds = Array.from(content.children).map(child => child.dataset.parameterId);
-    const selectedParameterIds = Array.from(this.selectedHotspots);
-    
-    // Remove parameters that are no longer selected
-    currentParameterIds.forEach(paramId => {
-      if (!selectedParameterIds.includes(paramId)) {
-        const paramElement = content.querySelector(`[data-parameter-id="${paramId}"]`);
-        if (paramElement) {
-          paramElement.style.transform = 'translateX(100%) scale(0.8)';
-          paramElement.style.opacity = '0';
-          setTimeout(() => {
-            if (paramElement.parentNode) {
-              paramElement.parentNode.removeChild(paramElement);
-            }
-          }, 300);
+      
+      // Get current parameters to determine what's new
+      const currentParameterIds = Array.from(content.children).map(child => child.dataset.parameterId);
+      const selectedParameterIds = Array.from(this.selectedHotspots);
+      
+      // Remove parameters that are no longer selected
+      currentParameterIds.forEach(paramId => {
+        if (!selectedParameterIds.includes(paramId)) {
+          const paramElement = content.querySelector(`[data-parameter-id="${paramId}"]`);
+          if (paramElement) {
+            paramElement.style.transform = 'translateX(100%) scale(0.8)';
+            paramElement.style.opacity = '0';
+            setTimeout(() => {
+              if (paramElement.parentNode) {
+                paramElement.parentNode.removeChild(paramElement);
+              }
+            }, 300);
+          }
         }
-      }
-    });
-    
-    // Add new parameters with slide-down animation
-    const currentSectionHotspots = this.hotspots.get(this.currentSection) || [];
-    selectedParameterIds.forEach((hotspotId, index) => {
-      const config = currentSectionHotspots.find(h => h.id === hotspotId);
-      if (config && !currentParameterIds.includes(hotspotId)) {
-        console.log(`📸 Adding parameter ${hotspotId} to dialog`);
-        this.addParameterToDialog(config, content, index);
-      }
-    });
+      });
+      
+      // Add new parameters with slide-down animation
+      const currentSectionHotspots = this.hotspots.get(this.currentSection) || [];
+      selectedParameterIds.forEach((hotspotId, index) => {
+        const config = currentSectionHotspots.find(h => h.id === hotspotId);
+        if (config && !currentParameterIds.includes(hotspotId)) {
+          console.log(`📸 Adding parameter ${hotspotId} to existing dialog`);
+          this.addParameterToDialog(config, content, index);
+        }
+      });
+    }
     
     console.log(`📊 Dialog updated with ${this.selectedHotspots.size} parameters`);
   }
