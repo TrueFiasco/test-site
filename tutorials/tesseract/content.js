@@ -765,10 +765,36 @@ const TesseractContent = {
 
               <h4>Key SDF Concepts:</h4>
               <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Test Point:</strong> The current pixel we're evaluating (where we are)</li>
-                <li><strong>Shape:</strong> Our line segment (what we're measuring distance to)</li>
-                <li><strong>Distance:</strong> How many pixels away the test point is from the line</li>
-                <li><strong>Result:</strong> Distance = 0 means "on the line", Distance > 0 means "away from line"</li>
+                <li><strong>Test Point (p):</strong> The current pixel we're evaluating (where we are)</li>
+                <li><strong>Line Segment:</strong> Our capsule shape (what we're measuring distance to)</li>
+                <li><strong>Distance Result:</strong> 0 = on the line, positive = away from line</li>
+              </ul>
+
+              <h3>How the SDF Algorithm Works Step-by-Step:</h3>
+              
+              <h4>Step 1: Coordinate Translation</h4>
+              <p><strong>p -= pa:</strong> Move everything so line starts at origin (0,0). <strong>pb -= pa:</strong> Line end becomes relative to new origin. This simplifies all the math that follows.</p>
+
+              <h4>Step 2: Line Analysis</h4>
+              <p><strong>h = dot(pb,pb):</strong> Calculate line length squared (avoiding expensive sqrt). <strong>q = projections/h:</strong> Project test point both along the line direction and perpendicular to it, normalized by line length.</p>
+
+              <h4>Step 3: Capsule Geometry</h4>
+              <p><strong>b = ra-rb:</strong> How much the radius changes from start to end. <strong>c = vec2(sqrt(h-b*b),b):</strong> Creates a geometry vector that describes the capsule's mathematical shape.</p>
+
+              <h4>Step 4: Determine Closest Region</h4>
+              <p><strong>k = cro(c,q):</strong> Cross product tells us which part of the capsule we're closest to. <strong>m = dot(c,q) and n = dot(q,q):</strong> Calculate actual distances for each possible case.</p>
+
+              <h4>Step 5: Return Distance</h4>
+              <p><strong>Three Cases:</strong> If k < 0 (near start cap), if k > c.x (near end cap), else (along main body). Each case has its own distance formula optimized for that part of the capsule.</p>
+
+              <h4>TouchDesigner-Specific Code:</h4>
+              <ul style="margin-left: 1rem; line-height: 1.8;">
+                <li><strong>vUV.st:</strong> TouchDesigner's built-in texture coordinates (0-1 range)</li>
+                <li><strong>sTD2DInputs[0]:</strong> TouchDesigner's input texture array (automatic)</li>
+                <li><strong>textureSize():</strong> Gets texture width - tells us how many line segments to check</li>
+                <li><strong>texelFetch():</strong> Exact pixel sampling - gets line data without interpolation</li>
+                <li><strong>ivec2(i, 0):</strong> Integer coordinates - which pixel contains our line data</li>
+                <li><strong>minDist = min(minDist, d):</strong> Keep only the shortest distance to any line</li>
               </ul>
 
               <h3>Why Use SDF Instead of Direct Line Drawing:</h3>
