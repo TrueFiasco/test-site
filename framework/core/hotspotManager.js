@@ -341,7 +341,7 @@ class HotspotManager {
    */
   isNarrowDesktop() {
     const width = window.innerWidth;
-    const isNarrow = width > 768 && width <= 1024;
+    const isNarrow = width > 768 && width <= 770;
     console.log(`📏 isNarrowDesktop check: ${width}px = ${isNarrow}`);
     return isNarrow;
   }
