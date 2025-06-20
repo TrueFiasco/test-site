@@ -759,51 +759,26 @@ const TesseractContent = {
               <p>This uses <a href="https://iquilezles.org/articles/distfunctions2d/" target="_blank" style="color: #00ffff;">Inigo Quilez's SDF functions</a> for uneven capsules.</p>
 
               <h3>Understanding Signed Distance Fields (SDF)</h3>
+              <p>A Signed Distance Field tells you the shortest distance from any point in space to the surface of a shape. For our lines: "How far is this pixel from the nearest line?"</p>
+
+              <p><strong>Key Concepts:</strong> <strong>p</strong> = current pixel (test point), <strong>pa/pb</strong> = line endpoints, distance = 0 means "on line", distance > 0 means "away from line".</p>
+
+              <h3>How the SDF Algorithm Works</h3>
+              <p><strong>Step 1:</strong> <code>p -= pa; pb -= pa</code> - Move everything so line starts at origin, simplifying all math.</p>
               
-              <h4>What is an SDF?</h4>
-              <p>A Signed Distance Field is a function that tells you the shortest distance from any point in space to the surface of a shape. For our lines, we want to know: "How far is this pixel from the nearest line?"</p>
-
-              <h4>Key SDF Concepts:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Test Point (p):</strong> The current pixel we're evaluating (where we are)</li>
-                <li><strong>Line Segment:</strong> Our capsule shape (what we're measuring distance to)</li>
-                <li><strong>Distance Result:</strong> 0 = on the line, positive = away from line</li>
-              </ul>
-
-              <h3>How the SDF Algorithm Works Step-by-Step:</h3>
+              <p><strong>Step 2:</strong> <code>h = dot(pb,pb); q = projections/h</code> - Calculate line length squared and project test point both along and perpendicular to line.</p>
               
-              <h4>Step 1: Coordinate Translation</h4>
-              <p><strong>p -= pa:</strong> Move everything so line starts at origin (0,0). <strong>pb -= pa:</strong> Line end becomes relative to new origin. This simplifies all the math that follows.</p>
+              <p><strong>Step 3:</strong> <code>b = ra-rb; c = vec2(sqrt(h-b*b),b)</code> - Determine radius change and capsule geometry.</p>
+              
+              <p><strong>Step 4:</strong> <code>k = cro(c,q)</code> - Cross product determines which part of capsule we're closest to (start cap, end cap, or main body).</p>
+              
+              <p><strong>Step 5:</strong> Return distance using optimized formula for each case.</p>
 
-              <h4>Step 2: Line Analysis</h4>
-              <p><strong>h = dot(pb,pb):</strong> Calculate line length squared (avoiding expensive sqrt). <strong>q = projections/h:</strong> Project test point both along the line direction and perpendicular to it, normalized by line length.</p>
+              <h3>TouchDesigner Integration</h3>
+              <p><strong>vUV.st</strong> = texture coordinates, <strong>sTD2DInputs[0]</strong> = input texture, <strong>textureSize()</strong> = how many line segments, <strong>texelFetch()</strong> = exact line data, <strong>minDist = min(minDist, d)</strong> = keep shortest distance to any line.</p>
 
-              <h4>Step 3: Capsule Geometry</h4>
-              <p><strong>b = ra-rb:</strong> How much the radius changes from start to end. <strong>c = vec2(sqrt(h-b*b),b):</strong> Creates a geometry vector that describes the capsule's mathematical shape.</p>
-
-              <h4>Step 4: Determine Closest Region</h4>
-              <p><strong>k = cro(c,q):</strong> Cross product tells us which part of the capsule we're closest to. <strong>m = dot(c,q) and n = dot(q,q):</strong> Calculate actual distances for each possible case.</p>
-
-              <h4>Step 5: Return Distance</h4>
-              <p><strong>Three Cases:</strong> If k < 0 (near start cap), if k > c.x (near end cap), else (along main body). Each case has its own distance formula optimized for that part of the capsule.</p>
-
-              <h4>TouchDesigner-Specific Code:</h4>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>vUV.st:</strong> TouchDesigner's built-in texture coordinates (0-1 range)</li>
-                <li><strong>sTD2DInputs[0]:</strong> TouchDesigner's input texture array (automatic)</li>
-                <li><strong>textureSize():</strong> Gets texture width - tells us how many line segments to check</li>
-                <li><strong>texelFetch():</strong> Exact pixel sampling - gets line data without interpolation</li>
-                <li><strong>ivec2(i, 0):</strong> Integer coordinates - which pixel contains our line data</li>
-                <li><strong>minDist = min(minDist, d):</strong> Keep only the shortest distance to any line</li>
-              </ul>
-
-              <h3>Why Use SDF Instead of Direct Line Drawing:</h3>
-              <ul style="margin-left: 1rem; line-height: 1.8;">
-                <li><strong>Smooth Anti-aliasing:</strong> Natural edge softening without jagged pixels</li>
-                <li><strong>GPU Efficient:</strong> Parallel calculation for every pixel simultaneously</li>
-                <li><strong>Flexible Effects:</strong> Easy to add glows, outlines, or other effects later</li>
-                <li><strong>Mathematical Precision:</strong> Exact distance calculations for perfect curves</li>
-              </ul>
+              <p><strong>Why SDF:</strong> Smooth anti-aliasing, GPU efficient parallel calculation, flexible for effects, mathematically precise curves.</p>
+            `
             `
           },
           right: {
