@@ -309,17 +309,6 @@ const TesseractContent = {
               
               <h4>Why We MUST Clamp the Speed:</h4>
               
-              <p><strong>Without Speed Limiting:</strong></p>
-              <div style="background: rgba(255, 100, 100, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; font-family: monospace;">
-                Frame 1: Velocity = 0.1<br>
-                Frame 2: Velocity = 0.2 (acceleration added)<br>
-                Frame 3: Velocity = 0.3 (acceleration added again)<br>
-                Frame 4: Velocity = 0.4 (keeps growing...)<br>
-                ...<br>
-                Frame 100: Velocity = 10.0 (spinning uncontrollably!)
-              </div>
-
-              <h4>The Physics Problem:</h4>
               <ul style="margin-left: 1rem; line-height: 1.8;">
                 <li>Constant force creates constant <strong>acceleration</strong></li>
                 <li>Acceleration means velocity keeps <strong>increasing every frame</strong></li>
