@@ -2,9 +2,11 @@
  * Tesseract Tutorial Control Configuration
  * Defines all parameters, buttons, and UI for the 4D hypercube controls
  * Used by ControlPanelRenderer to generate HTML and bind events
+ * 
+ * Exports both as ES6 modules and window globals for compatibility
  */
 
-export const TesseractControlConfig = {
+const TesseractControlConfig = {
   // Panel title
   title: "4D Projection Controls",
   
@@ -140,7 +142,7 @@ export const TesseractControlConfig = {
  * Parameter registration mapping for TesseractShader
  * Maps parameter IDs to shader uniform names
  */
-export const TesseractParameterMap = {
+const TesseractParameterMap = {
   'fov': 'u_fov',
   'perspective': 'u_perspective', 
   'cameraZ': 'u_cameraZ'
@@ -150,7 +152,7 @@ export const TesseractParameterMap = {
  * Button action mapping for TesseractShader
  * Maps button action names to shader method names
  */
-export const TesseractActionMap = {
+const TesseractActionMap = {
   'resetRotation': 'resetRotation',
   'toggleVelocityRX': function(shader) { return shader.toggleVelocity('rx'); },
   'toggleVelocityRY': function(shader) { return shader.toggleVelocity('ry'); },
@@ -164,7 +166,7 @@ export const TesseractActionMap = {
  * Default shader parameter values
  * Used for initialization and reset functionality
  */
-export const TesseractDefaults = {
+const TesseractDefaults = {
   fov: 7.0,
   perspective: 2.3,
   cameraZ: 10.0,
@@ -189,7 +191,7 @@ export const TesseractDefaults = {
  * Responsive button layout configuration
  * Defines how buttons are arranged on mobile vs desktop
  */
-export const TesseractButtonLayout = {
+const TesseractButtonLayout = {
   desktop: {
     rows: [
       ['stop-rx', 'stop-ry', 'stop-rw']
@@ -207,7 +209,7 @@ export const TesseractButtonLayout = {
  * Advanced configuration for parameter smoothing
  * Defines different filter strengths for different parameter types
  */
-export const TesseractSmoothingConfig = {
+const TesseractSmoothingConfig = {
   default: 0.1,
   parameters: {
     'fov': 0.05,        // Slower smoothing for FOV changes
@@ -220,7 +222,7 @@ export const TesseractSmoothingConfig = {
  * Validation rules for parameters
  * Used by control panel to validate user input
  */
-export const TesseractValidation = {
+const TesseractValidation = {
   fov: {
     min: 2,
     max: 120,
@@ -248,7 +250,7 @@ export const TesseractValidation = {
  * Helper function to register all parameters with a shader
  * @param {GenericShader} shader - The shader instance to register parameters with
  */
-export function registerTesseractParameters(shader) {
+function registerTesseractParameters(shader) {
   TesseractControlConfig.parameters.forEach(param => {
     shader.registerParameter(param.id, param.uniformName, param.default);
   });
@@ -260,7 +262,7 @@ export function registerTesseractParameters(shader) {
  * Helper function to apply default values to shader
  * @param {GenericShader} shader - The shader instance to apply defaults to
  */
-export function applyTesseractDefaults(shader) {
+function applyTesseractDefaults(shader) {
   // Apply parameter defaults
   Object.keys(TesseractDefaults).forEach(key => {
     if (key !== 'rotation' && key !== 'velocityEnabled' && shader.setParameter) {
@@ -271,10 +273,44 @@ export function applyTesseractDefaults(shader) {
   console.log('✅ Tesseract defaults applied to shader');
 }
 
+// ==========================================
+// EXPORT SYSTEM - BOTH ES6 AND WINDOW GLOBALS
+// ==========================================
+
+// ES6 Module Exports (for future framework use)
+if (typeof exports !== 'undefined') {
+  // Node.js/ES6 environment
+  exports.TesseractControlConfig = TesseractControlConfig;
+  exports.TesseractParameterMap = TesseractParameterMap;
+  exports.TesseractActionMap = TesseractActionMap;
+  exports.TesseractDefaults = TesseractDefaults;
+  exports.TesseractButtonLayout = TesseractButtonLayout;
+  exports.TesseractSmoothingConfig = TesseractSmoothingConfig;
+  exports.TesseractValidation = TesseractValidation;
+  exports.registerTesseractParameters = registerTesseractParameters;
+  exports.applyTesseractDefaults = applyTesseractDefaults;
+}
+
+// Window Global Exports (for current HTML usage)
+if (typeof window !== 'undefined') {
+  // Browser environment - make available globally
+  window.TesseractControlConfig = TesseractControlConfig;
+  window.TesseractParameterMap = TesseractParameterMap;
+  window.TesseractActionMap = TesseractActionMap;
+  window.TesseractDefaults = TesseractDefaults;
+  window.TesseractButtonLayout = TesseractButtonLayout;
+  window.TesseractSmoothingConfig = TesseractSmoothingConfig;
+  window.TesseractValidation = TesseractValidation;
+  window.registerTesseractParameters = registerTesseractParameters;
+  window.applyTesseractDefaults = applyTesseractDefaults;
+  
+  console.log('✅ TesseractControlConfig available globally on window object');
+}
+
 /**
- * Export everything as default for easy importing
+ * Default export object for ES6 imports
  */
-export default {
+const TesseractConfigDefault = {
   config: TesseractControlConfig,
   parameterMap: TesseractParameterMap,
   actionMap: TesseractActionMap,
@@ -286,10 +322,24 @@ export default {
   applyDefaults: applyTesseractDefaults
 };
 
+// ES6 default export
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = TesseractConfigDefault;
+  module.exports.TesseractControlConfig = TesseractControlConfig; // Named export too
+}
+
+// Also assign to window for HTML compatibility
+if (typeof window !== 'undefined') {
+  window.TesseractConfigDefault = TesseractConfigDefault;
+}
+
 /**
  * USAGE EXAMPLES:
  * 
- * // Basic usage:
+ * // Current HTML usage (window globals):
+ * const renderer = new ControlPanelRenderer(shader, window.TesseractControlConfig);
+ * 
+ * // Future ES6 module usage:
  * import { TesseractControlConfig } from './controlConfig.js';
  * const renderer = new ControlPanelRenderer(shader, TesseractControlConfig);
  * 
