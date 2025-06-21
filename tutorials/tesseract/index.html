@@ -894,6 +894,42 @@
     window.hideParameterDialog = hideParameterDialog;
 
     // ==========================================
+    // SETTINGS BUTTON HANDLER - ADD THIS
+    // ==========================================
+    function setupSettingsButton() {
+      const settingsToggle = document.getElementById('settings-toggle');
+      const controlsPanel = document.getElementById('controls-panel');
+      
+      if (settingsToggle && controlsPanel) {
+        settingsToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          console.log('⚙️ Settings button clicked');
+          
+          // Toggle panel visibility
+          if (controlsPanel.style.display === 'none' || controlsPanel.style.display === '') {
+            controlsPanel.style.display = 'block';
+            controlsPanel.style.opacity = '1';
+            controlsPanel.style.visibility = 'visible';
+            controlsPanel.style.pointerEvents = 'auto';
+            console.log('✅ Settings panel opened');
+          } else {
+            controlsPanel.style.display = 'none';
+            controlsPanel.style.opacity = '0';
+            controlsPanel.style.visibility = 'hidden';
+            controlsPanel.style.pointerEvents = 'none';
+            console.log('✅ Settings panel closed');
+          }
+        });
+        
+        console.log('✅ Settings button event listener added');
+      } else {
+        console.error('❌ Settings button or controls panel not found');
+      }
+    }
+    
+    // ==========================================
     // INITIALIZATION
     // ==========================================
 
@@ -923,6 +959,7 @@
         initProgressBar();
         updateSectionTitle();
         setupMobileButton();
+        setupSettingsButton();
         
         if (isMobile) {
           try {
