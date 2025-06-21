@@ -486,14 +486,10 @@ class TesseractShader {
   /**
    * Setup hero controls panel
    */
-  setupHeroControls() {
-    const toggle = document.getElementById('heroSettingsToggle');
-    const panel = document.getElementById('heroControlsPanel');
-    
-    if (!toggle || !panel) {
-      console.warn('Hero settings controls not found');
-      return;
-    }
+   setupHeroControls() {
+    // Skip hero-specific controls - using main controls panel instead
+    console.log('✅ Using main controls panel for hero section');
+  }
     
     toggle.addEventListener('click', (e) => {
       e.stopPropagation();
