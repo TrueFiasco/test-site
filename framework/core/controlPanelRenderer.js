@@ -18,6 +18,7 @@ class ControlPanelRenderer {
     this.settingsButton = null;
     this.controlsPanel = null;
     this.backdrop = null;
+    this.clickCooldown = false; // Prevent rapid clicking issues
     
     // Parameter smoothing system
     this.filterStrength = 0.1;
@@ -108,6 +109,17 @@ class ControlPanelRenderer {
     
     console.log('⚙️ Settings button clicked (framework managed), panel open:', this.panelOpen);
     
+    // Add a small delay to prevent rapid clicking issues
+    if (this.clickCooldown) {
+      console.log('⚙️ Click cooldown active, ignoring rapid click');
+      return;
+    }
+    
+    this.clickCooldown = true;
+    setTimeout(() => {
+      this.clickCooldown = false;
+    }, 200); // 200ms cooldown
+    
     if (this.panelOpen) {
       this.closePanel();
     } else {
@@ -121,15 +133,17 @@ class ControlPanelRenderer {
   openPanel() {
     console.log('✅ Opening panel (framework managed)');
     
-    // Show panel
+    // Show panel with proper z-index hierarchy
     this.controlsPanel.style.display = 'block';
     this.controlsPanel.style.opacity = '1';
     this.controlsPanel.style.visibility = 'visible';
     this.controlsPanel.style.pointerEvents = 'auto';
+    this.controlsPanel.style.zIndex = '2000'; // Below button, above backdrop
     
-    // Ensure button stays clickable
+    // Ensure button stays clickable and above everything
     this.settingsButton.style.zIndex = '99999';
     this.settingsButton.style.pointerEvents = 'auto';
+    this.settingsButton.style.position = 'fixed'; // Ensure it's properly positioned
     
     this.panelOpen = true;
     
@@ -138,6 +152,8 @@ class ControlPanelRenderer {
     
     // Add backdrop for mobile or outside-click closing
     this.addBackdrop();
+    
+    console.log('✅ Panel opened with proper z-index management');
   }
 
   /**
@@ -154,6 +170,11 @@ class ControlPanelRenderer {
     this.panelOpen = false;
     
     this.removeBackdrop();
+    
+    // Reset button z-index to normal level when panel is closed
+    this.settingsButton.style.zIndex = '2001';
+    
+    console.log('✅ Panel closed and z-index reset');
   }
 
   /**
@@ -226,21 +247,46 @@ class ControlPanelRenderer {
       pointer-events: auto;
     `;
     
+    // Get settings button bounds to avoid interfering with it
+    const buttonRect = this.settingsButton.getBoundingClientRect();
+    const buttonPadding = 20; // Extra space around button
+    
     // Backdrop click behavior depends on device
     this.backdrop.addEventListener('click', (e) => {
+      // Check if click is near settings button area
+      const clickX = e.clientX;
+      const clickY = e.clientY;
+      const isNearButton = (
+        clickX >= buttonRect.left - buttonPadding &&
+        clickX <= buttonRect.right + buttonPadding &&
+        clickY >= buttonRect.top - buttonPadding &&
+        clickY <= buttonRect.bottom + buttonPadding
+      );
+      
+      if (isNearButton) {
+        console.log('🎯 Click near settings button - ignoring backdrop action');
+        return; // Don't interfere with button
+      }
+      
       if (this.device.isMobile) {
         // Mobile: allow backdrop closing
         console.log('🎯 Mobile backdrop click - closing panel');
         e.preventDefault();
+        e.stopPropagation();
         this.closePanel();
       } else {
         // Desktop: backdrop doesn't close (only settings button closes)
         console.log('🎯 Desktop backdrop click - ignoring (settings button only)');
         e.preventDefault();
+        e.stopPropagation();
       }
     });
     
     document.body.appendChild(this.backdrop);
+    
+    // Ensure settings button stays above backdrop
+    this.settingsButton.style.zIndex = '99999';
+    this.settingsButton.style.position = 'relative';
   }
 
   /**
@@ -566,10 +612,28 @@ class ControlPanelRenderer {
       if (input.type === 'range' || input.type === 'number') {
         input.addEventListener('input', (e) => {
           const value = parseFloat(e.target.value);
-          this.smoothParameterChange(paramId, value);
+          console.log(`🎛️ Parameter ${paramId} changed to ${value}`);
+          
+          // Try direct update first, then smooth update
+          const directSuccess = this.shader.setParameter(paramId, value);
+          if (directSuccess) {
+            console.log(`✅ Direct parameter update successful for ${paramId}`);
+          } else {
+            console.log(`⚠️ Direct parameter update failed, trying smooth update for ${paramId}`);
+            this.smoothParameterChange(paramId, value);
+          }
         });
+        
+        // Also bind 'change' event for when user finishes editing
+        input.addEventListener('change', (e) => {
+          const value = parseFloat(e.target.value);
+          console.log(`🎛️ Parameter ${paramId} final value: ${value}`);
+          this.shader.setParameter(paramId, value);
+        });
+        
       } else if (input.tagName === 'SELECT') {
         input.addEventListener('change', (e) => {
+          console.log(`🎛️ Select parameter ${paramId} changed to ${e.target.value}`);
           this.shader.setParameter(paramId, e.target.value);
         });
       } else if (input.tagName === 'BUTTON') {
@@ -578,6 +642,8 @@ class ControlPanelRenderer {
           const currentValue = e.target.dataset.value === 'true';
           const newValue = !currentValue;
           
+          console.log(`🎛️ Boolean parameter ${paramId} toggled to ${newValue}`);
+          
           e.target.dataset.value = newValue;
           e.target.textContent = newValue ? 'ON' : 'OFF';
           
@@ -585,6 +651,8 @@ class ControlPanelRenderer {
         });
       }
     });
+    
+    console.log('🔗 Parameter events bound with enhanced logging');
   }
 
   /**
