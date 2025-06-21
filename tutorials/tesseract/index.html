@@ -349,7 +349,7 @@
     }
 
     // ==========================================
-    // CONTROL PANEL SETUP - NEW FUNCTION ADDED
+    // CONTROL PANEL SETUP - FIXED FUNCTION
     // ==========================================
 
     // Setup control panels with working button functionality
@@ -437,6 +437,7 @@
       }
     }
     
+    // FIXED: Proper setupButtonControls function
     function setupButtonControls() {
       // Reset Rotation Button
       const resetBtn = document.getElementById('reset-rotation');
@@ -499,40 +500,6 @@
         }
       });
     }
-
-
-      const stopRyMobileBtn = document.getElementById('stop-ry-mobile');
-      if (stopRyMobileBtn) {
-        stopRyMobileBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('ry');
-            if (enabled) {
-              stopRyMobileBtn.textContent = 'Stop RY';
-              stopRyMobileBtn.classList.remove('disabled');
-            } else {
-              stopRyMobileBtn.textContent = 'Enable RY';
-              stopRyMobileBtn.classList.add('disabled');
-            }
-          }
-        });
-      }
-
-      const stopRwMobileBtn = document.getElementById('stop-rw-mobile');
-      if (stopRwMobileBtn) {
-        stopRwMobileBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('rw');
-            if (enabled) {
-              stopRwMobileBtn.textContent = 'Stop RW';
-              stopRwMobileBtn.classList.remove('disabled');
-            } else {
-              stopRwMobileBtn.textContent = 'Enable RW';
-              stopRwMobileBtn.classList.add('disabled');
-            }
-          }
-        });
-      }
-    
 
     // ==========================================
     // NAVIGATION FUNCTIONS - KEEP YOUR EXISTING
