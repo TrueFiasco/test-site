@@ -352,33 +352,117 @@
     // CONTROL PANEL SETUP - FIXED FUNCTION
     // ==========================================
 
-    // Setup control panels with working button functionality
-    function setupControlPanels() {
-      console.log('🎛️ Setting up control panels...');
+    function setupParameterControls() {
+    // Initialize filter strength
+    window.filterStrength = 0.1; // Default value
     
-      // Settings toggle functionality
-      const settingsToggle = document.getElementById('settings-toggle');
-      const controlsPanel = document.getElementById('controls-panel');
-      
-      if (settingsToggle && controlsPanel) {
-        settingsToggle.addEventListener('click', function(e) {
-          e.stopPropagation();
-          console.log('🎛️ Settings toggle clicked');
-          
-          if (controlsPanel.style.display === 'none' || controlsPanel.style.display === '') {
-            controlsPanel.style.display = 'block';
-            console.log('🎛️ Controls panel shown');
-          } else {
-            controlsPanel.style.display = 'none';
-            console.log('🎛️ Controls panel hidden');
-          }
-        });
+    // FOV Control with filtering
+    const fovControl = document.getElementById('fov-control');
+    if (fovControl) {
+      fovControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ FOV target changed to:', targetValue);
         
-        // Prevent panel clicks from opening tutorial
-        controlsPanel.addEventListener('click', function(e) {
-          e.stopPropagation();
-        });
+        // Apply smoothing if filter is available
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('fov', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ fov: targetValue });
+        }
+      });
+    }
+  
+    // Perspective Control with filtering
+    const perspectiveControl = document.getElementById('perspective-control');
+    if (perspectiveControl) {
+      perspectiveControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ Perspective target changed to:', targetValue);
+        
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('perspective', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ perspective: targetValue });
+        }
+      });
+    }
+  
+    // Camera Z Control with filtering
+    const cameraZControl = document.getElementById('cameraz-control');
+    if (cameraZControl) {
+      cameraZControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ Camera Z target changed to:', targetValue);
+        
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('cameraZ', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ cameraZ: targetValue });
+        }
+      });
+    }
+    
+    // Filter Strength Control - NEW
+    const filterStrengthControl = document.getElementById('filter-strength');
+    if (filterStrengthControl) {
+      filterStrengthControl.addEventListener('input', function(e) {
+        const strength = parseFloat(e.target.value);
+        console.log('🎛️ Filter strength changed to:', strength);
+        
+        // Update global filter strength
+        window.filterStrength = strength;
+        console.log('✅ Filter strength updated for all parameters');
+      });
+    }
+  }
+  
+  // Smooth parameter change function
+  function smoothParameterChange(paramName, targetValue, filterStrength) {
+    if (!window.parameterTargets) {
+      window.parameterTargets = {};
+    }
+    
+    window.parameterTargets[paramName] = targetValue;
+    
+    // Start smoothing loop if not already running
+    if (!window.parameterSmoothingActive) {
+      window.parameterSmoothingActive = true;
+      smoothParameterLoop();
+    }
+  }
+  
+  function smoothParameterLoop() {
+    if (!window.parameterTargets || !tesseractShader) {
+      window.parameterSmoothingActive = false;
+      return;
+    }
+    
+    let hasActiveChanges = false;
+    const currentParams = tesseractShader.getShaderParams();
+    
+    if (!currentParams) {
+      window.parameterSmoothingActive = false;
+      return;
+    }
+    
+    Object.keys(window.parameterTargets).forEach(paramName => {
+      const target = window.parameterTargets[paramName];
+      const current = currentParams[paramName] || 0;
+      const diff = target - current;
+      
+      if (Math.abs(diff) > 0.01) {
+        const newValue = current + (diff * (window.filterStrength || 0.1));
+        tesseractShader.setShaderParams({ [paramName]: newValue });
+        hasActiveChanges = true;
       }
+    });
+    
+    if (hasActiveChanges) {
+      requestAnimationFrame(smoothParameterLoop);
+    } else {
+      window.parameterSmoothingActive = false;
+    }
+  }
     
       // WAIT FOR SHADER TO BE READY before setting up control listeners
       function waitForShaderAndSetupControls() {
