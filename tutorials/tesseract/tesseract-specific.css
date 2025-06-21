@@ -1,5 +1,5 @@
 /* ===================================================================
-   TESSERACT TUTORIAL - SPECIFIC STYLES
+   TESSERACT TUTORIAL - SPECIFIC STYLES - FIXED VERSION
    4D Hypercube visualization specific components and interactions
    =================================================================== */
 
@@ -96,7 +96,7 @@
   box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
 }
 
-/* === ENHANCED CONTROL PANEL (4D Specific) === */
+/* === ENHANCED CONTROL PANEL (4D Specific) - PERFORMANCE OPTIMIZED === */
 .controls-panel {
   position: fixed;
   top: var(--spacing-xl);
@@ -116,6 +116,9 @@
               visibility var(--transition-normal);
   opacity: 1;
   visibility: visible;
+  /* Performance optimization */
+  will-change: opacity, visibility;
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 .controls-panel h4 {
@@ -147,7 +150,7 @@
   font-size: 0.8rem;
   width: 80px;
   text-align: center;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-fast); /* Faster transition */
 }
 
 .control-group input:focus {
@@ -177,12 +180,14 @@
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.8rem;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  transition: all var(--transition-fast); /* Faster transition for better performance */
   text-align: center;
   flex: 1;
   min-width: 0;
   position: relative;
   user-select: none;
+  /* Performance optimization */
+  will-change: background-color, border-color;
 }
 
 .control-button:hover {
@@ -243,7 +248,7 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* === SETTINGS TOGGLE VISIBILITY CONTROL === */
+/* === SETTINGS TOGGLE VISIBILITY CONTROL - FIXED === */
 .settings-toggle {
   position: fixed;
   top: var(--spacing-xl);
@@ -254,7 +259,7 @@
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--border-light);
   border-radius: 50%;
-  display: flex; /* Always flex when visible */
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -279,72 +284,29 @@
   fill: var(--text-primary);
 }
 
-/* Hide settings button when tutorial is active */
-.tutorial-container.active ~ * .settings-toggle,
-.tutorial-container.active ~ .settings-toggle {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  transform: scale(0.8) !important;
+/* FIXED: JavaScript will control visibility - no more CSS conflicts */
+.settings-toggle.tutorial-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.8);
+  display: none;
 }
 
-/* Ensure controls panel is hidden when tutorial is active */
-.tutorial-container.active ~ * .controls-panel,
-.tutorial-container.active ~ .controls-panel {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+.settings-toggle.hero-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: scale(1);
+  display: flex;
 }
 
-/* Ensure settings don't interfere with tutorial navigation */
-.tutorial-container.active .settings-toggle,
-.tutorial-container.active .controls-panel {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  z-index: -1 !important;
-}
-
-/* Hero section specific - ensure settings are visible */
-.hero-section .settings-toggle {
-  display: flex !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  z-index: 1001 !important;
-}
-
-/* Animation for settings button appearance/disappearance */
-@keyframes settingsFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8) rotate(-90deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes settingsFadeOut {
-  from {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.8) rotate(-90deg);
-  }
-}
-
-.settings-toggle.show {
-  animation: settingsFadeIn 0.3s ease-out forwards;
-}
-
-.settings-toggle.hide {
-  animation: settingsFadeOut 0.3s ease-out forwards;
+/* Controls panel visibility control */
+.controls-panel.tutorial-hidden {
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* === MOTION CONTROL UI (Mobile-specific) === */
