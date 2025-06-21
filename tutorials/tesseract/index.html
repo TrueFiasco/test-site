@@ -399,43 +399,118 @@
       waitForShaderAndSetupControls();
     }
     
-    function setupParameterControls() {
-      // FOV Control
-      const fovControl = document.getElementById('fov-control');
-      if (fovControl) {
-        fovControl.addEventListener('input', function(e) {
-          const value = parseFloat(e.target.value);
-          console.log('🎛️ FOV changed to:', value);
-          if (tesseractShader && tesseractShader.setShaderParams) {
-            tesseractShader.setShaderParams({ fov: value });
-          }
-        });
-      }
+    // FOV Control with filtering - UPDATED
+    const fovControl = document.getElementById('fov-control');
+    if (fovControl) {
+      fovControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ FOV target changed to:', targetValue);
+        
+        // Apply smoothing if filter is available
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('fov', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ fov: targetValue });
+        }
+      });
+    }
     
-      // Perspective Control
-      const perspectiveControl = document.getElementById('perspective-control');
-      if (perspectiveControl) {
-        perspectiveControl.addEventListener('input', function(e) {
-          const value = parseFloat(e.target.value);
-          console.log('🎛️ Perspective changed to:', value);
-          if (tesseractShader && tesseractShader.setShaderParams) {
-            tesseractShader.setShaderParams({ perspective: value });
-          }
-        });
-      }
+    // Perspective Control with filtering - UPDATED  
+    const perspectiveControl = document.getElementById('perspective-control');
+    if (perspectiveControl) {
+      perspectiveControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ Perspective target changed to:', targetValue);
+        
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('perspective', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ perspective: targetValue });
+        }
+      });
+    }
     
-      // Camera Z Control
-      const cameraZControl = document.getElementById('cameraz-control');
-      if (cameraZControl) {
-        cameraZControl.addEventListener('input', function(e) {
-          const value = parseFloat(e.target.value);
-          console.log('🎛️ Camera Z changed to:', value);
-          if (tesseractShader && tesseractShader.setShaderParams) {
-            tesseractShader.setShaderParams({ cameraZ: value });
-          }
-        });
+    // Camera Z Control with filtering - UPDATED
+    const cameraZControl = document.getElementById('cameraz-control');
+    if (cameraZControl) {
+      cameraZControl.addEventListener('input', function(e) {
+        const targetValue = parseFloat(e.target.value);
+        console.log('🎛️ Camera Z target changed to:', targetValue);
+        
+        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+          smoothParameterChange('cameraZ', targetValue, window.filterStrength);
+        } else if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ cameraZ: targetValue });
+        }
+      });
+    }
+    
+    // Smooth parameter change function
+    function smoothParameterChange(paramName, targetValue, filterStrength) {
+      if (!window.parameterTargets) {
+        window.parameterTargets = {};
+      }
+      
+      window.parameterTargets[paramName] = targetValue;
+      
+      // Start smoothing loop if not already running
+      if (!window.parameterSmoothingActive) {
+        window.parameterSmoothingActive = true;
+        smoothParameterLoop();
       }
     }
+    
+    function smoothParameterLoop() {
+      if (!window.parameterTargets || !tesseractShader) {
+        window.parameterSmoothingActive = false;
+        return;
+      }
+      
+      let hasActiveChanges = false;
+      const currentParams = tesseractShader.getShaderParams();
+      
+      Object.keys(window.parameterTargets).forEach(paramName => {
+        const target = window.parameterTargets[paramName];
+        const current = currentParams[paramName] || 0;
+        const diff = target - current;
+        
+        if (Math.abs(diff) > 0.01) {
+          const newValue = current + (diff * (window.filterStrength || 0.1));
+          tesseractShader.setShaderParams({ [paramName]: newValue });
+          hasActiveChanges = true;
+        }
+      });
+      
+      if (hasActiveChanges) {
+        requestAnimationFrame(smoothParameterLoop);
+      } else {
+        window.parameterSmoothingActive = false;
+      }
+    }
+
+    // Filter Strength Control - FIXED
+    const filterStrengthControl = document.getElementById('filter-strength');
+    if (filterStrengthControl) {
+      filterStrengthControl.addEventListener('input', function(e) {
+        const strength = parseFloat(e.target.value);
+        console.log('🎛️ Filter strength changed to:', strength);
+        
+        // Update Enhanced Control Panel filter state if available
+        if (window.enhancedControlPanel && window.enhancedControlPanel.filterState) {
+          Object.keys(window.enhancedControlPanel.filterState).forEach(param => {
+            window.enhancedControlPanel.filterState[param].strength = strength;
+          });
+          console.log('✅ Filter strength updated for all parameters');
+        }
+        
+        // Alternative: Apply smoothing directly to shader parameter changes
+        window.filterStrength = strength;
+      });
+      
+      // Initialize filter strength
+      window.filterStrength = 0.1; // Default value
+    }
+
     
     // FIXED: Proper setupButtonControls function
     function setupButtonControls() {
