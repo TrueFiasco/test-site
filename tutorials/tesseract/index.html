@@ -462,26 +462,26 @@
     } else {
       window.parameterSmoothingActive = false;
     }
-  }
+ 
     
-      // WAIT FOR SHADER TO BE READY before setting up control listeners
-      function waitForShaderAndSetupControls() {
-        if (!tesseractShader || !tesseractShader.isInitialized) {
-          console.log('⏳ Waiting for shader to initialize...');
-          setTimeout(waitForShaderAndSetupControls, 100);
-          return;
-        }
-        
-        console.log('✅ Shader ready, setting up control listeners');
-        
-        // Control panel parameter listeners
-        setupParameterControls();
-        setupButtonControls();
+    // WAIT FOR SHADER TO BE READY before setting up control listeners
+    function waitForShaderAndSetupControls() {
+      if (!tesseractShader || !tesseractShader.isInitialized) {
+        console.log('⏳ Waiting for shader to initialize...');
+        setTimeout(waitForShaderAndSetupControls, 100);
+        return;
       }
       
-      // Start waiting for shader
-      waitForShaderAndSetupControls();
+      console.log('✅ Shader ready, setting up control listeners');
+      
+      // Control panel parameter listeners
+      setupParameterControls();
+      setupButtonControls();
     }
+    
+    // Start waiting for shader
+    waitForShaderAndSetupControls();
+    
     
     // FOV Control with filtering - UPDATED
     const fovControl = document.getElementById('fov-control');
