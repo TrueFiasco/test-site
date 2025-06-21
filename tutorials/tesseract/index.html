@@ -894,39 +894,144 @@
     window.hideParameterDialog = hideParameterDialog;
 
     // ==========================================
-    // SETTINGS BUTTON HANDLER - ADD THIS
+    // CLEAN SETTINGS BUTTON HANDLER
     // ==========================================
     function setupSettingsButton() {
       const settingsToggle = document.getElementById('settings-toggle');
       const controlsPanel = document.getElementById('controls-panel');
       
-      if (settingsToggle && controlsPanel) {
-        settingsToggle.addEventListener('click', function(e) {
+      if (!settingsToggle || !controlsPanel) {
+        console.error('❌ Settings button or controls panel not found');
+        return;
+      }
+      
+      // Remove any existing event listeners by cloning the element
+      const newSettingsToggle = settingsToggle.cloneNode(true);
+      settingsToggle.parentNode.replaceChild(newSettingsToggle, settingsToggle);
+      
+      // Single clean event handler
+      newSettingsToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        
+        console.log('⚙️ Settings button clicked');
+        
+        // Force button z-index to stay on top
+        newSettingsToggle.style.zIndex = '99999';
+        newSettingsToggle.style.pointerEvents = 'auto';
+        newSettingsToggle.style.position = 'fixed';
+        
+        // Check current panel state
+        const isOpen = controlsPanel.style.display === 'block';
+        
+        if (isOpen) {
+          closeControlsPanel();
+        } else {
+          openControlsPanel();
+        }
+      });
+      
+      // Mobile touch handlers for better responsiveness
+      if (isMobile) {
+        newSettingsToggle.addEventListener('touchstart', function(e) {
           e.preventDefault();
-          e.stopPropagation();
-          
-          console.log('⚙️ Settings button clicked');
-          
-          // Toggle panel visibility
-          if (controlsPanel.style.display === 'none' || controlsPanel.style.display === '') {
-            controlsPanel.style.display = 'block';
-            controlsPanel.style.opacity = '1';
-            controlsPanel.style.visibility = 'visible';
-            controlsPanel.style.pointerEvents = 'auto';
-            console.log('✅ Settings panel opened');
-          } else {
-            controlsPanel.style.display = 'none';
-            controlsPanel.style.opacity = '0';
-            controlsPanel.style.visibility = 'hidden';
-            controlsPanel.style.pointerEvents = 'none';
-            console.log('✅ Settings panel closed');
-          }
+          // Visual feedback
+          newSettingsToggle.style.transform = 'scale(1.1)';
+          newSettingsToggle.style.background = 'rgba(0, 255, 255, 0.4)';
         });
         
-        console.log('✅ Settings button event listener added');
-      } else {
-        console.error('❌ Settings button or controls panel not found');
+        newSettingsToggle.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          // Reset visual feedback
+          setTimeout(() => {
+            newSettingsToggle.style.transform = 'scale(1)';
+            newSettingsToggle.style.background = '';
+          }, 150);
+        });
       }
+      
+      function openControlsPanel() {
+        // Mobile-specific positioning to avoid overlap
+        if (window.innerWidth <= 768) {
+          controlsPanel.style.position = 'fixed';
+          controlsPanel.style.top = '80px';
+          controlsPanel.style.left = '1rem';
+          controlsPanel.style.right = '1rem';
+          controlsPanel.style.width = 'auto';
+          controlsPanel.style.maxWidth = 'calc(100vw - 2rem)';
+          controlsPanel.style.maxHeight = 'calc(100vh - 120px)';
+          controlsPanel.style.overflowY = 'auto';
+        }
+        
+        controlsPanel.style.display = 'block';
+        controlsPanel.style.opacity = '1';
+        controlsPanel.style.visibility = 'visible';
+        controlsPanel.style.pointerEvents = 'auto';
+        controlsPanel.style.zIndex = '2000';
+        
+        // Ensure button stays on top
+        newSettingsToggle.style.zIndex = '99999';
+        
+        // Add backdrop for easier closing
+        createBackdrop();
+        
+        console.log('✅ Controls panel opened');
+      }
+      
+      function closeControlsPanel() {
+        controlsPanel.style.display = 'none';
+        controlsPanel.style.opacity = '0';
+        controlsPanel.style.visibility = 'hidden';
+        controlsPanel.style.pointerEvents = 'none';
+        
+        // Remove backdrop
+        removeBackdrop();
+        
+        console.log('✅ Controls panel closed');
+      }
+      
+      function createBackdrop() {
+        // Remove existing backdrop first
+        removeBackdrop();
+        
+        const backdrop = document.createElement('div');
+        backdrop.id = 'settings-backdrop';
+        backdrop.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.3);
+          z-index: 1999;
+          pointer-events: auto;
+        `;
+        
+        // Close panel when backdrop is clicked
+        backdrop.addEventListener('click', function(e) {
+          e.preventDefault();
+          closeControlsPanel();
+        });
+        
+        document.body.appendChild(backdrop);
+      }
+      
+      function removeBackdrop() {
+        const existingBackdrop = document.getElementById('settings-backdrop');
+        if (existingBackdrop) {
+          existingBackdrop.remove();
+        }
+      }
+      
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && controlsPanel.style.display === 'block') {
+          closeControlsPanel();
+        }
+      });
+      
+      console.log('✅ Clean settings button handler setup complete');
     }
     
     // ==========================================
@@ -959,7 +1064,7 @@
         initProgressBar();
         updateSectionTitle();
         setupMobileButton();
-        setupSettingsButton();
+        setupSettingsButton(); // CLEAN SETTINGS BUTTON SETUP
         
         if (isMobile) {
           try {
@@ -986,7 +1091,7 @@
         console.log('📝 Edit content in: content.js');
         console.log('🎯 Edit hotspots in: hotspots.js');
         console.log('🎛️ Control buttons now fully functional with velocity toggles');
-        console.log('⚙️ Settings button visibility controlled by tutorial state');
+        console.log('⚙️ Settings button with clean z-index handling');
         
       } catch (error) {
         console.error('❌ Failed to initialize enhanced tutorial:', error);
