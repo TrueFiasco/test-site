@@ -101,7 +101,7 @@
   position: fixed;
   top: var(--spacing-xl);
   left: var(--spacing-xl);
-  z-index: 1000;
+  z-index: 2000;
   background: rgba(0, 0, 0, 0.8);
   padding: var(--spacing-lg);
   border-radius: 15px;
