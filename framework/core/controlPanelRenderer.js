@@ -1,0 +1,579 @@
+/**
+ * ControlPanelRenderer - Generates control panel HTML from configuration
+ * Uses existing tutorial-framework.css classes, binds to GenericShader interface
+ * Supports all control types and mobile/desktop responsive layouts
+ */
+class ControlPanelRenderer {
+  constructor(shader, config, options = {}) {
+    this.shader = shader;
+    this.config = config;
+    this.containerId = options.containerId || 'controls-panel';
+    this.device = shader.device;
+    
+    // Parameter smoothing system
+    this.filterStrength = 0.1;
+    this.parameterTargets = {};
+    this.smoothingActive = false;
+    
+    console.log('🎨 ControlPanelRenderer created');
+  }
+
+  /**
+   * Generate complete control panel HTML and bind events
+   */
+  render() {
+    const container = document.getElementById(this.containerId);
+    if (!container) {
+      console.error(`❌ Container ${this.containerId} not found`);
+      return;
+    }
+
+    // Generate HTML using existing CSS classes
+    container.innerHTML = this.generateHTML();
+    
+    // Bind all event listeners
+    this.bindEvents();
+    
+    console.log('✅ Control panel rendered and bound');
+  }
+
+  /**
+   * Generate complete HTML structure using existing CSS classes
+   */
+  generateHTML() {
+    return `
+      ${this.generateTitle()}
+      ${this.generateParameters()}
+      ${this.generateFilterControl()}
+      ${this.generateMotionControl()}
+      ${this.generateButtons()}
+      ${this.generateInfoSection()}
+    `;
+  }
+
+  /**
+   * Generate panel title
+   */
+  generateTitle() {
+    const title = this.config.title || 'Control Panel';
+    return `<h4>${title}</h4>`;
+  }
+
+  /**
+   * Generate parameter controls
+   */
+  generateParameters() {
+    if (!this.config.parameters) return '';
+    
+    return this.config.parameters.map(param => {
+      switch (param.type) {
+        case 'number':
+          return this.generateNumberControl(param);
+        case 'range':
+          return this.generateRangeControl(param);
+        case 'boolean':
+          return this.generateBooleanControl(param);
+        case 'select':
+          return this.generateSelectControl(param);
+        default:
+          console.warn(`Unknown parameter type: ${param.type}`);
+          return '';
+      }
+    }).join('');
+  }
+
+  /**
+   * Generate number input control
+   */
+  generateNumberControl(param) {
+    const { id, label, min, max, step, default: defaultValue } = param;
+    
+    return `
+      <div class="control-group">
+        <label for="${id}-control">${label}:</label>
+        <input type="number" 
+               id="${id}-control" 
+               value="${defaultValue}" 
+               ${min !== undefined ? `min="${min}"` : ''}
+               ${max !== undefined ? `max="${max}"` : ''}
+               ${step !== undefined ? `step="${step}"` : ''}
+               data-param-id="${id}">
+      </div>
+    `;
+  }
+
+  /**
+   * Generate range slider control
+   */
+  generateRangeControl(param) {
+    const { id, label, min, max, step, default: defaultValue } = param;
+    
+    return `
+      <div class="control-group">
+        <label for="${id}-control">${label}:</label>
+        <input type="range" 
+               id="${id}-control" 
+               value="${defaultValue}" 
+               min="${min || 0}" 
+               max="${max || 100}" 
+               ${step !== undefined ? `step="${step}"` : ''}
+               data-param-id="${id}"
+               style="width: 80px;">
+      </div>
+    `;
+  }
+
+  /**
+   * Generate boolean toggle control
+   */
+  generateBooleanControl(param) {
+    const { id, label, default: defaultValue } = param;
+    
+    return `
+      <div class="control-group">
+        <label for="${id}-control">${label}:</label>
+        <button class="control-button" 
+                id="${id}-control" 
+                data-param-id="${id}"
+                data-value="${defaultValue}"
+                style="width: 80px; padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+          ${defaultValue ? 'ON' : 'OFF'}
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate select dropdown control
+   */
+  generateSelectControl(param) {
+    const { id, label, options, default: defaultValue } = param;
+    
+    const optionsHTML = options.map(option => {
+      const value = typeof option === 'object' ? option.value : option;
+      const text = typeof option === 'object' ? option.label : option;
+      const selected = value === defaultValue ? 'selected' : '';
+      return `<option value="${value}" ${selected}>${text}</option>`;
+    }).join('');
+    
+    return `
+      <div class="control-group">
+        <label for="${id}-control">${label}:</label>
+        <select id="${id}-control" data-param-id="${id}" style="width: 80px;">
+          ${optionsHTML}
+        </select>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate filter strength control
+   */
+  generateFilterControl() {
+    return `
+      <div class="control-group">
+        <label for="filter-strength">Filter:</label>
+        <input type="range" 
+               id="filter-strength" 
+               value="0.1" 
+               min="0.01" 
+               max="1" 
+               step="0.01" 
+               style="width: 80px;" 
+               title="Parameter change smoothing">
+      </div>
+    `;
+  }
+
+  /**
+   * Generate mobile-only motion control
+   */
+  generateMotionControl() {
+    if (!this.device.isMobile || !this.config.mobile?.showMotionControl) {
+      return '';
+    }
+    
+    return `
+      <div class="control-group mobile-only" id="motion-control-group">
+        <label for="motion-control-toggle">Motion Control:</label>
+        <button class="control-button" 
+                id="motion-control-toggle" 
+                style="width: 80px; padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+          Enable
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate button controls
+   */
+  generateButtons() {
+    if (!this.config.buttons) return '';
+    
+    const buttons = this.config.buttons;
+    const desktopButtons = buttons.filter(btn => !btn.mobileOnly);
+    const mobileButtons = buttons.filter(btn => btn.mobileOnly);
+    
+    let html = '<div class="button-group">';
+    
+    // Wide buttons (like reset)
+    const wideButtons = desktopButtons.filter(btn => btn.wide);
+    wideButtons.forEach(btn => {
+      html += `
+        <button class="control-button wide" 
+                id="${btn.id}" 
+                data-action="${btn.action}">
+          ${btn.label}
+        </button>
+      `;
+    });
+    
+    // Desktop button rows
+    const normalButtons = desktopButtons.filter(btn => !btn.wide);
+    if (normalButtons.length > 0) {
+      html += '<div class="desktop-only">';
+      html += this.generateButtonRow(normalButtons);
+      html += '</div>';
+    }
+    
+    // Mobile button rows
+    if (mobileButtons.length > 0) {
+      html += '<div class="mobile-only">';
+      
+      // Group mobile buttons into rows
+      const mobileRows = this.groupButtonsIntoRows(mobileButtons, 3);
+      mobileRows.forEach(row => {
+        html += this.generateButtonRow(row);
+      });
+      
+      html += '</div>';
+    }
+    
+    html += '</div>';
+    return html;
+  }
+
+  /**
+   * Generate a row of buttons
+   */
+  generateButtonRow(buttons) {
+    const buttonHTML = buttons.map(btn => `
+      <button class="control-button" 
+              id="${btn.id}" 
+              data-action="${btn.action}">
+        ${btn.label}
+      </button>
+    `).join('');
+    
+    return `<div class="button-row">${buttonHTML}</div>`;
+  }
+
+  /**
+   * Group buttons into rows
+   */
+  groupButtonsIntoRows(buttons, buttonsPerRow) {
+    const rows = [];
+    for (let i = 0; i < buttons.length; i += buttonsPerRow) {
+      rows.push(buttons.slice(i, i + buttonsPerRow));
+    }
+    return rows;
+  }
+
+  /**
+   * Generate info section
+   */
+  generateInfoSection() {
+    if (!this.config.info) return '';
+    
+    let html = `
+      <div class="info-section">
+        <h4>${this.config.info.title || 'Controls'}</h4>
+    `;
+    
+    // Desktop instructions
+    if (this.config.info.desktop) {
+      this.config.info.desktop.forEach(text => {
+        html += `<p class="desktop-only">${text}</p>`;
+      });
+    }
+    
+    // Mobile instructions
+    if (this.config.info.mobile) {
+      this.config.info.mobile.forEach(text => {
+        html += `<p class="mobile-only">${text}</p>`;
+      });
+    }
+    
+    html += '</div>';
+    return html;
+  }
+
+  /**
+   * Bind all event listeners
+   */
+  bindEvents() {
+    this.bindParameterEvents();
+    this.bindFilterEvents();
+    this.bindMotionEvents();
+    this.bindButtonEvents();
+    
+    console.log('🔗 All events bound');
+  }
+
+  /**
+   * Bind parameter control events
+   */
+  bindParameterEvents() {
+    const container = document.getElementById(this.containerId);
+    if (!container) return;
+    
+    // Bind all parameter inputs
+    container.querySelectorAll('[data-param-id]').forEach(input => {
+      const paramId = input.dataset.paramId;
+      
+      if (input.type === 'range' || input.type === 'number') {
+        input.addEventListener('input', (e) => {
+          const value = parseFloat(e.target.value);
+          this.smoothParameterChange(paramId, value);
+        });
+      } else if (input.tagName === 'SELECT') {
+        input.addEventListener('change', (e) => {
+          this.shader.setParameter(paramId, e.target.value);
+        });
+      } else if (input.tagName === 'BUTTON') {
+        // Boolean toggle button
+        input.addEventListener('click', (e) => {
+          const currentValue = e.target.dataset.value === 'true';
+          const newValue = !currentValue;
+          
+          e.target.dataset.value = newValue;
+          e.target.textContent = newValue ? 'ON' : 'OFF';
+          
+          this.shader.setParameter(paramId, newValue);
+        });
+      }
+    });
+  }
+
+  /**
+   * Bind filter strength events
+   */
+  bindFilterEvents() {
+    const filterControl = document.getElementById('filter-strength');
+    if (filterControl) {
+      filterControl.addEventListener('input', (e) => {
+        this.filterStrength = parseFloat(e.target.value);
+        console.log('🎛️ Filter strength:', this.filterStrength);
+      });
+    }
+  }
+
+  /**
+   * Bind motion control events
+   */
+  bindMotionEvents() {
+    const motionToggle = document.getElementById('motion-control-toggle');
+    if (motionToggle && this.device.isMobile) {
+      motionToggle.addEventListener('click', (e) => {
+        // This will be handled by the tutorial's motion control system
+        // The button just triggers the existing motion control logic
+        if (window.mobileMotionControl) {
+          window.mobileMotionControl.toggle();
+        }
+      });
+    }
+  }
+
+  /**
+   * Bind button action events
+   */
+  bindButtonEvents() {
+    const container = document.getElementById(this.containerId);
+    if (!container) return;
+    
+    container.querySelectorAll('[data-action]').forEach(button => {
+      const action = button.dataset.action;
+      
+      button.addEventListener('click', (e) => {
+        this.handleButtonAction(action, button);
+      });
+    });
+  }
+
+  /**
+   * Handle button actions
+   */
+  handleButtonAction(action, button) {
+    console.log(`🎛️ Button action: ${action}`);
+    
+    switch (action) {
+      case 'resetAll':
+        if (typeof this.shader.resetAll === 'function') {
+          this.shader.resetAll();
+          this.showButtonFeedback(button, 'Reset ✓');
+        }
+        break;
+        
+      case 'resetRotation':
+        if (typeof this.shader.resetRotation === 'function') {
+          this.shader.resetRotation();
+          this.showButtonFeedback(button, 'Reset ✓');
+        }
+        break;
+        
+      default:
+        // Try to call method on shader
+        if (typeof this.shader[action] === 'function') {
+          const result = this.shader[action]();
+          
+          // Handle toggle methods that return boolean
+          if (typeof result === 'boolean') {
+            button.textContent = result ? button.textContent.replace('Stop', 'Enable') : button.textContent.replace('Enable', 'Stop');
+            button.classList.toggle('disabled', !result);
+          }
+        } else {
+          console.warn(`⚠️ Unknown action: ${action}`);
+        }
+        break;
+    }
+  }
+
+  /**
+   * Show temporary button feedback
+   */
+  showButtonFeedback(button, text) {
+    const originalText = button.textContent;
+    const originalBg = button.style.background;
+    
+    button.textContent = text;
+    button.style.background = 'rgba(0, 255, 0, 0.3)';
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.background = originalBg;
+    }, 1000);
+  }
+
+  /**
+   * Smooth parameter change with filtering
+   */
+  smoothParameterChange(paramId, targetValue) {
+    this.parameterTargets[paramId] = targetValue;
+    
+    if (!this.smoothingActive) {
+      this.smoothingActive = true;
+      this.smoothParameterLoop();
+    }
+  }
+
+  /**
+   * Parameter smoothing animation loop
+   */
+  smoothParameterLoop() {
+    if (!this.parameterTargets || Object.keys(this.parameterTargets).length === 0) {
+      this.smoothingActive = false;
+      return;
+    }
+    
+    let hasActiveChanges = false;
+    
+    Object.keys(this.parameterTargets).forEach(paramId => {
+      const target = this.parameterTargets[paramId];
+      const current = this.shader.getParameter(paramId) || 0;
+      const diff = target - current;
+      
+      if (Math.abs(diff) > 0.01) {
+        const newValue = current + (diff * this.filterStrength);
+        this.shader.setParameter(paramId, newValue);
+        hasActiveChanges = true;
+      } else {
+        // Close enough, set final value and remove from targets
+        this.shader.setParameter(paramId, target);
+        delete this.parameterTargets[paramId];
+      }
+    });
+    
+    if (hasActiveChanges) {
+      requestAnimationFrame(() => this.smoothParameterLoop());
+    } else {
+      this.smoothingActive = false;
+    }
+  }
+
+  /**
+   * Update control values from shader state
+   */
+  updateFromShader() {
+    const container = document.getElementById(this.containerId);
+    if (!container) return;
+    
+    const params = this.shader.getShaderParams();
+    
+    container.querySelectorAll('[data-param-id]').forEach(input => {
+      const paramId = input.dataset.paramId;
+      const value = params[paramId];
+      
+      if (value !== undefined) {
+        if (input.type === 'range' || input.type === 'number') {
+          input.value = value;
+        } else if (input.tagName === 'SELECT') {
+          input.value = value;
+        } else if (input.tagName === 'BUTTON' && input.dataset.value !== undefined) {
+          input.dataset.value = value;
+          input.textContent = value ? 'ON' : 'OFF';
+        }
+      }
+    });
+  }
+
+  /**
+   * Destroy and cleanup
+   */
+  destroy() {
+    this.smoothingActive = false;
+    this.parameterTargets = {};
+    
+    const container = document.getElementById(this.containerId);
+    if (container) {
+      container.innerHTML = '';
+    }
+    
+    console.log('🧹 ControlPanelRenderer destroyed');
+  }
+}
+
+// Export
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ControlPanelRenderer;
+} else if (typeof window !== 'undefined') {
+  window.ControlPanelRenderer = ControlPanelRenderer;
+}
+
+/**
+ * USAGE EXAMPLE:
+ * 
+ * // In tutorial's controlConfig.js:
+ * export const MyTutorialConfig = {
+ *   title: "4D Projection Controls",
+ *   parameters: [
+ *     { id: 'fov', label: 'FOV', type: 'number', default: 7, min: 2, max: 120 },
+ *     { id: 'perspective', label: '4D Scale', type: 'range', default: 2.3, min: 0.1, max: 10, step: 0.1 },
+ *     { id: 'enabled', label: 'Enable Effect', type: 'boolean', default: true }
+ *   ],
+ *   buttons: [
+ *     { id: 'reset-all', label: 'Reset All', action: 'resetAll', wide: true },
+ *     { id: 'toggle-x', label: 'Stop X', action: 'toggleX' }
+ *   ],
+ *   mobile: { showMotionControl: true },
+ *   info: {
+ *     title: "Controls",
+ *     desktop: ["• Mouse to rotate", "• Scroll for 4D"],
+ *     mobile: ["• Tilt device to rotate", "• Touch for 4D"]
+ *   }
+ * };
+ * 
+ * // In tutorial initialization:
+ * const renderer = new ControlPanelRenderer(shader, MyTutorialConfig);
+ * renderer.render();
+ */
