@@ -401,11 +401,15 @@ class ControlPanelRenderer {
     });
   }
 
-  /**
-   * Handle button actions
+ /**
+   * Handle button actions with Tesseract-specific logic
    */
   handleButtonAction(action, button) {
     console.log(`🎛️ Button action: ${action}`);
+    
+    // Check if TesseractActionMap is available for custom mappings
+    const actionMap = window.TesseractActionMap || {};
+    const mappedAction = actionMap[action] || action;
     
     switch (action) {
       case 'resetAll':
@@ -422,23 +426,89 @@ class ControlPanelRenderer {
         }
         break;
         
+      case 'toggleVelocityRX':
+      case 'toggleVelocityRY':
+      case 'toggleVelocityRW':
+        // Handle velocity toggle actions with axis parameter
+        if (typeof this.shader.toggleVelocity === 'function') {
+          const axis = mappedAction; // 'rx', 'ry', or 'rw'
+          const enabled = this.shader.toggleVelocity(axis);
+          
+          // Update button text and style based on state
+          if (enabled) {
+            button.textContent = button.textContent.replace('Enable', 'Stop');
+            button.classList.remove('disabled');
+            button.style.background = '';
+            button.style.borderColor = '';
+          } else {
+            button.textContent = button.textContent.replace('Stop', 'Enable');
+            button.classList.add('disabled');
+            button.style.background = 'rgba(255, 100, 100, 0.3)';
+            button.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+          }
+        }
+        break;
+        
+      case 'toggleMotionControl':
+        // Handle motion control toggle
+        if (typeof this.shader.toggleMotionControl === 'function') {
+          const enabled = this.shader.toggleMotionControl();
+          this.updateButtonToggleState(button, enabled, 'Motion');
+        }
+        break;
+        
+      case 'toggleTouchControl':
+        // Handle touch control toggle  
+        if (typeof this.shader.toggleTouchControl === 'function') {
+          const enabled = this.shader.toggleTouchControl();
+          this.updateButtonToggleState(button, enabled, 'Touch');
+        }
+        break;
+        
+      case 'toggleXAxisInvert':
+        // Handle X-axis invert toggle
+        if (typeof this.shader.toggleXAxisInvert === 'function') {
+          const enabled = this.shader.toggleXAxisInvert();
+          this.updateButtonToggleState(button, enabled, 'X-Axis', 'Fix X-Axis', 'Unfix X-Axis');
+        }
+        break;
+        
       default:
-        // Try to call method on shader
-        if (typeof this.shader[action] === 'function') {
-          const result = this.shader[action]();
+        // Try to call method on shader directly
+        if (typeof this.shader[mappedAction] === 'function') {
+          const result = this.shader[mappedAction]();
           
           // Handle toggle methods that return boolean
           if (typeof result === 'boolean') {
-            button.textContent = result ? button.textContent.replace('Stop', 'Enable') : button.textContent.replace('Enable', 'Stop');
-            button.classList.toggle('disabled', !result);
+            this.updateButtonToggleState(button, result);
           }
         } else {
-          console.warn(`⚠️ Unknown action: ${action}`);
+          console.warn(`⚠️ Unknown action: ${action} (mapped to: ${mappedAction})`);
         }
         break;
     }
   }
 
+  /**
+   * Update button state for toggle actions
+   */
+  updateButtonToggleState(button, enabled, actionType = '', enabledText = '', disabledText = '') {
+    if (enabled) {
+      button.textContent = disabledText || button.textContent.replace('Enable', 'Stop').replace('Start', 'Stop');
+      button.classList.remove('disabled');
+      button.style.background = '';
+      button.style.borderColor = '';
+    } else {
+      button.textContent = enabledText || button.textContent.replace('Stop', 'Enable').replace('Disable', 'Enable');
+      button.classList.add('disabled');
+      button.style.background = 'rgba(255, 100, 100, 0.3)';
+      button.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+    }
+    
+    if (actionType) {
+      console.log(`🎛️ ${actionType} is now: ${enabled ? 'enabled' : 'disabled'}`);
+    }
+  }
   /**
    * Show temporary button feedback
    */
