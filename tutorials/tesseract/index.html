@@ -280,7 +280,7 @@
     // ==========================================
 
     /**
-     * Initialize the new framework-based control panel
+     * Initialize the new framework-based control panel with automatic settings button management
      */
     async function initFrameworkControlPanel() {
       // Wait for shader to be initialized
@@ -297,19 +297,22 @@
       }
 
       try {
-        console.log('🎨 Initializing framework control panel...');
+        console.log('🎨 Initializing framework control panel with automatic settings button management...');
         
         // Create control panel renderer with Tesseract config
         controlPanelRenderer = new ControlPanelRenderer(
           tesseractShader, 
           window.TesseractControlConfig,
-          { containerId: 'controls-panel' }
+          { 
+            containerId: 'controls-panel',
+            settingsButtonId: 'settings-toggle'
+          }
         );
         
-        // Render the control panel
-        controlPanelRenderer.render();
+        // 🆕 NEW: Use framework method that handles everything automatically
+        controlPanelRenderer.renderWithSettingsButton();
         
-        console.log('✅ Framework control panel initialized successfully');
+        console.log('✅ Framework control panel with automatic settings button management initialized');
         
         // Setup additional integrations
         setupMotionControlIntegration();
@@ -897,7 +900,7 @@
         initProgressBar();
         updateSectionTitle();
         setupMobileButton();
-        setupSettingsButton();
+        // 🆕 REMOVED: setupSettingsButton() - now handled automatically by framework
         
         // 7. Setup event listeners
         document.addEventListener('wheel', onWheel, { passive: false });
@@ -905,10 +908,11 @@
         console.log('🎉 Enhanced tutorial with framework integration complete!');
         console.log('🎯 Framework Features Enabled:');
         console.log('  • GenericShader base class with parameter management');
-        console.log('  • ControlPanelRenderer generating UI from TesseractControlConfig'); 
+        console.log('  • ControlPanelRenderer with automatic settings button management'); 
         console.log('  • Integrated motion consent persistence across pages');
         console.log('  • Configuration-driven control system');
         console.log('  • Reusable framework components');
+        console.log('  • Zero hardcoded event handling - all framework managed');
         console.log('📝 Next tutorial will only need: config.js + shader.js files');
         
       } catch (error) {
