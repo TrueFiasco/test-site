@@ -646,3 +646,13 @@
     display: block !important;
   }
 }
+/* === MOBILE Z-INDEX FIXES === */
+@media (max-width: 768px) {
+  .settings-toggle {
+    z-index: 2100 !important; /* Higher than controls panel */
+  }
+  
+  .controls-panel {
+    z-index: 2000 !important; /* Lower than settings button */
+  }
+}
