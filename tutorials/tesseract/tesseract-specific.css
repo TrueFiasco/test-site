@@ -101,7 +101,7 @@
   position: fixed;
   top: var(--spacing-xl);
   left: var(--spacing-xl);
-  z-index: 2000;
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.8);
   padding: var(--spacing-lg);
   border-radius: 15px;
@@ -258,6 +258,21 @@
   width: 24px;
   height: 24px;
   fill: var(--text-primary);
+}
+
+/* === MOBILE Z-INDEX FIXES === */
+@media (max-width: 768px) {
+  .controls-panel {
+    z-index: 2000 !important; /* Higher than mobile button */
+  }
+  
+  .mobile-tutorial-button {
+    z-index: 1000; /* Lower than controls panel */
+  }
+  
+  .mobile-start-btn {
+    z-index: 1000;
+  }
 }
 
 /* === MOTION CONTROL UI (Mobile-specific) === */
