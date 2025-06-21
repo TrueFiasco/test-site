@@ -643,10 +643,9 @@
           console.log('✅ Settings button hidden');
         }
         
-        // Also hide the controls panel if it's open
-        if (controlsPanel) {
-          controlsPanel.style.display = 'none';
-        }
+      // Only hide the controls panel when entering tutorial sections
+      // Don't auto-hide it on the hero section
+      // (Let the user manually close it with the settings button)
         
         if (mobileBtn) {
           mobileBtn.style.opacity = '0';
