@@ -894,7 +894,7 @@
     window.hideParameterDialog = hideParameterDialog;
 
     // ==========================================
-    // CLEAN SETTINGS BUTTON HANDLER
+    // SIMPLE SETTINGS BUTTON HANDLER - NO MOVING
     // ==========================================
     function setupSettingsButton() {
       const settingsToggle = document.getElementById('settings-toggle');
@@ -905,98 +905,78 @@
         return;
       }
       
-      // Remove any existing event listeners by cloning the element
-      const newSettingsToggle = settingsToggle.cloneNode(true);
-      settingsToggle.parentNode.replaceChild(newSettingsToggle, settingsToggle);
+      // Remove existing listeners to prevent conflicts
+      const newButton = settingsToggle.cloneNode(true);
+      settingsToggle.parentNode.replaceChild(newButton, settingsToggle);
       
-      // Single clean event handler
-      newSettingsToggle.addEventListener('click', function(e) {
+      // Simple toggle function
+      let panelOpen = false;
+      
+      // SINGLE CLEAN EVENT HANDLER
+      newButton.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         
-        console.log('⚙️ Settings button clicked');
+        console.log('⚙️ Settings button clicked, panel open:', panelOpen);
         
-        // Force button z-index to stay on top
-        newSettingsToggle.style.zIndex = '99999';
-        newSettingsToggle.style.pointerEvents = 'auto';
-        newSettingsToggle.style.position = 'fixed';
-        
-        // Check current panel state
-        const isOpen = controlsPanel.style.display === 'block';
-        
-        if (isOpen) {
-          closeControlsPanel();
+        if (panelOpen) {
+          closePanel();
         } else {
-          openControlsPanel();
+          openPanel();
         }
       });
       
-      // Mobile touch handlers for better responsiveness
-      if (isMobile) {
-        newSettingsToggle.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          // Visual feedback
-          newSettingsToggle.style.transform = 'scale(1.1)';
-          newSettingsToggle.style.background = 'rgba(0, 255, 255, 0.4)';
-        });
-        
-        newSettingsToggle.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          // Reset visual feedback
-          setTimeout(() => {
-            newSettingsToggle.style.transform = 'scale(1)';
-            newSettingsToggle.style.background = '';
-          }, 150);
-        });
-      }
+      // PREVENT EVENT CONFLICTS ON PANEL
+      controlsPanel.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent clicks on panel from bubbling
+      });
       
-      function openControlsPanel() {
-        // Mobile-specific positioning to avoid overlap
-        if (window.innerWidth <= 768) {
-          controlsPanel.style.position = 'fixed';
-          controlsPanel.style.top = '80px';
-          controlsPanel.style.left = '1rem';
-          controlsPanel.style.right = '1rem';
-          controlsPanel.style.width = 'auto';
-          controlsPanel.style.maxWidth = 'calc(100vw - 2rem)';
-          controlsPanel.style.maxHeight = 'calc(100vh - 120px)';
-          controlsPanel.style.overflowY = 'auto';
-        }
+      // PREVENT MOUSE EVENTS FROM CONFLICTING
+      controlsPanel.addEventListener('mouseenter', function(e) {
+        e.stopPropagation();
+      });
+      
+      controlsPanel.addEventListener('mouseleave', function(e) {
+        e.stopPropagation();
+      });
+      
+      function openPanel() {
+        console.log('✅ Opening panel');
         
         controlsPanel.style.display = 'block';
         controlsPanel.style.opacity = '1';
         controlsPanel.style.visibility = 'visible';
         controlsPanel.style.pointerEvents = 'auto';
-        controlsPanel.style.zIndex = '2000';
         
         // Ensure button stays on top
-        newSettingsToggle.style.zIndex = '99999';
+        newButton.style.zIndex = '99999';
+        newButton.style.pointerEvents = 'auto';
         
-        // Add backdrop for easier closing
-        createBackdrop();
+        panelOpen = true;
         
-        console.log('✅ Controls panel opened');
+        // Add backdrop for easy closing
+        addBackdrop();
       }
       
-      function closeControlsPanel() {
+      function closePanel() {
+        console.log('✅ Closing panel');
+        
         controlsPanel.style.display = 'none';
         controlsPanel.style.opacity = '0';
         controlsPanel.style.visibility = 'hidden';
         controlsPanel.style.pointerEvents = 'none';
         
-        // Remove backdrop
-        removeBackdrop();
+        panelOpen = false;
         
-        console.log('✅ Controls panel closed');
+        removeBackdrop();
       }
       
-      function createBackdrop() {
-        // Remove existing backdrop first
-        removeBackdrop();
+      function addBackdrop() {
+        removeBackdrop(); // Remove existing first
         
         const backdrop = document.createElement('div');
-        backdrop.id = 'settings-backdrop';
+        backdrop.id = 'simple-backdrop';
         backdrop.style.cssText = `
           position: fixed;
           top: 0;
@@ -1008,30 +988,29 @@
           pointer-events: auto;
         `;
         
-        // Close panel when backdrop is clicked
         backdrop.addEventListener('click', function(e) {
           e.preventDefault();
-          closeControlsPanel();
+          closePanel();
         });
         
         document.body.appendChild(backdrop);
       }
       
       function removeBackdrop() {
-        const existingBackdrop = document.getElementById('settings-backdrop');
-        if (existingBackdrop) {
-          existingBackdrop.remove();
+        const backdrop = document.getElementById('simple-backdrop');
+        if (backdrop) {
+          backdrop.remove();
         }
       }
       
-      // Close on escape key
+      // Close on escape
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && controlsPanel.style.display === 'block') {
-          closeControlsPanel();
+        if (e.key === 'Escape' && panelOpen) {
+          closePanel();
         }
       });
       
-      console.log('✅ Clean settings button handler setup complete');
+      console.log('✅ Simple settings button setup complete');
     }
     
     // ==========================================
