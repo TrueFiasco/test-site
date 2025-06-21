@@ -490,15 +490,6 @@ class TesseractShader {
     // Skip hero-specific controls - using main controls panel instead
     console.log('✅ Using main controls panel for hero section');
   }
-    
-    toggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (panel.style.display === 'none' || panel.style.display === '') {
-        panel.style.display = 'block';
-      } else {
-        panel.style.display = 'none';
-      }
-    });
 
     // Prevent tutorial opening when clicking on panel
     panel.addEventListener('click', (e) => {
