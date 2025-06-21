@@ -486,45 +486,9 @@ class TesseractShader {
   /**
    * Setup hero controls panel
    */
-   setupHeroControls() {
+  setupHeroControls() {
     // Skip hero-specific controls - using main controls panel instead
     console.log('✅ Using main controls panel for hero section');
-  }
-
-    // Prevent tutorial opening when clicking on panel
-    panel.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-
-    // Control inputs
-    const fovControl = document.getElementById('hero-fov-control');
-    const perspectiveControl = document.getElementById('hero-perspective-control');
-    const cameraZControl = document.getElementById('hero-cameraz-control');
-
-    if (fovControl) {
-      fovControl.addEventListener('input', (e) => {
-        if (this.uniforms) this.uniforms.u_fov.value = parseFloat(e.target.value);
-      });
-    }
-
-    if (perspectiveControl) {
-      perspectiveControl.addEventListener('input', (e) => {
-        if (this.uniforms) this.uniforms.u_perspective.value = parseFloat(e.target.value);
-      });
-    }
-
-    if (cameraZControl) {
-      cameraZControl.addEventListener('input', (e) => {
-        if (this.uniforms) this.uniforms.u_cameraZ.value = parseFloat(e.target.value);
-      });
-    }
-
-    // Close panel when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!toggle.contains(e.target) && !panel.contains(e.target)) {
-        panel.style.display = 'none';
-      }
-    });
   }
 
   // ==========================================
