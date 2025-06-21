@@ -25,6 +25,13 @@ class TesseractShader {
     this.wheelVelocity = 0;
     this.maxSlowVelocity = 0.25;
     
+    // ADD NEW PROPERTIES FOR VELOCITY CONTROL
+    this.velocityEnabled = {
+      rx: true,  // X-axis rotation enabled by default
+      ry: true,  // Y-axis rotation enabled by default  
+      rw: true   // W-axis rotation enabled by default
+    };
+    
     // Mobile touch state
     this.touchStartX = 0;
     this.touchStartY = 0;
@@ -321,6 +328,78 @@ class TesseractShader {
   }
 
   // ==========================================
+  // NEW CONTROL METHODS
+  // ==========================================
+
+  /**
+   * Reset all rotation values to zero
+   */
+  resetRotation() {
+    this.angles.rx = 0;
+    this.angles.ry = 0;
+    this.angles.rw = 0;
+    this.velocity.x = 0;
+    this.velocity.y = 0;
+    this.slowVelocity.x = 0;
+    this.slowVelocity.y = 0;
+    this.wheelVelocity = 0;
+    this.motionInput = { x: 0, y: 0, w: 0 };
+    console.log('🔄 Rotation reset to zero');
+  }
+
+  /**
+   * Toggle velocity for specific axis
+   * @param {string} axis - 'rx', 'ry', or 'rw'
+   * @returns {boolean} - Whether velocity is now enabled
+   */
+  toggleVelocity(axis) {
+    if (!this.velocityEnabled) {
+      this.velocityEnabled = {};
+    }
+    
+    // Initialize all axes as enabled by default
+    if (this.velocityEnabled[axis] === undefined) {
+      this.velocityEnabled[axis] = true;
+    }
+    
+    // Toggle the specific axis
+    this.velocityEnabled[axis] = !this.velocityEnabled[axis];
+    
+    // If disabled, stop velocity for that axis
+    if (!this.velocityEnabled[axis]) {
+      switch(axis) {
+        case 'rx':
+          this.velocity.x = 0;
+          this.slowVelocity.x = 0;
+          if (this.motionInput) this.motionInput.x = 0;
+          break;
+        case 'ry':
+          this.velocity.y = 0;
+          this.slowVelocity.y = 0;
+          if (this.motionInput) this.motionInput.y = 0;
+          break;
+        case 'rw':
+          this.wheelVelocity = 0;
+          if (this.motionInput) this.motionInput.w = 0;
+          break;
+      }
+    }
+    
+    console.log(`🎛️ ${axis.toUpperCase()} velocity ${this.velocityEnabled[axis] ? 'enabled' : 'disabled'}`);
+    return this.velocityEnabled[axis];
+  }
+
+  /**
+   * Check if velocity is enabled for a specific axis
+   * @param {string} axis - 'rx', 'ry', or 'rw'
+   * @returns {boolean}
+   */
+  isVelocityEnabled(axis) {
+    if (!this.velocityEnabled) return true; // Default to enabled
+    return this.velocityEnabled[axis] !== false;
+  }
+
+  // ==========================================
   // MOTION CONTROL INTEGRATION
   // ==========================================
 
@@ -493,34 +572,49 @@ class TesseractShader {
   }
 
   /**
-   * Apply motion control rotation
+   * Apply motion control rotation - UPDATED to respect velocity toggles
    */
   applyMotionRotation() {
-    // Direct application of motion input
-    this.angles.rx += this.motionInput.x;
-    this.angles.ry += this.motionInput.y;
-    this.angles.rw += this.motionInput.w;
+    // Apply motion input only if velocity is enabled for each axis
+    if (this.isVelocityEnabled('rx')) {
+      this.angles.rx += this.motionInput.x;
+    }
+    if (this.isVelocityEnabled('ry')) {
+      this.angles.ry += this.motionInput.y;
+    }
+    if (this.isVelocityEnabled('rw')) {
+      this.angles.rw += this.motionInput.w;
+    }
     
-    // Apply some damping to motion input for smooth motion
+    // Apply damping to motion input
     this.motionInput.x *= 0.85;
     this.motionInput.y *= 0.85;
     this.motionInput.w *= 0.90;
   }
 
   /**
-   * Apply traditional mouse/touch rotation
+   * Apply traditional mouse/touch rotation - UPDATED to respect velocity toggles
    */
   applyMouseRotation() {
-    this.angles.rx += this.velocity.x + this.slowVelocity.x;
-    this.angles.ry += this.velocity.y + this.slowVelocity.y;
-    this.angles.rw += this.wheelVelocity;
+    // Apply rotation only if velocity is enabled for each axis
+    if (this.isVelocityEnabled('rx')) {
+      this.angles.rx += this.velocity.x + this.slowVelocity.x;
+    }
+    if (this.isVelocityEnabled('ry')) {
+      this.angles.ry += this.velocity.y + this.slowVelocity.y;
+    }
+    if (this.isVelocityEnabled('rw')) {
+      this.angles.rw += this.wheelVelocity;
+    }
     
+    // Apply damping
     this.velocity.x *= 0.95;
     this.velocity.y *= 0.95;
     this.wheelVelocity *= 0.96;
     
-    const targetSlowVelX = this.normalizedMouse.y * 0.0125;
-    const targetSlowVelY = this.normalizedMouse.x * 0.0125;
+    // Calculate slow velocity targets only if enabled
+    const targetSlowVelX = this.isVelocityEnabled('rx') ? this.normalizedMouse.y * 0.0125 : 0;
+    const targetSlowVelY = this.isVelocityEnabled('ry') ? this.normalizedMouse.x * 0.0125 : 0;
     
     this.slowVelocity.x += (targetSlowVelX - this.slowVelocity.x) * 0.1;
     this.slowVelocity.y += (targetSlowVelY - this.slowVelocity.y) * 0.1;
@@ -670,8 +764,8 @@ class TesseractShader {
     // DESKTOP ONLY: Click anywhere to open tutorial (except on controls)
     if (!this.getTutorialState() && !this.isMobile) {
       // Check if click was on controls panel or settings toggle
-      const settingsToggle = document.getElementById('heroSettingsToggle');
-      const controlsPanel = document.getElementById('heroControlsPanel');
+      const settingsToggle = document.getElementById('settings-toggle');
+      const controlsPanel = document.getElementById('controls-panel');
       const closeButton = document.querySelector('.close-btn');
       
       // Don't open tutorial if clicking on controls
