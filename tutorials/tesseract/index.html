@@ -349,6 +349,157 @@
     }
 
     // ==========================================
+    // CONTROL PANEL SETUP - NEW FUNCTION ADDED
+    // ==========================================
+
+    // Setup control panels with working button functionality
+    function setupControlPanels() {
+      // Settings toggle functionality
+      document.getElementById('settings-toggle').addEventListener('click', function() {
+        const panel = document.getElementById('controls-panel');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+          panel.style.display = 'block';
+        } else {
+          panel.style.display = 'none';
+        }
+      });
+
+      // Control panel event listeners
+      document.getElementById('fov-control').addEventListener('input', function(e) {
+        if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ fov: parseFloat(e.target.value) });
+        }
+      });
+
+      document.getElementById('perspective-control').addEventListener('input', function(e) {
+        if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ perspective: parseFloat(e.target.value) });
+        }
+      });
+
+      document.getElementById('cameraz-control').addEventListener('input', function(e) {
+        if (tesseractShader && tesseractShader.setShaderParams) {
+          tesseractShader.setShaderParams({ cameraZ: parseFloat(e.target.value) });
+        }
+      });
+
+      // Reset and control buttons with error checking
+      document.getElementById('reset-rotation').addEventListener('click', function() {
+        if (tesseractShader && tesseractShader.resetRotation) {
+          tesseractShader.resetRotation();
+        } else {
+          console.warn('TesseractShader resetRotation method not available');
+        }
+      });
+
+      // RX Velocity Toggle
+      const stopRxBtn = document.getElementById('stop-rx');
+      if (stopRxBtn) {
+        stopRxBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('rx');
+            if (enabled) {
+              stopRxBtn.textContent = 'Stop RX';
+              stopRxBtn.classList.remove('disabled');
+            } else {
+              stopRxBtn.textContent = 'Enable RX';
+              stopRxBtn.classList.add('disabled');
+            }
+          } else {
+            console.warn('TesseractShader toggleVelocity method not available');
+          }
+        });
+      }
+
+      // RY Velocity Toggle
+      const stopRyBtn = document.getElementById('stop-ry');
+      if (stopRyBtn) {
+        stopRyBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('ry');
+            if (enabled) {
+              stopRyBtn.textContent = 'Stop RY';
+              stopRyBtn.classList.remove('disabled');
+            } else {
+              stopRyBtn.textContent = 'Enable RY';
+              stopRyBtn.classList.add('disabled');
+            }
+          } else {
+            console.warn('TesseractShader toggleVelocity method not available');
+          }
+        });
+      }
+
+      // RW Velocity Toggle
+      const stopRwBtn = document.getElementById('stop-rw');
+      if (stopRwBtn) {
+        stopRwBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('rw');
+            if (enabled) {
+              stopRwBtn.textContent = 'Stop RW';
+              stopRwBtn.classList.remove('disabled');
+            } else {
+              stopRwBtn.textContent = 'Enable RW';
+              stopRwBtn.classList.add('disabled');
+            }
+          } else {
+            console.warn('TesseractShader toggleVelocity method not available');
+          }
+        });
+      }
+
+      // Mobile versions of the buttons
+      const stopRxMobileBtn = document.getElementById('stop-rx-mobile');
+      if (stopRxMobileBtn) {
+        stopRxMobileBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('rx');
+            if (enabled) {
+              stopRxMobileBtn.textContent = 'Stop RX';
+              stopRxMobileBtn.classList.remove('disabled');
+            } else {
+              stopRxMobileBtn.textContent = 'Enable RX';
+              stopRxMobileBtn.classList.add('disabled');
+            }
+          }
+        });
+      }
+
+      const stopRyMobileBtn = document.getElementById('stop-ry-mobile');
+      if (stopRyMobileBtn) {
+        stopRyMobileBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('ry');
+            if (enabled) {
+              stopRyMobileBtn.textContent = 'Stop RY';
+              stopRyMobileBtn.classList.remove('disabled');
+            } else {
+              stopRyMobileBtn.textContent = 'Enable RY';
+              stopRyMobileBtn.classList.add('disabled');
+            }
+          }
+        });
+      }
+
+      const stopRwMobileBtn = document.getElementById('stop-rw-mobile');
+      if (stopRwMobileBtn) {
+        stopRwMobileBtn.addEventListener('click', function() {
+          if (tesseractShader && tesseractShader.toggleVelocity) {
+            const enabled = tesseractShader.toggleVelocity('rw');
+            if (enabled) {
+              stopRwMobileBtn.textContent = 'Stop RW';
+              stopRwMobileBtn.classList.remove('disabled');
+            } else {
+              stopRwMobileBtn.textContent = 'Enable RW';
+              stopRwMobileBtn.classList.add('disabled');
+            }
+          }
+        });
+      }
+    }
+
+    // ==========================================
     // NAVIGATION FUNCTIONS - KEEP YOUR EXISTING
     // ==========================================
 
@@ -422,18 +573,30 @@
       }
     }
 
+    // UPDATED: Function to handle settings button visibility
     function updateTutorial() {
       const scroller = document.getElementById('tutorialScroller');
       const tutorialContainer = document.getElementById('tutorialContainer');
       const progressBar = document.getElementById('progressBar');
       const mobileBtn = document.getElementById('mobileTutorialBtn');
+      const settingsToggle = document.getElementById('settings-toggle'); // ADD THIS LINE
+      const controlsPanel = document.getElementById('controls-panel'); // ADD THIS LINE
       
       if (currentSection === 0) {
+        // HERO SECTION - Show settings button
         if (tutorialContainer) {
           tutorialContainer.classList.remove('active');
         }
         if (progressBar) {
           progressBar.style.display = 'none';
+        }
+        
+        // Show settings button on hero section
+        if (settingsToggle) {
+          settingsToggle.style.display = 'flex';
+          settingsToggle.style.opacity = '1';
+          settingsToggle.style.visibility = 'visible';
+          settingsToggle.style.pointerEvents = 'auto';
         }
         
         if (mobileBtn && isMobile) {
@@ -454,12 +617,27 @@
         
         tutorialOpen = false;
         window.tutorialOpen = false;
+        
       } else {
+        // TUTORIAL SECTIONS - Hide settings button
         if (tutorialContainer) {
           tutorialContainer.classList.add('active');
         }
         if (progressBar) {
           progressBar.style.display = 'flex';
+        }
+        
+        // Hide settings button during tutorial
+        if (settingsToggle) {
+          settingsToggle.style.display = 'none';
+          settingsToggle.style.opacity = '0';
+          settingsToggle.style.visibility = 'hidden';
+          settingsToggle.style.pointerEvents = 'none';
+        }
+        
+        // Also hide the controls panel if it's open
+        if (controlsPanel) {
+          controlsPanel.style.display = 'none';
         }
         
         if (mobileBtn) {
@@ -717,6 +895,10 @@
         await tesseractShader.init();
         console.log('✅ TesseractShader initialized');
         
+        // Setup Control Panels - NEW: Added this call
+        setupControlPanels();
+        console.log('✅ Control panels setup complete');
+        
         // Initialize Enhanced Control Panel
         enhancedControlPanel = new EnhancedControlPanel(tesseractShader);
         window.enhancedControlPanel = enhancedControlPanel;
@@ -752,6 +934,8 @@
         console.log('📊 ALL 14 sections using ContentBlockManager + HotspotManager');
         console.log('📝 Edit content in: content.js');
         console.log('🎯 Edit hotspots in: hotspots.js');
+        console.log('🎛️ Control buttons now fully functional with velocity toggles');
+        console.log('⚙️ Settings button visibility controlled by tutorial state');
         
       } catch (error) {
         console.error('❌ Failed to initialize enhanced tutorial:', error);
