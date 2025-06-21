@@ -800,6 +800,48 @@ p {
 
 /* === MOBILE RESPONSIVE STYLES === */
 @media (max-width: 768px) {
+   
+   /* === FRAMEWORK SETTINGS BUTTON POSITIONING === */
+  .settings-toggle {
+    /* CRITICAL: Ensure settings button stays top-left on mobile */
+    top: 1rem !important;
+    left: 1rem !important;
+    right: auto !important;
+    
+    /* Enhanced mobile properties */
+    width: 56px !important;
+    height: 56px !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    
+    /* Framework z-index management */
+    z-index: 99999 !important;
+    position: fixed !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+  
+  /* === FRAMEWORK CONTROLS PANEL POSITIONING === */
+  .controls-panel {
+    /* Position below the settings button */
+    top: 80px !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+    
+    /* Framework z-index (below button, above backdrop) */
+    z-index: 2000 !important;
+    
+    /* Prevent mobile overflow */
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+  }
+   
   /* === MOBILE HEADER - TWO LINES === */
   .tutorial-header {
     flex-direction: column !important;
