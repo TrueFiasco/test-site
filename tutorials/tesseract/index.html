@@ -354,100 +354,151 @@
 
     // Setup control panels with working button functionality
     function setupControlPanels() {
+      console.log('🎛️ Setting up control panels...');
+    
       // Settings toggle functionality
-      document.getElementById('settings-toggle').addEventListener('click', function() {
-        const panel = document.getElementById('controls-panel');
-        if (panel.style.display === 'none' || panel.style.display === '') {
-          panel.style.display = 'block';
+      const settingsToggle = document.getElementById('settings-toggle');
+      const controlsPanel = document.getElementById('controls-panel');
+      
+      if (settingsToggle && controlsPanel) {
+        settingsToggle.addEventListener('click', function(e) {
+          e.stopPropagation();
+          console.log('🎛️ Settings toggle clicked');
+          
+          if (controlsPanel.style.display === 'none' || controlsPanel.style.display === '') {
+            controlsPanel.style.display = 'block';
+            console.log('🎛️ Controls panel shown');
+          } else {
+            controlsPanel.style.display = 'none';
+            console.log('🎛️ Controls panel hidden');
+          }
+        });
+        
+        // Prevent panel clicks from opening tutorial
+        controlsPanel.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+    
+      // WAIT FOR SHADER TO BE READY before setting up control listeners
+      function waitForShaderAndSetupControls() {
+        if (!tesseractShader || !tesseractShader.isInitialized) {
+          console.log('⏳ Waiting for shader to initialize...');
+          setTimeout(waitForShaderAndSetupControls, 100);
+          return;
+        }
+        
+        console.log('✅ Shader ready, setting up control listeners');
+        
+        // Control panel parameter listeners
+        setupParameterControls();
+        setupButtonControls();
+      }
+      
+      // Start waiting for shader
+      waitForShaderAndSetupControls();
+    }
+    
+    function setupParameterControls() {
+      // FOV Control
+      const fovControl = document.getElementById('fov-control');
+      if (fovControl) {
+        fovControl.addEventListener('input', function(e) {
+          const value = parseFloat(e.target.value);
+          console.log('🎛️ FOV changed to:', value);
+          if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ fov: value });
+          }
+        });
+      }
+    
+      // Perspective Control
+      const perspectiveControl = document.getElementById('perspective-control');
+      if (perspectiveControl) {
+        perspectiveControl.addEventListener('input', function(e) {
+          const value = parseFloat(e.target.value);
+          console.log('🎛️ Perspective changed to:', value);
+          if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ perspective: value });
+          }
+        });
+      }
+    
+      // Camera Z Control
+      const cameraZControl = document.getElementById('cameraz-control');
+      if (cameraZControl) {
+        cameraZControl.addEventListener('input', function(e) {
+          const value = parseFloat(e.target.value);
+          console.log('🎛️ Camera Z changed to:', value);
+          if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ cameraZ: value });
+          }
+        });
+      }
+    }
+    
+    function setupButtonControls() {
+      // Reset Rotation Button
+      const resetBtn = document.getElementById('reset-rotation');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          console.log('🔄 Reset rotation button clicked');
+          if (tesseractShader && typeof tesseractShader.resetRotation === 'function') {
+            tesseractShader.resetRotation();
+            console.log('✅ Rotation reset successful');
+            
+            // Visual feedback
+            resetBtn.textContent = 'Reset ✓';
+            resetBtn.style.background = 'rgba(0, 255, 0, 0.3)';
+            setTimeout(() => {
+              resetBtn.textContent = 'Reset Rotation';
+              resetBtn.style.background = '';
+            }, 1000);
+          } else {
+            console.error('❌ TesseractShader resetRotation method not available');
+          }
+        });
+      }
+    
+      // Velocity control buttons - Desktop
+      setupVelocityButton('stop-rx', 'rx', 'RX');
+      setupVelocityButton('stop-ry', 'ry', 'RY');
+      setupVelocityButton('stop-rw', 'rw', 'RW');
+      
+      // Velocity control buttons - Mobile
+      setupVelocityButton('stop-rx-mobile', 'rx', 'RX');
+      setupVelocityButton('stop-ry-mobile', 'ry', 'RY');
+      setupVelocityButton('stop-rw-mobile', 'rw', 'RW');
+    }
+    
+    function setupVelocityButton(buttonId, axis, axisName) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+      
+      button.addEventListener('click', function() {
+        console.log(`🎛️ ${axisName} velocity button clicked`);
+        
+        if (tesseractShader && typeof tesseractShader.toggleVelocity === 'function') {
+          const enabled = tesseractShader.toggleVelocity(axis);
+          console.log(`🎛️ ${axisName} velocity is now: ${enabled ? 'enabled' : 'disabled'}`);
+          
+          // Update button appearance
+          if (enabled) {
+            button.textContent = `Stop ${axisName}`;
+            button.classList.remove('disabled');
+            button.style.background = '';
+            button.style.borderColor = '';
+          } else {
+            button.textContent = `Enable ${axisName}`;
+            button.classList.add('disabled');
+            button.style.background = 'rgba(255, 100, 100, 0.3)';
+            button.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+          }
         } else {
-          panel.style.display = 'none';
+          console.error(`❌ TesseractShader toggleVelocity method not available`);
         }
       });
-
-      // Control panel event listeners
-      document.getElementById('fov-control').addEventListener('input', function(e) {
-        if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ fov: parseFloat(e.target.value) });
-        }
-      });
-
-      document.getElementById('perspective-control').addEventListener('input', function(e) {
-        if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ perspective: parseFloat(e.target.value) });
-        }
-      });
-
-      document.getElementById('cameraz-control').addEventListener('input', function(e) {
-        if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ cameraZ: parseFloat(e.target.value) });
-        }
-      });
-
-      // Reset and control buttons with error checking
-      document.getElementById('reset-rotation').addEventListener('click', function() {
-        if (tesseractShader && tesseractShader.resetRotation) {
-          tesseractShader.resetRotation();
-        } else {
-          console.warn('TesseractShader resetRotation method not available');
-        }
-      });
-
-      // RX Velocity Toggle
-      const stopRxBtn = document.getElementById('stop-rx');
-      if (stopRxBtn) {
-        stopRxBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('rx');
-            if (enabled) {
-              stopRxBtn.textContent = 'Stop RX';
-              stopRxBtn.classList.remove('disabled');
-            } else {
-              stopRxBtn.textContent = 'Enable RX';
-              stopRxBtn.classList.add('disabled');
-            }
-          } else {
-            console.warn('TesseractShader toggleVelocity method not available');
-          }
-        });
-      }
-
-      // RY Velocity Toggle
-      const stopRyBtn = document.getElementById('stop-ry');
-      if (stopRyBtn) {
-        stopRyBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('ry');
-            if (enabled) {
-              stopRyBtn.textContent = 'Stop RY';
-              stopRyBtn.classList.remove('disabled');
-            } else {
-              stopRyBtn.textContent = 'Enable RY';
-              stopRyBtn.classList.add('disabled');
-            }
-          } else {
-            console.warn('TesseractShader toggleVelocity method not available');
-          }
-        });
-      }
-
-      // RW Velocity Toggle
-      const stopRwBtn = document.getElementById('stop-rw');
-      if (stopRwBtn) {
-        stopRwBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('rw');
-            if (enabled) {
-              stopRwBtn.textContent = 'Stop RW';
-              stopRwBtn.classList.remove('disabled');
-            } else {
-              stopRwBtn.textContent = 'Enable RW';
-              stopRwBtn.classList.add('disabled');
-            }
-          } else {
-            console.warn('TesseractShader toggleVelocity method not available');
-          }
-        });
-      }
+    }
 
       // Mobile versions of the buttons
       const stopRxMobileBtn = document.getElementById('stop-rx-mobile');
@@ -573,17 +624,19 @@
       }
     }
 
-    // UPDATED: Function to handle settings button visibility
+    // UPDATED: Function to handle settings button visibility and performance
     function updateTutorial() {
       const scroller = document.getElementById('tutorialScroller');
       const tutorialContainer = document.getElementById('tutorialContainer');
       const progressBar = document.getElementById('progressBar');
       const mobileBtn = document.getElementById('mobileTutorialBtn');
-      const settingsToggle = document.getElementById('settings-toggle'); // ADD THIS LINE
-      const controlsPanel = document.getElementById('controls-panel'); // ADD THIS LINE
+      const settingsToggle = document.getElementById('settings-toggle');
+      const controlsPanel = document.getElementById('controls-panel');
       
       if (currentSection === 0) {
         // HERO SECTION - Show settings button
+        console.log('🏠 Switching to hero section - showing settings');
+        
         if (tutorialContainer) {
           tutorialContainer.classList.remove('active');
         }
@@ -591,12 +644,13 @@
           progressBar.style.display = 'none';
         }
         
-        // Show settings button on hero section
+        // FIXED: Show settings button
         if (settingsToggle) {
           settingsToggle.style.display = 'flex';
           settingsToggle.style.opacity = '1';
           settingsToggle.style.visibility = 'visible';
           settingsToggle.style.pointerEvents = 'auto';
+          console.log('✅ Settings button made visible');
         }
         
         if (mobileBtn && isMobile) {
@@ -620,6 +674,8 @@
         
       } else {
         // TUTORIAL SECTIONS - Hide settings button
+        console.log(`📚 Switching to tutorial section ${currentSection} - hiding settings`);
+        
         if (tutorialContainer) {
           tutorialContainer.classList.add('active');
         }
@@ -627,12 +683,13 @@
           progressBar.style.display = 'flex';
         }
         
-        // Hide settings button during tutorial
+        // FIXED: Hide settings button
         if (settingsToggle) {
           settingsToggle.style.display = 'none';
           settingsToggle.style.opacity = '0';
           settingsToggle.style.visibility = 'hidden';
           settingsToggle.style.pointerEvents = 'none';
+          console.log('✅ Settings button hidden');
         }
         
         // Also hide the controls panel if it's open
