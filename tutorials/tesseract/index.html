@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tesseract Tutorial - Interactive TouchDesigner Guide</title>
-  <link rel="stylesheet" href="tutorials/tesseract/layoutTesseract.css" />
+  <!-- FIXED: Updated path to go up to root, then back to tutorials/tesseract -->
+  <link rel="stylesheet" href="./layoutTesseract.css" />
 </head>
 <body>
   <!-- Hero Section - KEEP YOUR EXISTING STRUCTURE -->
@@ -151,19 +152,19 @@
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   
-  <!-- YOUR EXISTING MODULES -->
-  <script src="tutorials/tesseract/shaders/shaderTesseract.js"></script>
-  <script src="shared/components/enhancedControlPanel.js"></script>
-  <script src="shared/components/mobileSwipeGestures.js"></script>
-  <script src="shared/components/mobileMotionControl.js"></script>
+  <!-- FIXED PATHS: Go up two directories to reach root, then navigate to files -->
+  <script src="./shaders/shaderTesseract.js"></script>
+  <script src="../../shared/components/enhancedControlPanel.js"></script>
+  <script src="../../shared/components/mobileSwipeGestures.js"></script>
+  <script src="../../shared/components/mobileMotionControl.js"></script>
 
   <!-- FRAMEWORK MODULES -->
-  <script src="framework/core/contentBlockManager.js"></script>
-  <script src="framework/core/hotspotManager.js"></script>
+  <script src="../../framework/core/contentBlockManager.js"></script>
+  <script src="../../framework/core/hotspotManager.js"></script>
   
   <!-- CONTENT AND HOTSPOT DATA -->
-  <script src="tutorials/tesseract/content.js"></script>
-  <script src="tutorials/tesseract/hotspots.js"></script>
+  <script src="./content.js"></script>
+  <script src="./hotspots.js"></script>
   
   <script>
   window.validateContentStructure();
@@ -221,7 +222,7 @@
         console.log('🎯 Initializing HotspotManager...');
         
         hotspotManager = await HotspotManager.create({
-          basePath: 'tutorials/tesseract/',
+          basePath: '', // FIXED: Empty basePath since we're now in the tesseract directory
           containerSelector: '#hotspotContainer',
           enableCollisionAvoidance: true,
           enableMultiDialog: true,
@@ -252,12 +253,6 @@
         console.warn('⚠️ HotspotManager not initialized, skipping hotspot update');
       }
     }
-
-    // REMOVED: Old hotspot functions are now handled by HotspotManager
-    // - showParameterDialog() -> hotspotManager.showDialog()
-    // - hideParameterDialog() -> hotspotManager.hideDialog() / hideAllDialogs()
-    // - toggleStickyDialog() -> hotspotManager.toggleStickyDialog()
-    // - scheduleHideDialog() -> hotspotManager.scheduleHideDialog()
 
     // Legacy function for ESC key (now handled by HotspotManager)
     function hideParameterDialog() {
@@ -344,7 +339,7 @@
     // Initialize ContentBlockManager with correct base path
     function initContentManager() {
       contentManager = new ContentBlockManager({
-        basePath: 'tutorials/tesseract/',
+        basePath: '', // FIXED: Empty basePath since we're now in the tesseract directory
         enableMarkdown: true,
         enableWidgets: true,
         enableSyntaxHighlighting: true
@@ -557,7 +552,7 @@
       const config = {
         aspectRatio: sectionData.background.aspectRatio,
         offset: sectionData.background.transition?.offset || { x: 0, y: 0 },
-        image: `tutorials/tesseract/${sectionData.background.image}`, // Add full path
+        image: sectionData.background.image, // FIXED: Use relative path since we're in the tesseract directory
       };
 
       const imageContainer = document.getElementById('staticImageContainer');
@@ -755,8 +750,8 @@
         console.log('🎉 Enhanced tutorial initialization complete!');
         console.log('🎯 HotspotManager ready with enhanced collision avoidance and multi-dialog support');
         console.log('📊 ALL 14 sections using ContentBlockManager + HotspotManager');
-        console.log('📝 Edit content in: tutorials/tesseract/content.js');
-        console.log('🎯 Edit hotspots in: tutorials/tesseract/hotspots.js');
+        console.log('📝 Edit content in: content.js');
+        console.log('🎯 Edit hotspots in: hotspots.js');
         
       } catch (error) {
         console.error('❌ Failed to initialize enhanced tutorial:', error);
