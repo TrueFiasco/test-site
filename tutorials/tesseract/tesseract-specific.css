@@ -653,3 +653,14 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+.controls-panel {
+  background: red !important;
+  z-index: 99999 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  top: 100px !important;
+  left: 100px !important;
+  width: 300px !important;
+  height: 400px !important;
+}
