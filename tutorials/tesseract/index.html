@@ -210,7 +210,7 @@
     let mobileSwipeGestures = null;
     let mobileMotionControl = null;
     let contentManager = null;
-    let hotspotManager = null; // NEW: HotspotManager instance
+    let hotspotManager = null;
 
     // ==========================================
     // ENHANCED HOTSPOT SYSTEM INTEGRATION
@@ -222,7 +222,7 @@
         console.log('🎯 Initializing HotspotManager...');
         
         hotspotManager = await HotspotManager.create({
-          basePath: '', // FIXED: Empty basePath since we're now in the tesseract directory
+          basePath: '',
           containerSelector: '#hotspotContainer',
           enableCollisionAvoidance: true,
           enableMultiDialog: true,
@@ -232,7 +232,6 @@
         
         console.log('✅ HotspotManager initialized successfully');
         
-        // Update hotspots for current section if tutorial is open
         if (currentSection > 0) {
           hotspotManager.updateHotspots(currentSection);
         }
@@ -244,9 +243,8 @@
       }
     }
 
-    // Legacy function kept for compatibility - now handled by HotspotManager
+    // Legacy function kept for compatibility
     function updateHotspots(hotspots) {
-      // This function is kept for compatibility but functionality moved to HotspotManager
       if (hotspotManager) {
         hotspotManager.updateHotspots(currentSection);
       } else {
@@ -254,7 +252,7 @@
       }
     }
 
-    // Legacy function for ESC key (now handled by HotspotManager)
+    // Legacy function for ESC key
     function hideParameterDialog() {
       if (hotspotManager) {
         hotspotManager.hideAllDialogs();
@@ -278,21 +276,17 @@
         throw new Error('Tutorial scroller element not found');
       }
 
-      // Clear existing content
       tutorialScroller.innerHTML = '';
 
-      // Generate all 14 sections
       TesseractContent.tutorial.sections.forEach((sectionConfig, index) => {
         const sectionElement = document.createElement('div');
         sectionElement.className = 'tutorial-section';
         sectionElement.dataset.sectionId = sectionConfig.id;
         
-        // Add background image class if needed
         if (sectionConfig.id > 0 && sectionConfig.id <= 14) {
           sectionElement.classList.add('has-background-image');
         }
         
-        // Add loading placeholder
         sectionElement.innerHTML = `
           <div style="padding: 2rem; text-align: center; color: #888;">
             <p>Loading section ${sectionConfig.id}...</p>
@@ -339,7 +333,7 @@
     // Initialize ContentBlockManager with correct base path
     function initContentManager() {
       contentManager = new ContentBlockManager({
-        basePath: '', // FIXED: Empty basePath since we're now in the tesseract directory
+        basePath: '',
         enableMarkdown: true,
         enableWidgets: true,
         enableSyntaxHighlighting: true
@@ -349,186 +343,73 @@
     }
 
     // ==========================================
-    // CONTROL PANEL SETUP - FIXED FUNCTION
+    // PARAMETER CONTROL FUNCTIONS - FIXED
     // ==========================================
 
     function setupParameterControls() {
-    // Initialize filter strength
-    window.filterStrength = 0.1; // Default value
-    
-    // FOV Control with filtering
-    const fovControl = document.getElementById('fov-control');
-    if (fovControl) {
-      fovControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ FOV target changed to:', targetValue);
-        
-        // Apply smoothing if filter is available
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('fov', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ fov: targetValue });
-        }
-      });
-    }
-  
-    // Perspective Control with filtering
-    const perspectiveControl = document.getElementById('perspective-control');
-    if (perspectiveControl) {
-      perspectiveControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ Perspective target changed to:', targetValue);
-        
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('perspective', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ perspective: targetValue });
-        }
-      });
-    }
-  
-    // Camera Z Control with filtering
-    const cameraZControl = document.getElementById('cameraz-control');
-    if (cameraZControl) {
-      cameraZControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ Camera Z target changed to:', targetValue);
-        
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('cameraZ', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ cameraZ: targetValue });
-        }
-      });
-    }
-    
-    // Filter Strength Control - NEW
-    const filterStrengthControl = document.getElementById('filter-strength');
-    if (filterStrengthControl) {
-      filterStrengthControl.addEventListener('input', function(e) {
-        const strength = parseFloat(e.target.value);
-        console.log('🎛️ Filter strength changed to:', strength);
-        
-        // Update global filter strength
-        window.filterStrength = strength;
-        console.log('✅ Filter strength updated for all parameters');
-      });
-    }
-  }
-  
-  // Smooth parameter change function
-  function smoothParameterChange(paramName, targetValue, filterStrength) {
-    if (!window.parameterTargets) {
-      window.parameterTargets = {};
-    }
-    
-    window.parameterTargets[paramName] = targetValue;
-    
-    // Start smoothing loop if not already running
-    if (!window.parameterSmoothingActive) {
-      window.parameterSmoothingActive = true;
-      smoothParameterLoop();
-    }
-  }
-  
-  function smoothParameterLoop() {
-    if (!window.parameterTargets || !tesseractShader) {
-      window.parameterSmoothingActive = false;
-      return;
-    }
-    
-    let hasActiveChanges = false;
-    const currentParams = tesseractShader.getShaderParams();
-    
-    if (!currentParams) {
-      window.parameterSmoothingActive = false;
-      return;
-    }
-    
-    Object.keys(window.parameterTargets).forEach(paramName => {
-      const target = window.parameterTargets[paramName];
-      const current = currentParams[paramName] || 0;
-      const diff = target - current;
+      console.log('🎛️ Setting up parameter controls...');
       
-      if (Math.abs(diff) > 0.01) {
-        const newValue = current + (diff * (window.filterStrength || 0.1));
-        tesseractShader.setShaderParams({ [paramName]: newValue });
-        hasActiveChanges = true;
+      // Initialize filter strength
+      window.filterStrength = 0.1;
+      
+      // FOV Control with filtering
+      const fovControl = document.getElementById('fov-control');
+      if (fovControl) {
+        fovControl.addEventListener('input', function(e) {
+          const targetValue = parseFloat(e.target.value);
+          console.log('🎛️ FOV target changed to:', targetValue);
+          
+          if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+            smoothParameterChange('fov', targetValue, window.filterStrength);
+          } else if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ fov: targetValue });
+          }
+        });
       }
-    });
-    
-    if (hasActiveChanges) {
-      requestAnimationFrame(smoothParameterLoop);
-    } else {
-      window.parameterSmoothingActive = false;
-    }
- 
-    
-    // WAIT FOR SHADER TO BE READY before setting up control listeners
-    function waitForShaderAndSetupControls() {
-      if (!tesseractShader || !tesseractShader.isInitialized) {
-        console.log('⏳ Waiting for shader to initialize...');
-        setTimeout(waitForShaderAndSetupControls, 100);
-        return;
+
+      // Perspective Control with filtering  
+      const perspectiveControl = document.getElementById('perspective-control');
+      if (perspectiveControl) {
+        perspectiveControl.addEventListener('input', function(e) {
+          const targetValue = parseFloat(e.target.value);
+          console.log('🎛️ Perspective target changed to:', targetValue);
+          
+          if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+            smoothParameterChange('perspective', targetValue, window.filterStrength);
+          } else if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ perspective: targetValue });
+          }
+        });
+      }
+
+      // Camera Z Control with filtering
+      const cameraZControl = document.getElementById('cameraz-control');
+      if (cameraZControl) {
+        cameraZControl.addEventListener('input', function(e) {
+          const targetValue = parseFloat(e.target.value);
+          console.log('🎛️ Camera Z target changed to:', targetValue);
+          
+          if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
+            smoothParameterChange('cameraZ', targetValue, window.filterStrength);
+          } else if (tesseractShader && tesseractShader.setShaderParams) {
+            tesseractShader.setShaderParams({ cameraZ: targetValue });
+          }
+        });
       }
       
-      console.log('✅ Shader ready, setting up control listeners');
+      // Filter Strength Control
+      const filterStrengthControl = document.getElementById('filter-strength');
+      if (filterStrengthControl) {
+        filterStrengthControl.addEventListener('input', function(e) {
+          const strength = parseFloat(e.target.value);
+          console.log('🎛️ Filter strength changed to:', strength);
+          window.filterStrength = strength;
+        });
+      }
       
-      // Control panel parameter listeners
-      setupParameterControls();
-      setupButtonControls();
+      console.log('✅ Parameter controls setup complete');
     }
-    
-    // Start waiting for shader
-    waitForShaderAndSetupControls();
-    
-    
-    // FOV Control with filtering - UPDATED
-    const fovControl = document.getElementById('fov-control');
-    if (fovControl) {
-      fovControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ FOV target changed to:', targetValue);
-        
-        // Apply smoothing if filter is available
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('fov', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ fov: targetValue });
-        }
-      });
-    }
-    
-    // Perspective Control with filtering - UPDATED  
-    const perspectiveControl = document.getElementById('perspective-control');
-    if (perspectiveControl) {
-      perspectiveControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ Perspective target changed to:', targetValue);
-        
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('perspective', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ perspective: targetValue });
-        }
-      });
-    }
-    
-    // Camera Z Control with filtering - UPDATED
-    const cameraZControl = document.getElementById('cameraz-control');
-    if (cameraZControl) {
-      cameraZControl.addEventListener('input', function(e) {
-        const targetValue = parseFloat(e.target.value);
-        console.log('🎛️ Camera Z target changed to:', targetValue);
-        
-        if (window.filterStrength && tesseractShader && tesseractShader.setShaderParams) {
-          smoothParameterChange('cameraZ', targetValue, window.filterStrength);
-        } else if (tesseractShader && tesseractShader.setShaderParams) {
-          tesseractShader.setShaderParams({ cameraZ: targetValue });
-        }
-      });
-    }
-    
+
     // Smooth parameter change function
     function smoothParameterChange(paramName, targetValue, filterStrength) {
       if (!window.parameterTargets) {
@@ -537,13 +418,12 @@
       
       window.parameterTargets[paramName] = targetValue;
       
-      // Start smoothing loop if not already running
       if (!window.parameterSmoothingActive) {
         window.parameterSmoothingActive = true;
         smoothParameterLoop();
       }
     }
-    
+
     function smoothParameterLoop() {
       if (!window.parameterTargets || !tesseractShader) {
         window.parameterSmoothingActive = false;
@@ -552,6 +432,11 @@
       
       let hasActiveChanges = false;
       const currentParams = tesseractShader.getShaderParams();
+      
+      if (!currentParams) {
+        window.parameterSmoothingActive = false;
+        return;
+      }
       
       Object.keys(window.parameterTargets).forEach(paramName => {
         const target = window.parameterTargets[paramName];
@@ -572,31 +457,24 @@
       }
     }
 
-    // Filter Strength Control - FIXED
-    const filterStrengthControl = document.getElementById('filter-strength');
-    if (filterStrengthControl) {
-      filterStrengthControl.addEventListener('input', function(e) {
-        const strength = parseFloat(e.target.value);
-        console.log('🎛️ Filter strength changed to:', strength);
-        
-        // Update Enhanced Control Panel filter state if available
-        if (window.enhancedControlPanel && window.enhancedControlPanel.filterState) {
-          Object.keys(window.enhancedControlPanel.filterState).forEach(param => {
-            window.enhancedControlPanel.filterState[param].strength = strength;
-          });
-          console.log('✅ Filter strength updated for all parameters');
+    // Setup control panels
+    function setupControlPanels() {
+      function waitForShaderAndSetupControls() {
+        if (!tesseractShader || !tesseractShader.isInitialized) {
+          console.log('⏳ Waiting for shader to initialize...');
+          setTimeout(waitForShaderAndSetupControls, 100);
+          return;
         }
         
-        // Alternative: Apply smoothing directly to shader parameter changes
-        window.filterStrength = strength;
-      });
+        console.log('✅ Shader ready, setting up control listeners');
+        setupParameterControls();
+        setupButtonControls();
+      }
       
-      // Initialize filter strength
-      window.filterStrength = 0.1; // Default value
+      waitForShaderAndSetupControls();
     }
-
     
-    // FIXED: Proper setupButtonControls function
+    // Setup button controls
     function setupButtonControls() {
       // Reset Rotation Button
       const resetBtn = document.getElementById('reset-rotation');
@@ -607,7 +485,6 @@
             tesseractShader.resetRotation();
             console.log('✅ Rotation reset successful');
             
-            // Visual feedback
             resetBtn.textContent = 'Reset ✓';
             resetBtn.style.background = 'rgba(0, 255, 0, 0.3)';
             setTimeout(() => {
@@ -620,12 +497,10 @@
         });
       }
     
-      // Velocity control buttons - Desktop
+      // Velocity control buttons
       setupVelocityButton('stop-rx', 'rx', 'RX');
       setupVelocityButton('stop-ry', 'ry', 'RY');
       setupVelocityButton('stop-rw', 'rw', 'RW');
-      
-      // Velocity control buttons - Mobile
       setupVelocityButton('stop-rx-mobile', 'rx', 'RX');
       setupVelocityButton('stop-ry-mobile', 'ry', 'RY');
       setupVelocityButton('stop-rw-mobile', 'rw', 'RW');
@@ -642,7 +517,6 @@
           const enabled = tesseractShader.toggleVelocity(axis);
           console.log(`🎛️ ${axisName} velocity is now: ${enabled ? 'enabled' : 'disabled'}`);
           
-          // Update button appearance
           if (enabled) {
             button.textContent = `Stop ${axisName}`;
             button.classList.remove('disabled');
@@ -661,7 +535,7 @@
     }
 
     // ==========================================
-    // NAVIGATION FUNCTIONS - KEEP YOUR EXISTING
+    // NAVIGATION FUNCTIONS
     // ==========================================
 
     function openTutorial() {
@@ -689,7 +563,6 @@
         cleanupTimeout = null;
       }
       
-      // Clear hotspots when closing tutorial
       if (hotspotManager) {
         hotspotManager.clearHotspots();
       }
@@ -727,24 +600,20 @@
       updateSectionTitle();
       updateTutorial();
       
-      // Render section content if needed
       if (currentSection > 0 && currentSection <= 14) {
         await renderSection(currentSection);
         transitionStaticImage(currentSection);
       }
     }
 
-    // UPDATED: Function to handle settings button visibility and performance
     function updateTutorial() {
       const scroller = document.getElementById('tutorialScroller');
       const tutorialContainer = document.getElementById('tutorialContainer');
       const progressBar = document.getElementById('progressBar');
       const mobileBtn = document.getElementById('mobileTutorialBtn');
       const settingsToggle = document.getElementById('settings-toggle');
-      const controlsPanel = document.getElementById('controls-panel');
       
       if (currentSection === 0) {
-        // HERO SECTION - Show settings button
         console.log('🏠 Switching to hero section - showing settings');
         
         if (tutorialContainer) {
@@ -754,7 +623,6 @@
           progressBar.style.display = 'none';
         }
         
-        // FIXED: Show settings button
         if (settingsToggle) {
           settingsToggle.style.display = 'flex';
           settingsToggle.style.opacity = '1';
@@ -774,7 +642,6 @@
           mobileMotionControl.enable();
         }
         
-        // Clear hotspots when returning to hero
         if (hotspotManager) {
           hotspotManager.clearHotspots();
         }
@@ -783,7 +650,6 @@
         window.tutorialOpen = false;
         
       } else {
-        // TUTORIAL SECTIONS - Hide settings button
         console.log(`📚 Switching to tutorial section ${currentSection} - hiding settings`);
         
         if (tutorialContainer) {
@@ -793,7 +659,6 @@
           progressBar.style.display = 'flex';
         }
         
-        // FIXED: Hide settings button
         if (settingsToggle) {
           settingsToggle.style.display = 'none';
           settingsToggle.style.opacity = '0';
@@ -801,10 +666,6 @@
           settingsToggle.style.pointerEvents = 'none';
           console.log('✅ Settings button hidden');
         }
-        
-      // Only hide the controls panel when entering tutorial sections
-      // Don't auto-hide it on the hero section
-      // (Let the user manually close it with the settings button)
         
         if (mobileBtn) {
           mobileBtn.style.opacity = '0';
@@ -882,21 +743,20 @@
     }
 
     // ==========================================
-    // IMAGE TRANSITIONS & HOTSPOTS - UPDATED FOR HOTSPOTMANAGER
+    // IMAGE TRANSITIONS & HOTSPOTS
     // ==========================================
 
     let currentTransition = null;
     let transitionCounter = 0;
 
     function transitionStaticImage(newSection) {
-      // Get config from TesseractContent instead of old sectionConfig
       const sectionData = TesseractContent.tutorial.sections.find(s => s.id === newSection);
       if (!sectionData || !sectionData.background) return;
 
       const config = {
         aspectRatio: sectionData.background.aspectRatio,
         offset: sectionData.background.transition?.offset || { x: 0, y: 0 },
-        image: sectionData.background.image, // FIXED: Use relative path since we're in the tesseract directory
+        image: sectionData.background.image,
       };
 
       const imageContainer = document.getElementById('staticImageContainer');
@@ -947,7 +807,6 @@
           return;
         }
         
-        // UPDATE HOTSPOTS using HotspotManager
         if (hotspotManager) {
           hotspotManager.updateHotspots(newSection);
         }
@@ -1032,7 +891,7 @@
     window.transitionToSection = transitionToSection;
     window.goToHero = () => transitionToSection(0);
     window.goToTutorialsPage = () => window.history.back();
-    window.hideParameterDialog = hideParameterDialog; // Legacy compatibility
+    window.hideParameterDialog = hideParameterDialog;
 
     // ==========================================
     // INITIALIZATION
@@ -1042,17 +901,12 @@
       try {
         console.log('🚀 Starting enhanced tutorial initialization...');
         
-        // Initialize ContentBlockManager
         initContentManager();
-        
-        // Generate tutorial sections from content file
         generateTutorialSections();
         console.log('✅ Tutorial sections generated');
         
-        // Initialize HotspotManager
         await initHotspotManager();
         
-        // Initialize TesseractShader
         tesseractShader = new TesseractShader('hypercube-canvas', {
           onTutorialOpen: openTutorial,
           getTutorialState: () => tutorialOpen
@@ -1061,20 +915,15 @@
         await tesseractShader.init();
         console.log('✅ TesseractShader initialized');
         
-        // Setup Control Panels - NEW: Added this call
         setupControlPanels();
         console.log('✅ Control panels setup complete');
         
-        // Initialize Enhanced Control Panel
-        //enhancedControlPanel = new EnhancedControlPanel(tesseractShader);
-        //window.enhancedControlPanel = enhancedControlPanel;
         console.log('✅ Enhanced Control Panel initialized');
         
         initProgressBar();
         updateSectionTitle();
         setupMobileButton();
         
-        // Initialize mobile features
         if (isMobile) {
           try {
             mobileSwipeGestures = new MobileSwipeGestures();
@@ -1092,7 +941,6 @@
           }
         }
         
-        // Setup wheel event for tutorial navigation
         document.addEventListener('wheel', onWheel, { passive: false });
         
         console.log('🎉 Enhanced tutorial initialization complete!');
@@ -1141,7 +989,6 @@
           modal.classList.remove('active');
         });
         
-        // Use HotspotManager to close dialogs
         if (hotspotManager) {
           hotspotManager.hideAllDialogs();
         }
@@ -1161,7 +1008,6 @@
       if (contentManager) {
         contentManager.destroy();
       }
-      // NEW: Cleanup HotspotManager
       if (hotspotManager) {
         hotspotManager.destroy();
       }
