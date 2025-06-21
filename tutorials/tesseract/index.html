@@ -500,22 +500,6 @@
       });
     }
 
-      // Mobile versions of the buttons
-      const stopRxMobileBtn = document.getElementById('stop-rx-mobile');
-      if (stopRxMobileBtn) {
-        stopRxMobileBtn.addEventListener('click', function() {
-          if (tesseractShader && tesseractShader.toggleVelocity) {
-            const enabled = tesseractShader.toggleVelocity('rx');
-            if (enabled) {
-              stopRxMobileBtn.textContent = 'Stop RX';
-              stopRxMobileBtn.classList.remove('disabled');
-            } else {
-              stopRxMobileBtn.textContent = 'Enable RX';
-              stopRxMobileBtn.classList.add('disabled');
-            }
-          }
-        });
-      }
 
       const stopRyMobileBtn = document.getElementById('stop-ry-mobile');
       if (stopRyMobileBtn) {
