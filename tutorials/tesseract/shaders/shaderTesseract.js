@@ -1,22 +1,14 @@
 /**
  * TesseractShader - 4D Hypercube WebGL Visualization
- * Enhanced with mobile motion control support
- * Handles all Three.js/WebGL rendering for the hero section
+ * Enhanced with framework integration and mobile motion control support
+ * Extends GenericShader for reusable tutorial framework
  */
-class TesseractShader {
+class TesseractShader extends GenericShader {
   constructor(canvasId, options = {}) {
-    // Configuration
-    this.canvasId = canvasId;
-    this.onTutorialOpen = options.onTutorialOpen || (() => {});
-    this.getTutorialState = options.getTutorialState || (() => false);
+    // Call parent constructor
+    super(canvasId, options);
     
-    // Three.js components
-    this.scene = null;
-    this.camera = null;
-    this.renderer = null;
-    this.uniforms = null;
-    
-    // Interaction state
+    // Tesseract-specific interaction state
     this.mousePos = { x: 0, y: 0 };
     this.normalizedMouse = { x: 0, y: 0 };
     this.velocity = { x: 0, y: 0 };
@@ -25,7 +17,7 @@ class TesseractShader {
     this.wheelVelocity = 0;
     this.maxSlowVelocity = 0.25;
     
-    // ADD NEW PROPERTIES FOR VELOCITY CONTROL
+    // Velocity control system
     this.velocityEnabled = {
       rx: true,  // X-axis rotation enabled by default
       ry: true,  // Y-axis rotation enabled by default  
@@ -35,16 +27,42 @@ class TesseractShader {
     // Mobile touch state
     this.touchStartX = 0;
     this.touchStartY = 0;
-    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Motion control state
+    // Motion control state (integrated with GenericShader consent system)
     this.rotationSource = 'mouse'; // 'mouse' or 'motion'
     this.motionInput = { x: 0, y: 0, w: 0 }; // Motion control input
     this.motionEnabled = false;
     
+    // Mobile control options
+    this.xAxisInverted = false; // X-axis inversion state for mobile
+    
     // Animation state
     this.animationId = null;
-    this.isInitialized = false;
+    
+    // Auto-register parameters from TesseractControlConfig
+    this.registerTesseractParameters();
+    
+    console.log('🎯 TesseractShader created with framework integration');
+  }
+
+  /**
+   * Auto-register parameters from TesseractControlConfig
+   */
+  registerTesseractParameters() {
+    // Import and register parameters if TesseractControlConfig is available
+    if (typeof window !== 'undefined' && window.TesseractControlConfig) {
+      const config = window.TesseractControlConfig;
+      config.parameters.forEach(param => {
+        this.registerParameter(param.id, param.uniformName, param.default);
+      });
+      console.log('✅ Auto-registered Tesseract parameters from config');
+    } else {
+      // Fallback manual registration
+      this.registerParameter('fov', 'u_fov', 7.0);
+      this.registerParameter('perspective', 'u_perspective', 2.3);
+      this.registerParameter('cameraZ', 'u_cameraZ', 10.0);
+      console.log('✅ Fallback parameter registration complete');
+    }
   }
 
   /**
@@ -57,9 +75,10 @@ class TesseractShader {
       this.setupHeroControls();
       this.startAnimation();
       this.isInitialized = true;
-      console.log('TesseractShader initialized successfully');
+      console.log('✅ TesseractShader initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize TesseractShader:', error);
+      console.error('❌ Failed to initialize TesseractShader:', error);
+      throw error;
     }
   }
 
@@ -328,11 +347,11 @@ class TesseractShader {
   }
 
   // ==========================================
-  // NEW CONTROL METHODS
+  // TESSERACT-SPECIFIC CONTROL METHODS
   // ==========================================
 
   /**
-   * Reset all rotation values to zero
+   * Reset all rotation values to zero - FRAMEWORK INTERFACE
    */
   resetRotation() {
     this.angles.rx = 0;
@@ -345,6 +364,27 @@ class TesseractShader {
     this.wheelVelocity = 0;
     this.motionInput = { x: 0, y: 0, w: 0 };
     console.log('🔄 Rotation reset to zero');
+  }
+
+  /**
+   * Reset all parameters and state - FRAMEWORK INTERFACE (required abstract method)
+   */
+  resetAll() {
+    // Reset rotation
+    this.resetRotation();
+    
+    // Reset parameters to defaults
+    this.setParameter('fov', 7.0);
+    this.setParameter('perspective', 2.3);
+    this.setParameter('cameraZ', 10.0);
+    
+    // Reset velocity states
+    this.velocityEnabled = { rx: true, ry: true, rw: true };
+    
+    // Reset mobile control states
+    this.xAxisInverted = false;
+    
+    console.log('🔄 All Tesseract parameters reset to defaults');
   }
 
   /**
@@ -400,7 +440,7 @@ class TesseractShader {
   }
 
   // ==========================================
-  // MOTION CONTROL INTEGRATION
+  // MOTION CONTROL INTEGRATION (with framework consent system)
   // ==========================================
 
   /**
@@ -413,12 +453,19 @@ class TesseractShader {
   }
 
   /**
-   * Enable motion control
+   * Enable motion control (integrated with framework consent)
    */
   enableMotionControl() {
+    // Check framework consent system first
+    if (!this.canUseMotion()) {
+      console.log('📱 Motion control not available or not consented');
+      return false;
+    }
+    
     this.motionEnabled = true;
     this.setRotationSource('motion');
     console.log('🎯 Motion control enabled in shader');
+    return true;
   }
 
   /**
@@ -430,6 +477,18 @@ class TesseractShader {
     // Reset motion input
     this.motionInput = { x: 0, y: 0, w: 0 };
     console.log('🎯 Motion control disabled in shader');
+  }
+
+  /**
+   * Toggle motion control (for button integration)
+   */
+  toggleMotionControl() {
+    if (this.isMotionControlActive()) {
+      this.disableMotionControl();
+      return false;
+    } else {
+      return this.enableMotionControl();
+    }
   }
 
   /**
@@ -449,6 +508,104 @@ class TesseractShader {
    */
   isMotionControlActive() {
     return this.motionEnabled && this.rotationSource === 'motion';
+  }
+
+  // ==========================================
+  // ADDITIONAL CONTROL METHODS (for mobile buttons)
+  // ==========================================
+
+  /**
+   * Toggle touch control (for mobile control panel)
+   */
+  toggleTouchControl() {
+    // For Tesseract, this could disable/enable touch-based 4D rotation
+    const currentlyEnabled = !this.motionEnabled || this.rotationSource !== 'motion';
+    
+    if (currentlyEnabled) {
+      // Currently using touch - disable it (motion only)
+      if (this.canUseMotion()) {
+        this.enableMotionControl();
+        console.log('🎯 Touch control disabled - motion only mode');
+        return false;
+      } else {
+        console.log('🎯 Cannot disable touch - motion not available');
+        return true;
+      }
+    } else {
+      // Currently motion only - enable touch
+      this.disableMotionControl();
+      console.log('🎯 Touch control enabled - mixed mode');
+      return true;
+    }
+  }
+
+  /**
+   * Toggle X-axis inversion (for mobile control panel)
+   */
+  toggleXAxisInvert() {
+    // Toggle X-axis inversion state
+    if (!this.xAxisInverted) {
+      this.xAxisInverted = true;
+    } else {
+      this.xAxisInverted = false;
+    }
+    
+    console.log(`🎯 X-axis inversion: ${this.xAxisInverted ? 'enabled' : 'disabled'}`);
+    return this.xAxisInverted;
+  }
+
+  // ==========================================
+  // ENHANCED PARAMETER INTEGRATION
+  // ==========================================
+
+  /**
+   * Override setParameter to handle Tesseract-specific parameters
+   */
+  setParameter(parameterId, value) {
+    const success = super.setParameter(parameterId, value);
+    
+    if (success) {
+      console.log(`🎛️ Parameter ${parameterId} set to ${value}`);
+    }
+    
+    return success;
+  }
+
+  /**
+   * Get shader parameters including Tesseract-specific state
+   */
+  getShaderParams() {
+    const baseParams = super.getShaderParams();
+    
+    return {
+      ...baseParams,
+      rotation: {
+        x: this.angles.rx,
+        y: this.angles.ry,
+        w: this.angles.rw
+      },
+      velocityEnabled: { ...this.velocityEnabled },
+      rotationSource: this.rotationSource,
+      motionEnabled: this.motionEnabled,
+      xAxisInverted: this.xAxisInverted
+    };
+  }
+
+  /**
+   * Set shader parameters including Tesseract-specific state
+   */
+  setShaderParams(params) {
+    super.setShaderParams(params);
+    
+    if (params.rotation) {
+      if (params.rotation.x !== undefined) this.angles.rx = params.rotation.x;
+      if (params.rotation.y !== undefined) this.angles.ry = params.rotation.y;
+      if (params.rotation.w !== undefined) this.angles.rw = params.rotation.w;
+    }
+    
+    if (params.velocityEnabled) {
+      this.velocityEnabled = { ...this.velocityEnabled, ...params.velocityEnabled };
+    }
   }
 
   // ==========================================
@@ -523,12 +680,13 @@ class TesseractShader {
   }
 
   /**
-   * Apply motion control rotation - UPDATED to respect velocity toggles
+   * Apply motion control rotation - respects velocity toggles and X-axis inversion
    */
   applyMotionRotation() {
     // Apply motion input only if velocity is enabled for each axis
     if (this.isVelocityEnabled('rx')) {
-      this.angles.rx += this.motionInput.x;
+      const xInput = this.xAxisInverted ? -this.motionInput.x : this.motionInput.x;
+      this.angles.rx += xInput;
     }
     if (this.isVelocityEnabled('ry')) {
       this.angles.ry += this.motionInput.y;
@@ -544,12 +702,14 @@ class TesseractShader {
   }
 
   /**
-   * Apply traditional mouse/touch rotation - UPDATED to respect velocity toggles
+   * Apply traditional mouse/touch rotation - respects velocity toggles and X-axis inversion
    */
   applyMouseRotation() {
     // Apply rotation only if velocity is enabled for each axis
     if (this.isVelocityEnabled('rx')) {
-      this.angles.rx += this.velocity.x + this.slowVelocity.x;
+      const xVelocity = this.xAxisInverted ? -this.velocity.x : this.velocity.x;
+      const xSlowVelocity = this.xAxisInverted ? -this.slowVelocity.x : this.slowVelocity.x;
+      this.angles.rx += xVelocity + xSlowVelocity;
     }
     if (this.isVelocityEnabled('ry')) {
       this.angles.ry += this.velocity.y + this.slowVelocity.y;
@@ -750,14 +910,13 @@ class TesseractShader {
   }
 
   /**
-   * Cleanup resources
+   * Cleanup resources - FRAMEWORK INTERFACE
    */
   destroy() {
     this.stopAnimation();
     
-    if (this.renderer) {
-      this.renderer.dispose();
-    }
+    // Call parent destroy
+    super.destroy();
     
     // Remove event listeners
     document.removeEventListener('mousemove', this.onMouseMove);
@@ -770,51 +929,14 @@ class TesseractShader {
       if (!this.isMobile) {
         canvas.removeEventListener('click', this.onCanvasClick);
       } else {
-        // Remove touch event listeners for mobile (now on canvas again)
+        // Remove touch event listeners for mobile
         canvas.removeEventListener('touchstart', this.onTouchStart);
         canvas.removeEventListener('touchmove', this.onTouchMove);
         canvas.removeEventListener('touchend', this.onTouchEnd);
       }
     }
     
-    this.isInitialized = false;
-  }
-
-  /**
-   * Get current shader parameters (useful for debugging/external control)
-   */
-  getShaderParams() {
-    if (!this.uniforms) return null;
-    
-    return {
-      fov: this.uniforms.u_fov.value,
-      perspective: this.uniforms.u_perspective.value,
-      cameraZ: this.uniforms.u_cameraZ.value,
-      rotation: {
-        x: this.angles.rx,
-        y: this.angles.ry,
-        w: this.angles.rw
-      },
-      rotationSource: this.rotationSource,
-      motionEnabled: this.motionEnabled
-    };
-  }
-
-  /**
-   * Set shader parameters (useful for external control)
-   */
-  setShaderParams(params) {
-    if (!this.uniforms) return;
-    
-    if (params.fov !== undefined) this.uniforms.u_fov.value = params.fov;
-    if (params.perspective !== undefined) this.uniforms.u_perspective.value = params.perspective;
-    if (params.cameraZ !== undefined) this.uniforms.u_cameraZ.value = params.cameraZ;
-    
-    if (params.rotation) {
-      if (params.rotation.x !== undefined) this.angles.rx = params.rotation.x;
-      if (params.rotation.y !== undefined) this.angles.ry = params.rotation.y;
-      if (params.rotation.w !== undefined) this.angles.rw = params.rotation.w;
-    }
+    console.log('🧹 TesseractShader destroyed');
   }
 }
 
