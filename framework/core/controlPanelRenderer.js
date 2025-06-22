@@ -254,23 +254,6 @@ class ControlPanelRenderer {
     console.log('📱 Mobile backdrop with click-through controls');
   }
       
-      // Only close if clicking outside both button and panel
-      if (!isNearButton && !isInsidePanel) {
-        console.log('🎯 Mobile backdrop click outside controls - closing panel');
-        e.preventDefault();
-        this.closePanel();
-      } else if (isInsidePanel) {
-        console.log('🎯 Click inside controls panel - keeping open');
-        // Don't close - user is interacting with controls
-      }
-    });
-    
-    document.body.appendChild(this.backdrop);
-    this.forceCorrectPositioning(); // Keep button above backdrop
-    
-    console.log('📱 Mobile backdrop added with controls panel exclusion');
-  }
-
   /**
    * Remove backdrop
    */
