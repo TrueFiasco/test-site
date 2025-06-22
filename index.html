@@ -70,8 +70,8 @@
 
         .hero-title {
             font-family: 'Spy Agency', 'Arial', sans-serif;
-            font-size: clamp(3.75rem, 12vw, 9rem); /* 50% bigger: was clamp(2.5rem, 8vw, 6rem) */
-            font-weight: normal; /* Spy Agency only has normal weight */
+            font-size: clamp(3.75rem, 12vw, 9rem);
+            font-weight: normal;
             margin-bottom: 1rem;
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
             background-size: 200% 200%;
@@ -81,10 +81,10 @@
         }
 
         .hero-subtitle {
-            font-size: 2.25rem; /* 50% bigger: was 1.5rem */
+            font-size: 2.25rem;
             margin-bottom: 2rem;
             opacity: 0.9;
-            line-height: 1.2; /* Better line spacing for the line break */
+            line-height: 1.2;
         }
 
         @keyframes gradientShift {
@@ -92,23 +92,16 @@
             50% { background-position: 100% 50%; }
         }
 
-        @keyframes asciiFlicker {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            25% { opacity: 0.6; transform: scale(0.98); }
-            50% { opacity: 1; transform: scale(1.02); }
-            75% { opacity: 0.7; transform: scale(0.99); }
-        }
-
         .cta-button {
             display: inline-block;
-            padding: 1.5rem 3rem; /* 50% bigger padding: was 1rem 2rem */
+            padding: 1.5rem 3rem;
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 75px; /* 50% bigger: was 50px */
+            border-radius: 75px;
             color: white;
             text-decoration: none;
-            font-size: 1.65rem; /* 50% bigger: was 1.1rem */
-            font-weight: 500; /* Orbitron Medium */
+            font-size: 1.65rem;
+            font-weight: 500;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
@@ -275,39 +268,21 @@
             border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .hypercube-info {
-            position: fixed;
-            bottom: 2rem;
-            left: 2rem;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 1rem;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 0.9rem;
-            max-width: 300px;
-        }
-
-        .hypercube-info h4 {
-            color: #4ecdc4;
-            margin-bottom: 0.5rem;
-        }
-
+        /* 🆕 FRAMEWORK CONTROL PANEL STYLES */
         .controls-panel {
             position: fixed;
             top: 2rem;
             left: 2rem;
-            z-index: 1000;
+            z-index: 2000;
             background: rgba(0, 0, 0, 0.8);
             padding: 1.5rem;
             border-radius: 15px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             font-size: 0.9rem;
-            min-width: 250px;
-            display: none; /* Hidden by default */
-            pointer-events: auto; /* Ensure it can be interacted with */
+            min-width: 280px;
+            display: none; /* Hidden by default - framework manages this */
+            pointer-events: auto;
         }
 
         .controls-panel h4 {
@@ -329,7 +304,7 @@
             min-width: 80px;
         }
 
-        .control-group input {
+        .control-group input, .control-group select {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 5px;
@@ -340,7 +315,7 @@
             text-align: center;
         }
 
-        .control-group input:focus {
+        .control-group input:focus, .control-group select:focus {
             outline: none;
             border-color: #4ecdc4;
             background: rgba(255, 255, 255, 0.15);
@@ -350,6 +325,11 @@
             margin-top: 1rem;
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .button-row {
+            display: flex;
             gap: 0.5rem;
         }
 
@@ -363,6 +343,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            flex: 1;
+        }
+
+        .control-button.wide {
+            width: 100%;
         }
 
         .control-button:hover {
@@ -390,7 +375,7 @@
             position: fixed;
             top: 2rem;
             left: 2rem;
-            z-index: 1001;
+            z-index: 99999;
             width: 50px;
             height: 50px;
             background: rgba(0, 0, 0, 0.6);
@@ -434,6 +419,7 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
+        /* Mobile responsive styles */
         @media (max-width: 768px) {
             .tutorials-grid {
                 grid-template-columns: 1fr;
@@ -447,19 +433,20 @@
                 margin: 2rem 0;
             }
 
-            .controls-panel {
-                position: relative;
-                top: auto;
-                left: auto;
-                margin: 2rem;
-                min-width: auto;
+            .settings-toggle {
+                top: 1rem;
+                left: 1rem;
+                width: 56px;
+                height: 56px;
             }
 
-            .settings-toggle {
-                position: relative;
-                top: auto;
-                left: auto;
-                margin: 2rem auto;
+            .controls-panel {
+                top: 80px;
+                left: 1rem;
+                right: 1rem;
+                min-width: auto;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
             }
         }
 
@@ -481,6 +468,25 @@
             transform: translateY(0);
             pointer-events: auto;
         }
+
+        /* Framework mobile controls */
+        .mobile-only {
+            display: none;
+        }
+
+        .desktop-only {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-only {
+                display: block;
+            }
+            
+            .desktop-only {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -489,46 +495,23 @@
         <a href="#contact" class="nav-btn">Contact</a>
     </nav>
 
+    <!-- 🆕 FRAMEWORK: Settings toggle (managed automatically by framework) -->
     <div class="settings-toggle" id="settings-toggle">
         <svg viewBox="0 0 24 24">
             <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
         </svg>
     </div>
 
+    <!-- 🆕 FRAMEWORK: Controls panel (content generated by framework) -->
     <div class="controls-panel" id="controls-panel">
-        <h4>4D Projection Controls</h4>
-        <div class="control-group">
-            <label for="fov-control">FOV:</label>
-            <input type="number" id="fov-control" value="7" step="1" min="2" max="120">
-        </div>
-        <div class="control-group">
-            <label for="perspective-control">4D Scale:</label>
-            <input type="number" id="perspective-control" value="2.3" step="0.1" min="0.1" max="10">
-        </div>
-        <div class="control-group">
-            <label for="cameraz-control">Camera Z:</label>
-            <input type="number" id="cameraz-control" value="10" step="1" min="-100" max="50">
-        </div>
-        
-        <div class="button-group">
-            <button class="control-button" id="reset-rotation">Reset Rotation</button>
-            <button class="control-button" id="stop-rx">Stop RX Velocity</button>
-            <button class="control-button" id="stop-ry">Stop RY Velocity</button>
-            <button class="control-button" id="stop-rw">Stop RW Velocity</button>
-        </div>
-        
-        <div class="info-section">
-            <h4>4D Hypercube Controls</h4>
-            <p>• Move mouse to rotate in 3D space</p>
-            <p>• Scroll to rotate through 4th dimension</p>
-        </div>
+        <!-- Content will be generated by ControlPanelRenderer -->
     </div>
 
     <section class="hero-section">
         <canvas id="hypercube-canvas"></canvas>
         <div class="hero-content">
             <h1 class="hero-title">TRUE FIASCO</h1>
-            <p class="hero-subtitle">Explore higher dimensions through<br>immersive visualization</p>
+            <p class="hero-subtitle">taking event to the next dimension</p>
             <a href="#tutorials" class="cta-button">Start Learning</a>
         </div>
     </section>
@@ -593,56 +576,61 @@
     <!-- Tutorial transition overlay -->
     <div class="tutorial-transition" id="tutorialTransition"></div>
 
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 🆕 FRAMEWORK CORE MODULES -->
+    <script src="framework/core/genericShader.js"></script>
+    <script src="framework/core/controlPanelRenderer.js"></script>
     
-    <!-- Tesseract Shader Module -->
-    <script src="shaderTesseract.js"></script>
+    <!-- 🆕 MOBILE COMPONENTS -->
+    <script src="shared/components/mobileMotionControl.js"></script>
+    
+    <!-- 🆕 HOMEPAGE CONTROL CONFIG -->
+    <script src="homepageControlConfig.js"></script>
+    
+    <!-- 🆕 BASE TESSERACT SHADER -->
+    <script src="tutorials/tesseract/shaders/shaderTesseract.js"></script>
+    
+    <!-- 🆕 HOMEPAGE CUSTOM SHADER -->
+    <script src="homepageShader.js"></script>
 
     <script>
         // Tutorial navigation state
         let tutorialTransitioning = false;
         
-        // Initialize Tesseract shader instance
+        // 🆕 FRAMEWORK INSTANCES
         let tesseractShader = null;
+        let controlPanelRenderer = null;
+        let mobileMotionControl = null;
 
-        // Tutorial functions
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Tutorial functions (unchanged)
         function openTesseractTutorial() {
-            if (tutorialTransitioning) return; // Prevent multiple clicks during transition
+            if (tutorialTransitioning) return;
             
             tutorialTransitioning = true;
             
-            // Show transition overlay
             const transition = document.getElementById('tutorialTransition');
             transition.classList.add('active');
             
-            // Wait for transition, then navigate
             setTimeout(() => {
-                // Navigate to the tutorial file
                 window.location.href = 'tutorials/tesseract/';
-            }, 250); // Half-way through the transition
+            }, 250);
         }
 
-        // ASCII Tutorial function
         function openAsciiTutorial() {
-            if (tutorialTransitioning) return; // Prevent multiple clicks during transition
+            if (tutorialTransitioning) return;
             
             tutorialTransitioning = true;
             
-            // Show transition overlay
             const transition = document.getElementById('tutorialTransition');
             transition.classList.add('active');
             
-            // Wait for transition, then navigate
             setTimeout(() => {
-                // Navigate to the ASCII tutorial
                 window.location.href = 'https://truefiasco.org/ascii-tutorial.html';
-            }, 250); // Half-way through the transition
+            }, 250);
         }
 
-        // Button click handler for hero section
         function onStartLearningClick() {
-            // Scroll to tutorials section
             const target = document.querySelector('#tutorials');
             if (target) {
                 target.scrollIntoView({
@@ -652,95 +640,78 @@
             }
         }
 
-        // Initialize
+        // 🆕 FRAMEWORK INITIALIZATION
         async function init() {
-            // Initialize Tesseract shader with custom configuration
-            tesseractShader = new TesseractShader('hypercube-canvas', {
-                title: 'TRUE FIASCO',
-                subtitle: [
-                    'Explore higher dimensions through',
-                    'immersive visualization'
-                ],
-                button: 'Start Learning',
-                titleFont: 'Spy Agency',
-                subtitleFont: 'Orbitron',
-                onCanvasClick: onStartLearningClick,
-                getTutorialState: () => tutorialTransitioning
-            });
-            
-            await tesseractShader.init();
-            
-            setupControlPanels();
+            try {
+                console.log('🚀 Initializing TRUE FIASCO homepage with framework...');
+                
+                // 1. Initialize enhanced homepage Tesseract shader with custom text
+                tesseractShader = new HomepageTesseractShader('hypercube-canvas', {
+                    title: 'TRUE FIASCO',
+                    subtitle: 'taking event to the next dimension',
+                    titleFont: 'Spy Agency',
+                    subtitleFont: 'Orbitron',
+                    onCanvasClick: onStartLearningClick,
+                    getTutorialState: () => tutorialTransitioning
+                });
+                
+                await tesseractShader.init();
+                console.log('✅ Homepage TesseractShader initialized with custom text');
+                
+                // 2. Initialize framework control panel
+                controlPanelRenderer = new ControlPanelRenderer(
+                    tesseractShader,
+                    window.HomepageControlConfig,
+                    {
+                        containerId: 'controls-panel',
+                        settingsButtonId: 'settings-toggle'
+                    }
+                );
+                
+                controlPanelRenderer.renderWithSettingsButton();
+                console.log('✅ Framework control panel initialized');
+                
+                // 3. Initialize mobile motion control (full experience)
+                if (isMobile) {
+                    mobileMotionControl = new MobileMotionControl(tesseractShader);
+                    window.mobileMotionControl = mobileMotionControl;
+                    console.log('✅ Mobile motion control initialized (glass-attached mode)');
+                }
+                
+                console.log('🎉 TRUE FIASCO homepage with framework complete!');
+                console.log('🎯 Features enabled:');
+                console.log('  • Enhanced text: TRUE FIASCO / taking event to the next dimension');
+                console.log('  • Framework control panel with automatic management');
+                console.log('  • Full mobile experience with glass-attached device orientation');
+                console.log('  • Desktop experience preserved and enhanced');
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize homepage framework:', error);
+                createFallbackExperience(error);
+            }
         }
 
-        // Setup control panels
-        function setupControlPanels() {
-            // Settings toggle functionality
-            document.getElementById('settings-toggle').addEventListener('click', function() {
-                const panel = document.getElementById('controls-panel');
-                if (panel.style.display === 'none' || panel.style.display === '') {
-                    panel.style.display = 'block';
-                } else {
-                    panel.style.display = 'none';
-                }
-            });
-
-            // Control panel event listeners
-            document.getElementById('fov-control').addEventListener('input', function(e) {
-                tesseractShader.setShaderParams({ fov: parseFloat(e.target.value) });
-            });
-
-            document.getElementById('perspective-control').addEventListener('input', function(e) {
-                tesseractShader.setShaderParams({ perspective: parseFloat(e.target.value) });
-            });
-
-            document.getElementById('cameraz-control').addEventListener('input', function(e) {
-                tesseractShader.setShaderParams({ cameraZ: parseFloat(e.target.value) });
-            });
-
-            // Reset and control buttons
-            document.getElementById('reset-rotation').addEventListener('click', function() {
-                tesseractShader.resetRotation();
-            });
-
-            document.getElementById('stop-rx').addEventListener('click', function() {
-                const enabled = tesseractShader.toggleVelocity('rx');
-                const button = document.getElementById('stop-rx');
-                if (enabled) {
-                    button.textContent = 'Stop RX Velocity';
-                    button.classList.remove('disabled');
-                } else {
-                    button.textContent = 'Enable RX Velocity';
-                    button.classList.add('disabled');
-                }
-            });
-
-            document.getElementById('stop-ry').addEventListener('click', function() {
-                const enabled = tesseractShader.toggleVelocity('ry');
-                const button = document.getElementById('stop-ry');
-                if (enabled) {
-                    button.textContent = 'Stop RY Velocity';
-                    button.classList.remove('disabled');
-                } else {
-                    button.textContent = 'Enable RY Velocity';
-                    button.classList.add('disabled');
-                }
-            });
-
-            document.getElementById('stop-rw').addEventListener('click', function() {
-                const enabled = tesseractShader.toggleVelocity('rw');
-                const button = document.getElementById('stop-rw');
-                if (enabled) {
-                    button.textContent = 'Stop RW Velocity';
-                    button.classList.remove('disabled');
-                } else {
-                    button.textContent = 'Enable RW Velocity';
-                    button.classList.add('disabled');
-                }
-            });
+        function createFallbackExperience(error) {
+            console.warn('⚠️ Using fallback experience due to framework error');
+            
+            // Fallback to basic shader if framework fails
+            const heroSection = document.getElementById('hero-section');
+            if (heroSection) {
+                heroSection.innerHTML += `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                background: rgba(255, 0, 0, 0.8); color: white; padding: 1rem; border-radius: 10px;
+                                text-align: center; z-index: 9999; font-size: 0.9rem;">
+                        <p>Framework loading issue - refresh page</p>
+                        <button onclick="location.reload()" style="margin-top: 0.5rem; padding: 0.3rem 0.8rem; 
+                                background: white; color: black; border: none; border-radius: 5px; cursor: pointer;">
+                            Reload
+                        </button>
+                    </div>
+                `;
+            }
         }
-        
-        // Start when DOM is ready
+
+        // Initialize when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
@@ -763,8 +734,23 @@
 
         // Form handling
         const form = document.querySelector('.contact-form');
-        form.addEventListener('submit', function(e) {
-            console.log('Form submitted');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                console.log('Form submitted');
+            });
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (mobileMotionControl) {
+                mobileMotionControl.destroy();
+            }
+            if (tesseractShader) {
+                tesseractShader.destroy();
+            }
+            if (controlPanelRenderer) {
+                controlPanelRenderer.destroy();
+            }
         });
     </script>
 </body>
