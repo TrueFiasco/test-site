@@ -979,6 +979,182 @@
         controlPanelRenderer.destroy();
       }
     });
+    
+    /**
+ * NUCLEAR MOBILE POSITIONING FIX - JavaScript Enforcement
+ * Add this code to the END of your index.html <script> section
+ * This will continuously enforce correct positioning
+ */
+
+// NUCLEAR MOBILE POSITIONING ENFORCER
+function nuclearMobilePositionFix() {
+  const isMobile = window.innerWidth <= 768;
+  const settingsButton = document.getElementById('settings-toggle');
+  const controlsPanel = document.getElementById('controls-panel');
+  
+  if (!settingsButton) return;
+  
+  console.log('🚀 NUCLEAR positioning fix running...', { isMobile, buttonExists: !!settingsButton });
+  
+  if (isMobile) {
+    // MOBILE: Force top-left positioning
+    settingsButton.style.cssText = `
+      position: fixed !important;
+      top: 1rem !important;
+      left: 1rem !important;
+      right: auto !important;
+      bottom: auto !important;
+      z-index: 999999 !important;
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;
+      min-height: 56px !important;
+      max-width: 56px !important;
+      max-height: 56px !important;
+      transform: none !important;
+      translate: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      background: rgba(0, 0, 0, 0.9) !important;
+      backdrop-filter: blur(10px) !important;
+      border-radius: 50% !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      align-items: center !important;
+      justify-content: center !important;
+    `;
+    
+    if (controlsPanel) {
+      controlsPanel.style.cssText = `
+        position: fixed !important;
+        top: 80px !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        bottom: auto !important;
+        z-index: 2000 !important;
+        width: auto !important;
+        min-width: auto !important;
+        max-width: none !important;
+        max-height: calc(100vh - 120px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        transform: none !important;
+        translate: none !important;
+        margin: 0 !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        padding: 1.5rem !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        font-size: 0.9rem !important;
+        min-width: 300px !important;
+      `;
+    }
+    
+    console.log('✅ MOBILE positioning enforced');
+    
+  } else {
+    // DESKTOP: Force top-left positioning
+    settingsButton.style.cssText = `
+      position: fixed !important;
+      top: 2rem !important;
+      left: 2rem !important;
+      right: auto !important;
+      bottom: auto !important;
+      z-index: 99999 !important;
+      width: 50px !important;
+      height: 50px !important;
+      transform: none !important;
+      translate: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      background: rgba(0, 0, 0, 0.6) !important;
+      backdrop-filter: blur(10px) !important;
+      border-radius: 50% !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      align-items: center !important;
+      justify-content: center !important;
+    `;
+    
+    if (controlsPanel) {
+      controlsPanel.style.cssText = `
+        position: fixed !important;
+        top: 2rem !important;
+        left: 2rem !important;
+        right: auto !important;
+        bottom: auto !important;
+        z-index: 2000 !important;
+        width: auto !important;
+        min-width: 280px !important;
+        max-width: none !important;
+        transform: none !important;
+        translate: none !important;
+        margin: 0 !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        padding: 1.5rem !important;
+        border-radius: 15px !important;
+        backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        font-size: 0.9rem !important;
+      `;
+    }
+    
+    console.log('✅ DESKTOP positioning enforced');
+  }
+}
+
+// NUCLEAR CONTINUOUS ENFORCEMENT
+function startNuclearPositioningEnforcement() {
+  console.log('🚀 Starting NUCLEAR positioning enforcement...');
+  
+  // Run immediately
+  nuclearMobilePositionFix();
+  
+  // Run after page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', nuclearMobilePositionFix);
+  } else {
+    nuclearMobilePositionFix();
+  }
+  
+  // Run on window resize
+  window.addEventListener('resize', nuclearMobilePositionFix);
+  
+  // Run periodically to catch any dynamic changes
+  setInterval(nuclearMobilePositionFix, 2000);
+  
+  // Run on orientation change (mobile)
+  if ('orientation' in window) {
+    window.addEventListener('orientationchange', () => {
+      setTimeout(nuclearMobilePositionFix, 100);
+    });
+  }
+  
+  // Run when tutorial state changes
+  const originalTransitionToSection = window.transitionToSection;
+  if (originalTransitionToSection) {
+    window.transitionToSection = function(...args) {
+      const result = originalTransitionToSection.apply(this, args);
+      setTimeout(nuclearMobilePositionFix, 100);
+      return result;
+    };
+  }
+  
+  console.log('✅ NUCLEAR positioning enforcement active');
+}
+
+// AUTO-START THE NUCLEAR ENFORCEMENT
+startNuclearPositioningEnforcement();
+
+
+    
   </script>
 </body>
 </html>
