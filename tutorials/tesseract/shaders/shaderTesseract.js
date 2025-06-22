@@ -45,7 +45,7 @@ class TesseractShader extends GenericShader {
     // NEW: Mobile-specific state
     this.touchStartX = 0;
     this.touchStartY = 0;
-    this.deviceOrientationEnabled = false;
+    this.deviceOrientationEnabled = false;  // Will be auto-enabled by MobileMotionControl
     this.touchGestureEnabled = true;
     
     // NEW: Input source tracking
@@ -426,13 +426,14 @@ class TesseractShader extends GenericShader {
   }
 
   /**
-   * NEW: Mobile control application
+   * Apply motion control rotation - respects velocity toggles and X-axis inversion
    */
   applyMobileControls() {
     // Apply device orientation to camera (magic window)
     if (this.deviceOrientationEnabled) {
       if (this.isVelocityEnabled('cameraRx')) {
-        this.angles.cameraRx += this.deviceOrientationInput.rx;
+        const rxInput = this.xAxisInverted ? -this.deviceOrientationInput.rx : this.deviceOrientationInput.rx;
+        this.angles.cameraRx += rxInput;
       }
       if (this.isVelocityEnabled('cameraRy')) {
         this.angles.cameraRy += this.deviceOrientationInput.ry;
@@ -746,9 +747,10 @@ class TesseractShader extends GenericShader {
       const deltaX = (touch.clientX - this.touchStartX) / window.innerWidth;
       const deltaY = (touch.clientY - this.touchStartY) / window.innerHeight;
       
-      // NEW: Separated 4D gesture mapping
-      this.touchInput.rwx += deltaX * 0.15;  // Horizontal → RWX (NEW 4D)
-      this.touchInput.rwy += deltaY * 0.15;  // Vertical → RWY (same as wheel)
+      // NEW: Separated 4D gesture mapping with X-axis inversion support
+      const adjustedDeltaX = this.xAxisInverted ? -deltaX : deltaX;
+      this.touchInput.rwx += adjustedDeltaX * 0.15;  // Horizontal → RWX (NEW 4D)
+      this.touchInput.rwy += deltaY * 0.15;          // Vertical → RWY (same as wheel)
       
       // Update start position for continuous gesture
       this.touchStartX = touch.clientX;
@@ -894,6 +896,64 @@ class TesseractShader extends GenericShader {
     
     console.log(`🎯 Touch gesture control: ${this.touchGestureEnabled ? 'enabled' : 'disabled'}`);
     return this.touchGestureEnabled;
+  }
+
+  /**
+   * NEW: Toggle all camera controls at once
+   */
+  toggleAllCameraControls() {
+    const allCameraEnabled = this.isVelocityEnabled('cameraRx') && 
+                            this.isVelocityEnabled('cameraRy') && 
+                            this.isVelocityEnabled('cameraRz');
+    
+    // Toggle all camera axes to opposite state
+    const newState = !allCameraEnabled;
+    this.velocityEnabled.cameraRx = newState;
+    this.velocityEnabled.cameraRy = newState;
+    this.velocityEnabled.cameraRz = newState;
+    
+    if (!newState) {
+      // Clear camera input when disabled
+      this.deviceOrientationInput = { rx: 0, ry: 0, rz: 0 };
+    }
+    
+    console.log(`🎯 All camera controls: ${newState ? 'enabled' : 'disabled'}`);
+    return newState;
+  }
+
+  /**
+   * NEW: Toggle device orientation control (alias for compatibility)
+   */
+  toggleDeviceOrientationControl() {
+    if (this.deviceOrientationEnabled) {
+      this.disableDeviceOrientation();
+      return false;
+    } else {
+      return this.enableDeviceOrientation();
+    }
+  }
+
+  /**
+   * NEW: Toggle touch gesture control (alias for compatibility)
+   */
+  toggleTouchGestureControl() {
+    this.touchGestureEnabled = !this.touchGestureEnabled;
+    
+    if (!this.touchGestureEnabled) {
+      this.touchInput = { rwx: 0, rwy: 0 };
+    }
+    
+    console.log(`🎯 Touch gesture control: ${this.touchGestureEnabled ? 'enabled' : 'disabled'}`);
+    return this.touchGestureEnabled;
+  }
+
+  /**
+   * NEW: Toggle X-axis inversion
+   */
+  toggleXAxisInvert() {
+    this.xAxisInverted = !this.xAxisInverted;
+    console.log(`🎯 X-axis inversion: ${this.xAxisInverted ? 'enabled' : 'disabled'}`);
+    return this.xAxisInverted;
   }
 
   updateMotionInput(input) {
