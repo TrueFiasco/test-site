@@ -1,9 +1,9 @@
 /**
- * ControlPanelRenderer - Complete framework control panel system
+ * ControlPanelRenderer - FIXED - Complete framework control panel system
+ * FIXED: Button action mapping, z-index conflicts, desktop flickering
  * Generates control panel HTML from configuration, handles all event management
  * Uses existing tutorial-framework.css classes, binds to GenericShader interface
  * Includes automatic settings button management for complete framework integration
- * Supports all control types and mobile/desktop responsive layouts
  */
 class ControlPanelRenderer {
   constructor(shader, config, options = {}) {
@@ -13,19 +13,20 @@ class ControlPanelRenderer {
     this.settingsButtonId = options.settingsButtonId || 'settings-toggle';
     this.device = shader.device;
     
-    // Panel state management
+    // Panel state management - FIXED: Prevent rapid state changes
     this.panelOpen = false;
     this.settingsButton = null;
     this.controlsPanel = null;
     this.backdrop = null;
-    this.clickCooldown = false; // Prevent rapid clicking issues
+    this.clickCooldown = false;
+    this.stateChanging = false; // FIXED: Prevent rapid state changes
     
     // Parameter smoothing system
     this.filterStrength = 0.1;
     this.parameterTargets = {};
     this.smoothingActive = false;
     
-    console.log('🎨 ControlPanelRenderer created with framework settings button management');
+    console.log('🎨 ControlPanelRenderer created with FIXED button actions and positioning');
   }
 
   // ==========================================
@@ -43,7 +44,7 @@ class ControlPanelRenderer {
     // Then setup automatic settings button management
     this.setupSettingsButtonManagement();
     
-    console.log('✅ Control panel rendered with automatic settings button management');
+    console.log('✅ Control panel rendered with FIXED automatic settings button management');
   }
 
   /**
@@ -66,11 +67,11 @@ class ControlPanelRenderer {
   }
 
   // ==========================================
-  // SETTINGS BUTTON MANAGEMENT (Framework)
+  // FIXED SETTINGS BUTTON MANAGEMENT (Framework)
   // ==========================================
 
   /**
-   * Setup automatic settings button management (framework handles everything)
+   * FIXED: Setup automatic settings button management with proper z-index handling
    */
   setupSettingsButtonManagement() {
     this.settingsButton = document.getElementById(this.settingsButtonId);
@@ -81,10 +82,13 @@ class ControlPanelRenderer {
       return;
     }
     
-    // Clean up any existing listeners
+    // FIXED: Clean up any existing listeners and reset positioning
     const newButton = this.settingsButton.cloneNode(true);
     this.settingsButton.parentNode.replaceChild(newButton, this.settingsButton);
     this.settingsButton = newButton;
+    
+    // FIXED: Force correct initial positioning
+    this.resetButtonPosition();
     
     // Bind settings button click
     this.settingsButton.addEventListener('click', (e) => this.handleSettingsButtonClick(e));
@@ -96,54 +100,90 @@ class ControlPanelRenderer {
       }
     });
     
-    console.log('🎛️ Framework settings button management setup complete');
+    console.log('🎛️ FIXED framework settings button management setup complete');
   }
 
   /**
-   * Handle settings button click with proper event management
+   * FIXED: Reset button position to prevent movement
+   */
+  resetButtonPosition() {
+    if (!this.settingsButton) return;
+    
+    // FIXED: Force button to stay in correct position
+    this.settingsButton.style.position = 'fixed';
+    this.settingsButton.style.zIndex = '99999';
+    this.settingsButton.style.pointerEvents = 'auto';
+    this.settingsButton.style.transform = 'none';
+    
+    if (this.device.isMobile) {
+      // Mobile: top-left (framework standard)
+      this.settingsButton.style.top = '1rem';
+      this.settingsButton.style.left = '1rem';
+      this.settingsButton.style.right = 'auto';
+    } else {
+      // Desktop: top-left (framework standard)
+      this.settingsButton.style.top = '2rem';
+      this.settingsButton.style.left = '2rem';
+      this.settingsButton.style.right = 'auto';
+    }
+    
+    console.log('🔧 Button position reset to framework standard');
+  }
+
+  /**
+   * FIXED: Handle settings button click with proper state management
    */
   handleSettingsButtonClick(e) {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     
-    console.log('⚙️ Settings button clicked (framework managed), panel open:', this.panelOpen);
+    console.log('⚙️ Settings button clicked (FIXED), panel open:', this.panelOpen);
     
-    // Add a small delay to prevent rapid clicking issues
-    if (this.clickCooldown) {
-      console.log('⚙️ Click cooldown active, ignoring rapid click');
+    // FIXED: Prevent rapid clicking and state changes
+    if (this.clickCooldown || this.stateChanging) {
+      console.log('⚙️ Click ignored - cooldown or state changing');
       return;
     }
     
     this.clickCooldown = true;
+    this.stateChanging = true;
+    
     setTimeout(() => {
       this.clickCooldown = false;
-    }, 200); // 200ms cooldown
+    }, 300); // Increased cooldown
     
     if (this.panelOpen) {
       this.closePanel();
     } else {
       this.openPanel();
     }
+    
+    // FIXED: Reset state changing flag after delay
+    setTimeout(() => {
+      this.stateChanging = false;
+    }, 100);
   }
 
   /**
-   * Open control panel with framework event protection
+   * FIXED: Open control panel with stable positioning
    */
   openPanel() {
-    console.log('✅ Opening panel (framework managed)');
+    if (this.stateChanging && this.panelOpen) return;
     
-    // Show panel with proper z-index hierarchy
+    console.log('✅ Opening panel (FIXED)');
+    
+    // FIXED: Stable z-index hierarchy
     this.controlsPanel.style.display = 'block';
     this.controlsPanel.style.opacity = '1';
     this.controlsPanel.style.visibility = 'visible';
     this.controlsPanel.style.pointerEvents = 'auto';
-    this.controlsPanel.style.zIndex = '2000'; // Below button, above backdrop
+    this.controlsPanel.style.zIndex = '2000';
+    this.controlsPanel.style.position = 'fixed';
     
-    // Ensure button stays clickable and above everything
+    // FIXED: Ensure button stays in place and above everything
+    this.resetButtonPosition();
     this.settingsButton.style.zIndex = '99999';
-    this.settingsButton.style.pointerEvents = 'auto';
-    this.settingsButton.style.position = 'fixed'; // Ensure it's properly positioned
     
     this.panelOpen = true;
     
@@ -153,14 +193,16 @@ class ControlPanelRenderer {
     // Add backdrop for mobile or outside-click closing
     this.addBackdrop();
     
-    console.log('✅ Panel opened with proper z-index management');
+    console.log('✅ Panel opened with FIXED stable positioning');
   }
 
   /**
-   * Close control panel
+   * FIXED: Close control panel with stable positioning
    */
   closePanel() {
-    console.log('✅ Closing panel (framework managed)');
+    if (this.stateChanging && !this.panelOpen) return;
+    
+    console.log('✅ Closing panel (FIXED)');
     
     this.controlsPanel.style.display = 'none';
     this.controlsPanel.style.opacity = '0';
@@ -171,10 +213,10 @@ class ControlPanelRenderer {
     
     this.removeBackdrop();
     
-    // Reset button z-index to normal level when panel is closed
-    this.settingsButton.style.zIndex = '2001';
+    // FIXED: Reset button to stable position when panel is closed
+    this.resetButtonPosition();
     
-    console.log('✅ Panel closed and z-index reset');
+    console.log('✅ Panel closed with FIXED positioning');
   }
 
   /**
@@ -229,7 +271,7 @@ class ControlPanelRenderer {
   }
 
   /**
-   * Add backdrop for outside-click closing (mobile friendly)
+   * FIXED: Add backdrop with improved button detection
    */
   addBackdrop() {
     this.removeBackdrop(); // Remove existing first
@@ -247,15 +289,14 @@ class ControlPanelRenderer {
       pointer-events: auto;
     `;
     
-    // Get settings button bounds to avoid interfering with it
-    const buttonRect = this.settingsButton.getBoundingClientRect();
-    const buttonPadding = 20; // Extra space around button
-    
-    // Backdrop click behavior depends on device
+    // FIXED: More robust button area detection
     this.backdrop.addEventListener('click', (e) => {
       // Check if click is near settings button area
+      const buttonRect = this.settingsButton.getBoundingClientRect();
       const clickX = e.clientX;
       const clickY = e.clientY;
+      const buttonPadding = 30; // Reasonable padding
+      
       const isNearButton = (
         clickX >= buttonRect.left - buttonPadding &&
         clickX <= buttonRect.right + buttonPadding &&
@@ -284,9 +325,8 @@ class ControlPanelRenderer {
     
     document.body.appendChild(this.backdrop);
     
-    // Ensure settings button stays above backdrop
-    this.settingsButton.style.zIndex = '99999';
-    this.settingsButton.style.position = 'relative';
+    // FIXED: Ensure button stays above backdrop and in correct position
+    this.resetButtonPosition();
   }
 
   /**
@@ -784,18 +824,17 @@ class ControlPanelRenderer {
   }
 
   // ==========================================
-  // BUTTON ACTION SYSTEM
+  // FIXED BUTTON ACTION SYSTEM
   // ==========================================
 
   /**
-   * Handle button actions with Tesseract-specific logic
+   * FIXED: Handle button actions with corrected velocity toggle mapping
    */
   handleButtonAction(action, button) {
-    console.log(`🎛️ Button action: ${action}`);
+    console.log(`🎛️ FIXED Button action: ${action}`);
     
-    // Check if TesseractActionMap is available for custom mappings
+    // FIXED: Get the action map for lookup
     const actionMap = window.TesseractActionMap || {};
-    const mappedAction = actionMap[action] || action;
     
     switch (action) {
       case 'resetAll':
@@ -812,25 +851,34 @@ class ControlPanelRenderer {
         }
         break;
         
-      case 'toggleVelocityRX':
-      case 'toggleVelocityRY':
-      case 'toggleVelocityRW':
-        // Handle velocity toggle actions with axis parameter
+      // FIXED: Handle velocity toggle actions with direct axis mapping
+      case 'toggleVelocity_rx':
+      case 'toggleVelocity_ry':
+      case 'toggleVelocity_rw':
         if (typeof this.shader.toggleVelocity === 'function') {
-          const axis = mappedAction; // 'rx', 'ry', or 'rw'
-          const enabled = this.shader.toggleVelocity(axis);
+          // FIXED: Extract axis from action map (maps to 'rx', 'ry', 'rw')
+          const axis = actionMap[action]; // Now correctly maps to string axis
+          console.log(`🎛️ FIXED: Toggling velocity for axis: ${axis}`);
           
-          // Update button text and style based on state
-          if (enabled) {
-            button.textContent = button.textContent.replace('Enable', 'Stop');
-            button.classList.remove('disabled');
-            button.style.background = '';
-            button.style.borderColor = '';
+          if (axis) {
+            const enabled = this.shader.toggleVelocity(axis);
+            
+            // Update button text and style based on state
+            if (enabled) {
+              button.textContent = button.textContent.replace('Enable', 'Stop');
+              button.classList.remove('disabled');
+              button.style.background = '';
+              button.style.borderColor = '';
+            } else {
+              button.textContent = button.textContent.replace('Stop', 'Enable');
+              button.classList.add('disabled');
+              button.style.background = 'rgba(255, 100, 100, 0.3)';
+              button.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+            }
+            
+            console.log(`✅ FIXED: ${axis.toUpperCase()} velocity ${enabled ? 'enabled' : 'disabled'}`);
           } else {
-            button.textContent = button.textContent.replace('Stop', 'Enable');
-            button.classList.add('disabled');
-            button.style.background = 'rgba(255, 100, 100, 0.3)';
-            button.style.borderColor = 'rgba(255, 100, 100, 0.5)';
+            console.error(`❌ No axis mapping found for action: ${action}`);
           }
         }
         break;
@@ -861,15 +909,16 @@ class ControlPanelRenderer {
         
       default:
         // Try to call method on shader directly
-        if (typeof this.shader[mappedAction] === 'function') {
-          const result = this.shader[mappedAction]();
+        const methodName = actionMap[action] || action;
+        if (typeof this.shader[methodName] === 'function') {
+          const result = this.shader[methodName]();
           
           // Handle toggle methods that return boolean
           if (typeof result === 'boolean') {
             this.updateButtonToggleState(button, result);
           }
         } else {
-          console.warn(`⚠️ Unknown action: ${action} (mapped to: ${mappedAction})`);
+          console.warn(`⚠️ Unknown action: ${action} (mapped to: ${methodName})`);
         }
         break;
     }
@@ -1018,8 +1067,9 @@ class ControlPanelRenderer {
     this.panelOpen = false;
     this.settingsButton = null;
     this.controlsPanel = null;
+    this.stateChanging = false;
     
-    console.log('🧹 ControlPanelRenderer destroyed (framework managed)');
+    console.log('🧹 ControlPanelRenderer (FIXED) destroyed');
   }
 }
 
