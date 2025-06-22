@@ -698,7 +698,7 @@ class TesseractShader extends GenericShader {
     // Apply damping to motion input
     this.motionInput.x *= 0.85;
     this.motionInput.y *= 0.85;
-    this.motionInput.w *= 0.90;
+    this.motionInput.w *= 1.00;
   }
 
   /**
