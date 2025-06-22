@@ -1,5 +1,5 @@
 /* ===================================================================
-   TUTORIAL FRAMEWORK - REUSABLE STYLES
+   TUTORIAL FRAMEWORK - REUSABLE STYLES - FIXED MOBILE POSITIONING
    Core layout and widget system for all TouchDesigner tutorials
    =================================================================== */
 
@@ -801,12 +801,24 @@ p {
 /* === MOBILE RESPONSIVE STYLES === */
 @media (max-width: 768px) {
    
-   /* === FRAMEWORK SETTINGS BUTTON POSITIONING === */
+  /* ===============================================================
+     FIXED: FRAMEWORK SETTINGS BUTTON POSITIONING (ULTRA HIGH PRIORITY)
+     This MUST take precedence over tutorial-specific CSS
+     =============================================================== */
+     
+  /* FRAMEWORK STANDARD: Settings button ALWAYS top-left on mobile */
+  body .settings-toggle,
+  html body .settings-toggle,
+  .hero-section .settings-toggle,
+  div .settings-toggle,
   .settings-toggle {
-    /* CRITICAL: Ensure settings button stays top-left on mobile */
+    /* FIXED: Force button to stay top-left on mobile (framework standard) */
     top: 1rem !important;
     left: 1rem !important;
     right: auto !important;
+    
+    /* NUCLEAR Z-INDEX: Stay above everything */
+    z-index: 999999 !important;
     
     /* Enhanced mobile properties */
     width: 56px !important;
@@ -814,8 +826,7 @@ p {
     background: rgba(0, 0, 0, 0.9) !important;
     backdrop-filter: blur(10px) !important;
     
-    /* Framework z-index management */
-    z-index: 99999 !important;
+    /* Force properties to override conflicts */
     position: fixed !important;
     pointer-events: auto !important;
     display: flex !important;
@@ -824,9 +835,13 @@ p {
     transform: none !important;
   }
   
-  /* === FRAMEWORK CONTROLS PANEL POSITIONING === */
+  /* FRAMEWORK STANDARD: Controls panel positioned below button */
+  body .controls-panel,
+  html body .controls-panel,
+  .hero-section .controls-panel,
+  div .controls-panel,
   .controls-panel {
-    /* Position below the settings button */
+    /* Position below the button */
     top: 80px !important;
     left: 1rem !important;
     right: 1rem !important;
@@ -1043,6 +1058,21 @@ p {
     width: 100%;
     max-width: 100%;
   }
+  
+  /* === DESKTOP: Settings button positioning === */
+  .settings-toggle {
+    top: 2rem !important;
+    left: 2rem !important;
+    right: auto !important;
+    z-index: 99999 !important;
+  }
+  
+  .controls-panel {
+    top: 2rem !important;
+    left: 2rem !important;
+    right: auto !important;
+    z-index: 2000 !important;
+  }
 }
 
 /* === EXTRA SMALL MOBILE STYLES === */
@@ -1075,5 +1105,28 @@ p {
     width: 30px !important;
     height: 30px !important;
     min-width: 30px !important;
+  }
+  
+  /* === EXTRA SMALL: Force settings button positioning === */
+  body .settings-toggle,
+  html body .settings-toggle,
+  .hero-section .settings-toggle,
+  div .settings-toggle,
+  .settings-toggle {
+    width: 50px !important;
+    height: 50px !important;
+    top: 0.75rem !important;
+    left: 0.75rem !important;
+    right: auto !important;
+  }
+  
+  body .controls-panel,
+  html body .controls-panel,
+  .hero-section .controls-panel,
+  div .controls-panel,
+  .controls-panel {
+    top: 70px !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
   }
 }
