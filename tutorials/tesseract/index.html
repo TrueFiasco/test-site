@@ -1226,37 +1226,54 @@ setupSmartPositioning();
   Debug info will appear here...
 </div>
 
-<script>
-// Motion Debug System
-document.getElementById('motion-debug-btn').addEventListener('click', function() {
-  let eventCount = 0;
-  const debugDiv = document.getElementById('motion-debug-display');
-  debugDiv.style.display = 'block';
-  this.textContent = 'Debug Active';
-  this.style.background = 'green';
-  
-  window.addEventListener('deviceorientation', (event) => {
-    eventCount++;
-    debugDiv.innerHTML = `
-      Events: ${eventCount}<br>
-      Alpha: ${(event.alpha || 0).toFixed(1)}<br>
-      Beta: ${(event.beta || 0).toFixed(1)}<br>
-      Gamma: ${(event.gamma || 0).toFixed(1)}<br>
-      Motion Active: ${window.mobileMotionControl ? mobileMotionControl.isActive : 'No instance'}<br>
-      Shader CameraRX: ${window.tesseractShader ? tesseractShader.angles.cameraRx.toFixed(3) : 'No shader'}<br>
-      Shader CameraRY: ${window.tesseractShader ? tesseractShader.angles.cameraRy.toFixed(3) : 'No shader'}<br>
-      Time: ${new Date().toLocaleTimeString()}
-    `;
-  });
-  
-  // Test manual input after 3 seconds
-  setTimeout(() => {
-    if (window.tesseractShader) {
-      tesseractShader.updateDeviceOrientationInput({rx: 0.1, ry: 0.1, rz: 0.1});
-      debugDiv.innerHTML += '<br><br>✅ Manual test input sent to shader';
+  <script>
+  // FIXED Motion Debug System
+  document.getElementById('motion-debug-btn').addEventListener('click', function() {
+    let eventCount = 0;
+    const debugDiv = document.getElementById('motion-debug-display');
+    debugDiv.style.display = 'block';
+    this.textContent = 'Debug Active';
+    this.style.background = 'green';
+    
+    // FIXED: Better object references
+    const motionControl = window.mobileMotionControl || mobileMotionControl;
+    const shader = window.tesseractShader || tesseractShader;
+    
+    window.addEventListener('deviceorientation', (event) => {
+      eventCount++;
+      debugDiv.innerHTML = `
+        Events: ${eventCount}<br>
+        Alpha: ${(event.alpha || 0).toFixed(1)}<br>
+        Beta: ${(event.beta || 0).toFixed(1)}<br>
+        Gamma: ${(event.gamma || 0).toFixed(1)}<br>
+        Motion Control Found: ${!!motionControl}<br>
+        Motion Active: ${motionControl ? motionControl.isActive : 'N/A'}<br>
+        Motion Calibrated: ${motionControl ? motionControl.isCalibrated : 'N/A'}<br>
+        Shader Found: ${!!shader}<br>
+        Shader Motion Enabled: ${shader ? shader.deviceOrientationEnabled : 'N/A'}<br>
+        Shader CameraRX: ${shader && shader.angles ? shader.angles.cameraRx.toFixed(3) : 'N/A'}<br>
+        Time: ${new Date().toLocaleTimeString()}
+      `;
+    });
+    
+    // IMMEDIATE: Try to enable motion control
+    if (motionControl && !motionControl.isActive) {
+      debugDiv.innerHTML += '<br><br>🔧 Trying to enable motion control...';
+      motionControl.toggleMotionControl();
+      
+      setTimeout(() => {
+        debugDiv.innerHTML += '<br>Motion now active: ' + motionControl.isActive;
+      }, 500);
     }
-  }, 3000);
-});
-</script>
+    
+    // Test manual input after 3 seconds
+    setTimeout(() => {
+      if (shader) {
+        shader.updateDeviceOrientationInput({rx: 0.1, ry: 0.1, rz: 0.1});
+        debugDiv.innerHTML += '<br><br>✅ Manual test input sent to shader';
+      }
+    }, 3000);
+  });
+  </script>
 </body>
 </html>
