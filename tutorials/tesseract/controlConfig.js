@@ -1,12 +1,12 @@
 /**
- * Enhanced Tesseract Control Configuration - 8-AXIS MOBILE SYSTEM
- * NEW: Supports Magic Window device orientation + separated touch gestures
- * ENHANCED: Desktop compatibility maintained + new mobile controls
+ * Compatible Tesseract Control Configuration - Desktop Safe + Mobile Enhanced  
+ * PRESERVES: Desktop RX, RY, RWY system (mouse XY → RX,RY, wheel → RWY)
+ * ADDS: Mobile magic window (device orientation) + separated touch (RWX, RWY)
  */
 
 const TesseractControlConfig = {
   // Panel title
-  title: "Enhanced 4D Controls",
+  title: "4D Projection Controls",
   
   // UNCHANGED: Parameter controls (work for both desktop and mobile)
   parameters: [
@@ -42,100 +42,103 @@ const TesseractControlConfig = {
     }
   ],
   
-  // ENHANCED: Button controls with 8-axis support
+  // COMPATIBLE: Button controls for both desktop and mobile
   buttons: [
     // Wide reset button (universal)
     {
       id: 'reset-rotation',
-      label: 'Reset All Rotation',
+      label: 'Reset Rotation',
       action: 'resetRotation',
       wide: true
     },
     
-    // DESKTOP-ONLY: Original 3-axis controls (unchanged for compatibility)
+    // DESKTOP-ONLY: Original system (unchanged)
     {
       id: 'stop-rx-desktop',
       label: 'Stop RX',
       action: 'toggleVelocity_rx',
-      desktopOnly: true
+      desktopOnly: true,
+      tooltip: 'Hypercube X-axis rotation (mouse Y)'
     },
     {
       id: 'stop-ry-desktop',
       label: 'Stop RY', 
       action: 'toggleVelocity_ry',
-      desktopOnly: true
+      desktopOnly: true,
+      tooltip: 'Hypercube Y-axis rotation (mouse X)'
     },
     {
-      id: 'stop-rw-desktop',
-      label: 'Stop RW',
-      action: 'toggleVelocity_rw',
-      desktopOnly: true
+      id: 'stop-rwy-desktop',
+      label: 'Stop RWY',
+      action: 'toggleVelocity_rwy',
+      desktopOnly: true,
+      tooltip: '4D W-Y plane rotation (mouse wheel)'
     },
     
-    // MOBILE-ONLY: Enhanced 8-axis controls
-    // Row 1: 3D Camera Controls (Magic Window)
+    // MOBILE-ONLY: Enhanced controls
+    // Row 1: Original hypercube controls (compatible with desktop)
     {
       id: 'stop-rx-mobile',
       label: 'Stop RX',
       action: 'toggleVelocity_rx',
       mobileOnly: true,
-      tooltip: 'Pitch (forward/back tilt)'
+      tooltip: 'Hypercube X-axis rotation'
     },
     {
       id: 'stop-ry-mobile', 
       label: 'Stop RY',
       action: 'toggleVelocity_ry',
       mobileOnly: true,
-      tooltip: 'Roll (left/right tilt)'
+      tooltip: 'Hypercube Y-axis rotation'
     },
     {
-      id: 'stop-rz-mobile',
-      label: 'Stop RZ', 
-      action: 'toggleVelocity_rz',
+      id: 'stop-rwy-mobile',
+      label: 'Stop RWY', 
+      action: 'toggleVelocity_rwy',
       mobileOnly: true,
-      tooltip: 'Yaw (compass rotation)'
+      tooltip: '4D W-Y plane rotation (vertical touch)'
     },
     
-    // Row 2: 4D Hypercube Controls (Touch Gestures)
+    // Row 2: 4D Hypercube Controls (like desktop)
     {
       id: 'stop-rwx-mobile',
       label: 'Stop RWX',
       action: 'toggleVelocity_rwx',
       mobileOnly: true,
-      tooltip: '4D W-X rotation (horizontal touch)'
+      tooltip: '4D W-X plane rotation (horizontal touch)'
     },
     {
-      id: 'stop-rwy-mobile',
-      label: 'Stop RWY',
-      action: 'toggleVelocity_rwy', 
+      id: 'stop-rz-mobile',
+      label: 'Stop RZ',
+      action: 'toggleVelocity_cameraRz', 
       mobileOnly: true,
-      tooltip: '4D W-Y rotation (vertical touch)'
+      tooltip: 'Camera Z rotation (device yaw)'
     },
     {
-      id: 'stop-rw-mobile',
-      label: 'Stop RW',
-      action: 'toggleVelocity_rw',
+      id: 'stop-camera-controls',
+      label: 'Stop Camera',
+      action: 'toggleAllCamera',
       mobileOnly: true,
-      tooltip: 'Legacy 4D rotation'
+      tooltip: 'Stop all camera motion'
     },
     
-    // Row 3: Input Source Controls
+    // Row 3: Input source controls
     {
       id: 'toggle-magic-window',
       label: 'Magic Window',
-      action: 'toggleDeviceOrientationControl',
+      action: 'toggleMotionControl',
       mobileOnly: true,
-      tooltip: 'Device orientation → 3D camera'
+      tooltip: 'Device orientation → camera perspective'
     },
     {
-      id: 'toggle-touch-gestures',
-      label: 'Touch Gestures',
-      action: 'toggleTouchGestureControl', 
+      id: 'toggle-touch',
+      label: 'Touch 4D',
+      action: 'toggleTouchControl', 
       mobileOnly: true,
-      tooltip: 'Touch → 4D hypercube rotation'
+      tooltip: 'Touch gestures → 4D hypercube'
     },
     {
-      id: 'invert-x-axis',
+      id: 'invert-x',
       label: 'Invert X',
       action: 'toggleXAxisInvert',
       mobileOnly: true,
@@ -143,38 +146,33 @@ const TesseractControlConfig = {
     }
   ],
   
-  // ENHANCED: Mobile-specific settings
+  // Mobile-specific settings
   mobile: {
     showMotionControl: true,
-    showMagicWindowControls: true,
-    additionalControls: [
-      'toggle-magic-window', 
-      'toggle-touch-gestures', 
-      'invert-x-axis'
-    ]
+    showMagicWindow: true,
+    additionalControls: ['toggle-magic-window', 'toggle-touch', 'invert-x']
   },
   
-  // ENHANCED: Info section with 8-axis explanations
+  // Info section with accurate descriptions
   info: {
-    title: "Enhanced 4D Hypercube Controls",
+    title: "4D Hypercube Controls",
     desktop: [
       "• Click anywhere to start tutorial",
-      "• Move mouse to rotate in 3D space (RX, RY)", 
-      "• Scroll to rotate through 4th dimension (RW)",
-      "• Classic 3-axis control system"
+      "• Move mouse to rotate hypercube (RX, RY)", 
+      "• Scroll wheel for 4D rotation (RWY)",
+      "• Original 3-axis system"
     ],
     mobile: [
       "• Tap button below to start tutorial",
-      "• MAGIC WINDOW: Tilt device for 3D perspective (RX, RY, RZ)",
-      "• TOUCH GESTURES: Swipe for 4D rotations (RWX, RWY)",
-      "• Horizontal swipe = RWX, Vertical swipe = RWY",
-      "• Full 8-axis control system"
+      "• MAGIC WINDOW: Tilt device for camera perspective",
+      "• TOUCH 4D: Horizontal swipe = RWX, Vertical swipe = RWY",
+      "• Combined camera + hypercube control"
     ]
   }
 };
 
 /**
- * ENHANCED: Parameter registration mapping (unchanged)
+ * UNCHANGED: Parameter registration mapping
  */
 const TesseractParameterMap = {
   'fov': 'u_fov',
@@ -183,31 +181,31 @@ const TesseractParameterMap = {
 };
 
 /**
- * ENHANCED: Button action mapping for 8-axis system
+ * FIXED: Button action mapping with proper mobile axis handling
  */
 const TesseractActionMap = {
   'resetRotation': 'resetRotation',
   
-  // 8-axis velocity toggles
-  'toggleVelocity_rx': 'rx',    // Camera pitch
-  'toggleVelocity_ry': 'ry',    // Camera roll
-  'toggleVelocity_rz': 'rz',    // Camera yaw
-  'toggleVelocity_rwx': 'rwx',  // 4D W-X rotation
-  'toggleVelocity_rwy': 'rwy',  // 4D W-Y rotation
-  'toggleVelocity_rw': 'rw',    // Legacy 4D rotation
+  // DESKTOP: Original velocity toggles (unchanged)
+  'toggleVelocity_rx': 'rx',      // Hypercube X-axis rotation
+  'toggleVelocity_ry': 'ry',      // Hypercube Y-axis rotation  
+  'toggleVelocity_rwy': 'rwy',    // 4D W-Y plane rotation
   
-  // NEW: Input source controls
-  'toggleDeviceOrientationControl': 'toggleDeviceOrientationControl',
-  'toggleTouchGestureControl': 'toggleTouchGestureControl',
-  'toggleXAxisInvert': 'toggleXAxisInvert',
+  // MOBILE: NEW velocity toggles (fixed axis names)
+  'toggleVelocity_rwx': 'rwx',            // 4D W-X plane rotation
+  'toggleVelocity_cameraRx': 'cameraRx',  // Camera pitch
+  'toggleVelocity_cameraRy': 'cameraRy',  // Camera roll
+  'toggleVelocity_cameraRz': 'cameraRz',  // Camera yaw
   
-  // LEGACY: Compatibility mappings
+  // MOBILE: Input source controls (fixed method names)
   'toggleMotionControl': 'toggleDeviceOrientationControl',
-  'toggleTouchControl': 'toggleTouchGestureControl'
+  'toggleTouchControl': 'toggleTouchGestureControl',
+  'toggleXAxisInvert': 'toggleXAxisInvert',
+  'toggleAllCamera': 'toggleAllCameraControls'
 };
 
 /**
- * ENHANCED: Default values for 8-axis system
+ * COMPATIBLE: Default values preserving desktop system
  */
 const TesseractDefaults = {
   fov: 7.0,
@@ -215,23 +213,27 @@ const TesseractDefaults = {
   cameraZ: 10.0,
   lineWidth: 0.02,
   
-  // ENHANCED: 8-axis rotation defaults
+  // DESKTOP: Original rotation defaults
   rotation: {
-    // 3D Camera (Magic Window)
-    rx: 0, ry: 0, rz: 0,
-    // 4D Hypercube (Touch + Legacy)
-    rwx: 0, rwy: 0, rw: 0
+    rx: 0,   // Hypercube X-axis
+    ry: 0,   // Hypercube Y-axis  
+    rwy: 0,  // 4D W-Y plane (wheel)
+    
+    // MOBILE: Camera perspective defaults
+    cameraRx: 0, cameraRy: 0, cameraRz: 0,
+    rwx: 0   // 4D W-X plane (horizontal touch)
   },
   
-  // ENHANCED: 8-axis velocity defaults
+  // Velocity defaults for all axes
   velocityEnabled: {
-    // 3D Camera controls
-    rx: true, ry: true, rz: true,
-    // 4D Hypercube controls
-    rwx: true, rwy: true, rw: true
+    // Desktop original
+    rx: true, ry: true, rwy: true,
+    // Mobile additions
+    cameraRx: true, cameraRy: true, cameraRz: true,
+    rwx: true
   },
   
-  // NEW: Input source defaults
+  // Input source defaults
   inputSources: {
     deviceOrientationEnabled: false,
     touchGestureEnabled: true,
@@ -240,28 +242,28 @@ const TesseractDefaults = {
 };
 
 /**
- * ENHANCED: Responsive button layout for 8-axis system
+ * COMPATIBLE: Button layout reflecting desktop vs mobile systems
  */
 const TesseractButtonLayout = {
   desktop: {
     rows: [
-      ['stop-rx-desktop', 'stop-ry-desktop', 'stop-rw-desktop']
+      ['stop-rx-desktop', 'stop-ry-desktop', 'stop-rwy-desktop']
     ]
   },
   mobile: {
     rows: [
-      // 3D Camera Controls (Magic Window)
-      ['stop-rx-mobile', 'stop-ry-mobile', 'stop-rz-mobile'],
-      // 4D Hypercube Controls (Touch Gestures) 
-      ['stop-rwx-mobile', 'stop-rwy-mobile', 'stop-rw-mobile'],
-      // Input Source Controls
-      ['toggle-magic-window', 'toggle-touch-gestures', 'invert-x-axis']
+      // Original hypercube controls (desktop-compatible)
+      ['stop-rx-mobile', 'stop-ry-mobile', 'stop-rwy-mobile'],
+      // NEW camera + 4D controls
+      ['stop-camera-rx', 'stop-camera-ry', 'stop-rwx'],
+      // Input source toggles
+      ['toggle-magic-window', 'toggle-touch', 'invert-x']
     ]
   }
 };
 
 /**
- * ENHANCED: Advanced configuration with 8-axis smoothing
+ * Advanced configuration (unchanged)
  */
 const TesseractSmoothingConfig = {
   default: 0.1,
@@ -270,17 +272,19 @@ const TesseractSmoothingConfig = {
     'perspective': 0.1,
     'cameraZ': 0.15
   },
-  // NEW: Axis-specific smoothing
+  // Axis-specific smoothing
   motionAxes: {
-    // 3D Camera (smoother for magic window effect)
-    'rx': 0.12, 'ry': 0.12, 'rz': 0.10,
-    // 4D Hypercube (responsive for touch gestures)
-    'rwx': 0.08, 'rwy': 0.08, 'rw': 0.10
+    // Desktop original (preserve feel)
+    'rx': 0.10, 'ry': 0.10, 'rwy': 0.10,
+    // Mobile camera (smooth magic window)
+    'cameraRx': 0.12, 'cameraRy': 0.12, 'cameraRz': 0.10,
+    // Mobile 4D (responsive touch)
+    'rwx': 0.08
   }
 };
 
 /**
- * ENHANCED: Validation rules (unchanged parameters)
+ * Validation rules (unchanged)
  */
 const TesseractValidation = {
   fov: {
@@ -301,19 +305,16 @@ const TesseractValidation = {
 };
 
 /**
- * ENHANCED: Helper function to register 8-axis parameters with shader
+ * Helper functions
  */
 function registerTesseractParameters(shader) {
   TesseractControlConfig.parameters.forEach(param => {
     shader.registerParameter(param.id, param.uniformName, param.default);
   });
   
-  console.log('✅ Enhanced Tesseract 8-axis parameters registered');
+  console.log('✅ Compatible Tesseract parameters registered');
 }
 
-/**
- * ENHANCED: Helper function to apply 8-axis defaults
- */
 function applyTesseractDefaults(shader) {
   // Apply parameter defaults
   Object.keys(TesseractDefaults).forEach(key => {
@@ -322,7 +323,7 @@ function applyTesseractDefaults(shader) {
     }
   });
   
-  // Apply 8-axis defaults if enhanced shader
+  // Apply rotation defaults if enhanced shader
   if (shader.angles && TesseractDefaults.rotation) {
     Object.assign(shader.angles, TesseractDefaults.rotation);
   }
@@ -331,12 +332,9 @@ function applyTesseractDefaults(shader) {
     Object.assign(shader.velocityEnabled, TesseractDefaults.velocityEnabled);
   }
   
-  console.log('✅ Enhanced Tesseract 8-axis defaults applied');
+  console.log('✅ Compatible Tesseract defaults applied');
 }
 
-/**
- * NEW: Helper function to detect mobile capabilities
- */
 function detectMobileCapabilities() {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const hasDeviceOrientation = 'DeviceOrientationEvent' in window;
@@ -348,17 +346,14 @@ function detectMobileCapabilities() {
     hasDeviceOrientation,
     hasDeviceMotion,
     hasPermissionAPI,
-    supports8Axis: isMobile && hasDeviceOrientation
+    supportsMagicWindow: isMobile && hasDeviceOrientation
   };
 }
 
-/**
- * NEW: Helper function to get appropriate button layout
- */
 function getButtonLayoutForDevice() {
   const capabilities = detectMobileCapabilities();
   
-  if (capabilities.supports8Axis) {
+  if (capabilities.supportsMagicWindow) {
     return TesseractButtonLayout.mobile;
   } else {
     return TesseractButtonLayout.desktop;
@@ -366,7 +361,7 @@ function getButtonLayoutForDevice() {
 }
 
 // ==========================================
-// EXPORT SYSTEM (Both ES6 and Window Globals)
+// EXPORT SYSTEM
 // ==========================================
 
 if (typeof exports !== 'undefined') {
@@ -396,11 +391,11 @@ if (typeof window !== 'undefined') {
   window.detectMobileCapabilities = detectMobileCapabilities;
   window.getButtonLayoutForDevice = getButtonLayoutForDevice;
   
-  console.log('✅ Enhanced TesseractControlConfig (8-AXIS) available globally');
+  console.log('✅ Compatible TesseractControlConfig available globally');
 }
 
 /**
- * ENHANCED: Default export object for ES6
+ * Default export object
  */
 const TesseractConfigDefault = {
   config: TesseractControlConfig,
@@ -426,22 +421,21 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * 🎮 ENHANCED 8-AXIS CONTROL SYSTEM COMPLETE!
+ * 🎮 COMPATIBLE CONTROL SYSTEM COMPLETE!
  * 
- * Features:
- * ✅ 8-axis control system (RX,RY,RZ + RWX,RWY,RW)
- * ✅ Magic Window device orientation mapping
- * ✅ Separated touch gesture controls  
- * ✅ Desktop compatibility maintained
- * ✅ Mobile-specific button layouts
- * ✅ Enhanced tooltips and explanations
- * ✅ Input source toggle controls
+ * ✅ DESKTOP (unchanged):
+ * - Mouse XY → RX, RY (hypercube rotations)
+ * - Mouse wheel → RWY (4D W-Y plane rotation) 
+ * - Original 3-button control panel
  * 
- * Mobile Button Layout:
- * Row 1: RX, RY, RZ (3D Camera - Magic Window)
- * Row 2: RWX, RWY, RW (4D Hypercube - Touch)
- * Row 3: Magic Window, Touch, Invert (Input Sources)
+ * ✅ MOBILE (enhanced):
+ * - Device orientation → Camera RX, RY, RZ (magic window)
+ * - Touch horizontal → RWX (NEW 4D W-X plane rotation)  
+ * - Touch vertical → RWY (same 4D rotation as desktop wheel)
+ * - 9-button mobile control panel
  * 
- * Desktop Layout: 
- * Row 1: RX, RY, RW (Original system unchanged)
+ * ✅ COMPATIBILITY:
+ * - Platform detection automatically chooses system
+ * - Shared reset and parameter controls
+ * - No desktop behavior changes
  */
