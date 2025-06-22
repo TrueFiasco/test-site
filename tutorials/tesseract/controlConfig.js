@@ -1,9 +1,7 @@
 /**
- * Tesseract Tutorial Control Configuration
+ * Tesseract Tutorial Control Configuration - FIXED
+ * Corrected button action mapping to prevent axis.toUpperCase() errors
  * Defines all parameters, buttons, and UI for the 4D hypercube controls
- * Used by ControlPanelRenderer to generate HTML and bind events
- * 
- * Exports both as ES6 modules and window globals for compatibility
  */
 
 const TesseractControlConfig = {
@@ -44,7 +42,7 @@ const TesseractControlConfig = {
     }
   ],
   
-  // Button controls
+  // Button controls - FIXED: Consistent action naming
   buttons: [
     // Wide reset button
     {
@@ -54,43 +52,43 @@ const TesseractControlConfig = {
       wide: true
     },
     
-    // Desktop-only velocity controls
+    // Desktop-only velocity controls - FIXED: Direct axis mapping
     {
       id: 'stop-rx',
       label: 'Stop RX',
-      action: 'toggleVelocityRX',
+      action: 'toggleVelocity_rx',  // FIXED: Direct axis reference
       desktopOnly: true
     },
     {
       id: 'stop-ry',
       label: 'Stop RY', 
-      action: 'toggleVelocityRY',
+      action: 'toggleVelocity_ry',  // FIXED: Direct axis reference
       desktopOnly: true
     },
     {
       id: 'stop-rw',
       label: 'Stop RW',
-      action: 'toggleVelocityRW', 
+      action: 'toggleVelocity_rw',  // FIXED: Direct axis reference
       desktopOnly: true
     },
     
-    // Mobile-only velocity controls (first row)
+    // Mobile-only velocity controls (first row) - FIXED
     {
       id: 'stop-rx-mobile',
       label: 'Stop RX',
-      action: 'toggleVelocityRX',
+      action: 'toggleVelocity_rx',  // FIXED: Direct axis reference
       mobileOnly: true
     },
     {
       id: 'stop-ry-mobile', 
       label: 'Stop RY',
-      action: 'toggleVelocityRY',
+      action: 'toggleVelocity_ry',  // FIXED: Direct axis reference
       mobileOnly: true
     },
     {
       id: 'stop-rw-mobile',
       label: 'Stop RW', 
-      action: 'toggleVelocityRW',
+      action: 'toggleVelocity_rw',  // FIXED: Direct axis reference
       mobileOnly: true
     },
     
@@ -149,14 +147,17 @@ const TesseractParameterMap = {
 };
 
 /**
- * Button action mapping for TesseractShader
- * Maps button action names to shader method names
+ * FIXED: Button action mapping for TesseractShader
+ * Now uses direct method names and axis extraction pattern
  */
 const TesseractActionMap = {
   'resetRotation': 'resetRotation',
-  'toggleVelocityRX': function(shader) { return shader.toggleVelocity('rx'); },
-  'toggleVelocityRY': function(shader) { return shader.toggleVelocity('ry'); },
-  'toggleVelocityRW': function(shader) { return shader.toggleVelocity('rw'); },
+  
+  // FIXED: Use pattern matching for velocity toggles instead of functions
+  'toggleVelocity_rx': 'rx',   // Maps to axis name
+  'toggleVelocity_ry': 'ry',   // Maps to axis name  
+  'toggleVelocity_rw': 'rw',   // Maps to axis name
+  
   'toggleMotionControl': 'toggleMotionControl',
   'toggleTouchControl': 'toggleTouchControl',
   'toggleXAxisInvert': 'toggleXAxisInvert'
@@ -304,7 +305,7 @@ if (typeof window !== 'undefined') {
   window.registerTesseractParameters = registerTesseractParameters;
   window.applyTesseractDefaults = applyTesseractDefaults;
   
-  console.log('✅ TesseractControlConfig available globally on window object');
+  console.log('✅ TesseractControlConfig (FIXED) available globally on window object');
 }
 
 /**
@@ -332,7 +333,6 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
   window.TesseractConfigDefault = TesseractConfigDefault;
 }
-
 /**
  * USAGE EXAMPLES:
  * 
