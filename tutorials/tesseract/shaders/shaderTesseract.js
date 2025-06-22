@@ -897,7 +897,7 @@ class TesseractShader extends GenericShader {
     // Skip wheel input if motion control is active
     if (this.isMotionControlActive()) return;
     
-    const wheelDelta = event.deltaY > 0 ? 0.5 : -0.5;
+    const wheelDelta = event.deltaY > 0 ? 0.3927 : 0.3927;
     this.wheelVelocity += wheelDelta * 0.07;
   }
 
