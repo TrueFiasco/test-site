@@ -1,41 +1,45 @@
 /**
- * Enhanced TesseractShader - 8-Axis Mobile System (Phase 1)
- * NEW: Adds RWX and RZ rotations + DeviceOrientationControls integration
- * KEEPS: Desktop functionality completely unchanged
+ * Backwards-Compatible TesseractShader - Desktop Unchanged + Mobile Enhanced
+ * PRESERVES: 100% desktop behavior (mouse XY → RX,RY, wheel → RWY)
+ * ADDS: Mobile magic window (device orientation → camera) + separated touch (RWX, RWY)
  */
 class TesseractShader extends GenericShader {
   constructor(canvasId, options = {}) {
     super(canvasId, options);
     
-    // EXISTING: Desktop/general interaction state
+    // UNCHANGED: Original desktop interaction state
     this.mousePos = { x: 0, y: 0 };
     this.normalizedMouse = { x: 0, y: 0 };
     this.velocity = { x: 0, y: 0 };
     this.slowVelocity = { x: 0, y: 0 };
-    this.wheelVelocity = 0;
     this.maxSlowVelocity = 0.25;
     
-    // ENHANCED: 8-axis rotation system for mobile
+    // CORRECTED: Original angles system + mobile extensions
     this.angles = {
-      // 3D Camera Rotation (DeviceOrientation → Magic Window)
-      rx: 0,  // X-axis rotation (pitch) ← beta
-      ry: 0,  // Y-axis rotation (roll) ← gamma  
-      rz: 0,  // Z-axis rotation (yaw) ← alpha
+      // UNCHANGED: Original desktop hypercube rotations
+      rx: 0,   // X-axis hypercube rotation ← mouse Y
+      ry: 0,   // Y-axis hypercube rotation ← mouse X
+      rwy: 0,  // W-Y plane 4D rotation ← mouse wheel (was "rw")
       
-      // 4D Hypercube Rotations (Touch Gestures)
-      rwx: 0, // W-X plane rotation ← horizontal touch
-      rwy: 0, // W-Y plane rotation ← vertical touch (existing, enhanced)
+      // NEW: Mobile camera perspective (magic window)
+      cameraRx: 0,  // Camera pitch ← device beta
+      cameraRy: 0,  // Camera roll ← device gamma  
+      cameraRz: 0,  // Camera yaw ← device alpha
       
-      // Legacy desktop 4D rotation (wheel)
-      rw: 0   // Kept for desktop compatibility
+      // NEW: Mobile 4D touch rotation
+      rwx: 0   // W-X plane 4D rotation ← horizontal touch (NEW)
     };
     
-    // ENHANCED: Velocity control for all 8 axes
+    // UNCHANGED: Original desktop velocity system
+    this.wheelVelocity = 0;
+    
+    // ENHANCED: Velocity control for all axes (desktop + mobile)
     this.velocityEnabled = {
-      // 3D camera controls
-      rx: true, ry: true, rz: true,
-      // 4D hypercube controls  
-      rwx: true, rwy: true, rw: true
+      // Original desktop controls
+      rx: true, ry: true, rwy: true,
+      // New mobile controls  
+      cameraRx: true, cameraRy: true, cameraRz: true,
+      rwx: true
     };
     
     // NEW: Mobile-specific state
@@ -44,8 +48,8 @@ class TesseractShader extends GenericShader {
     this.deviceOrientationEnabled = false;
     this.touchGestureEnabled = true;
     
-    // NEW: Motion control integration
-    this.rotationSource = 'mouse'; // 'mouse', 'motion', or 'combined'
+    // NEW: Input source tracking
+    this.rotationSource = this.isMobile ? 'combined' : 'mouse';
     this.deviceOrientationInput = { rx: 0, ry: 0, rz: 0 };
     this.touchInput = { rwx: 0, rwy: 0 };
     
@@ -58,11 +62,11 @@ class TesseractShader extends GenericShader {
     // Auto-register parameters
     this.registerTesseractParameters();
     
-    console.log('🎯 Enhanced TesseractShader - 8-axis mobile system ready!');
+    console.log('🎯 Backwards-Compatible TesseractShader - Desktop safe + Mobile enhanced');
   }
 
   /**
-   * ENHANCED: Get shader code with new 4D rotation matrices
+   * BACKWARDS-COMPATIBLE: Shader code that works for both desktop and mobile
    */
   getShaderCode() {
     const vertexShader = `void main() { gl_Position = vec4(position, 1.0); }`;
@@ -73,16 +77,20 @@ class TesseractShader extends GenericShader {
       uniform sampler2D u_vertices;
       uniform sampler2D u_textTexture;
       
-      // ENHANCED: All rotation uniforms for 8-axis system
-      uniform vec3 u_rotation3D;    // RX, RY, RZ (camera orientation)
-      uniform vec3 u_rotation4D;    // RWX, RWY, RW (hypercube 4D rotations)
+      // UNCHANGED: Original uniform for desktop compatibility
+      uniform vec3 u_rotation;        // RX, RY, RWY (original system)
+      
+      // NEW: Mobile-only uniforms (only used on mobile)
+      uniform vec3 u_cameraRotation;  // Camera RX, RY, RZ (magic window)
+      uniform float u_rwxRotation;    // RWX 4D rotation (horizontal touch)
+      uniform bool u_isMobile;        // Platform detection
       
       uniform float u_lineWidth;
       uniform float u_fov;
       uniform float u_perspective;
       uniform float u_cameraZ;
       
-      // EXISTING: 3D rotation matrices (camera)
+      // UNCHANGED: Original 3D rotation matrices
       mat4 rotateX(float angle) {
         float c = cos(angle); float s = sin(angle);
         return mat4(1.0, 0.0, 0.0, 0.0, 0.0, c, -s, 0.0, 0.0, s, c, 0.0, 0.0, 0.0, 0.0, 1.0);
@@ -98,13 +106,13 @@ class TesseractShader extends GenericShader {
         return mat4(c, -s, 0.0, 0.0, s, c, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       }
       
-      // EXISTING: Legacy 4D rotation (desktop wheel)
+      // UNCHANGED: Original RWY 4D rotation (mouse wheel)
       mat4 rotateWY(float angle) {
         float c = cos(angle); float s = sin(angle);
         return mat4(1.0, 0.0, 0.0, 0.0, 0.0, c, 0.0, -s, 0.0, 0.0, 1.0, 0.0, 0.0, s, 0.0, c);
       }
       
-      // NEW: 4D rotation matrices for mobile touch
+      // NEW: RWX 4D rotation (horizontal touch)
       mat4 rotateWX(float angle) {
         float c = cos(angle); float s = sin(angle);
         return mat4(c, 0.0, 0.0, -s, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, s, 0.0, 0.0, c);
@@ -134,19 +142,31 @@ class TesseractShader extends GenericShader {
         vec4 textSample = texture2D(u_textTexture, screenSt);
         float textMask = textSample.r;
         
-        // ENHANCED: Combined transformation order
-        // 1. Apply 4D rotations to hypercube (touch gestures)
-        mat4 hypercube4D = rotateWX(u_rotation4D.x) *  // RWX ← horizontal touch
-                          rotateWY(u_rotation4D.y) *  // RWY ← vertical touch  
-                          rotateWY(u_rotation4D.z);   // RW ← desktop wheel
+        mat4 finalRotation;
         
-        // 2. Apply 3D camera rotation (device orientation) 
-        mat4 camera3D = rotateZ(u_rotation3D.z) *     // RZ ← alpha (yaw)
-                       rotateY(u_rotation3D.y) *     // RY ← gamma (roll)
-                       rotateX(u_rotation3D.x);      // RX ← beta (pitch)
-        
-        // 3. Combine for final transformation
-        mat4 finalRotation = camera3D * hypercube4D;
+        if (u_isMobile) {
+          // MOBILE: Enhanced system with camera + hypercube separation
+          
+          // 1. Apply 4D rotations to hypercube
+          mat4 hypercube4D = rotateWX(u_rwxRotation) *           // RWX ← horizontal touch
+                            rotateWY(u_rotation.z) *            // RWY ← vertical touch/wheel
+                            rotateY(u_rotation.y) *             // RY ← (mobile: touch legacy)
+                            rotateX(u_rotation.x);              // RX ← (mobile: touch legacy)
+          
+          // 2. Apply 3D camera rotation (magic window)
+          mat4 camera3D = rotateZ(u_cameraRotation.z) *         // Camera yaw ← alpha
+                         rotateY(u_cameraRotation.y) *         // Camera roll ← gamma
+                         rotateX(u_cameraRotation.x);          // Camera pitch ← beta
+          
+          // 3. Combine: camera perspective + hypercube
+          finalRotation = camera3D * hypercube4D;
+          
+        } else {
+          // DESKTOP: Original system unchanged
+          finalRotation = rotateWY(u_rotation.z) *              // RWY ← mouse wheel
+                         rotateY(u_rotation.y) *               // RY ← mouse X
+                         rotateX(u_rotation.x);                // RX ← mouse Y
+        }
         
         float minDist = 1000.0;
         
@@ -208,7 +228,7 @@ class TesseractShader extends GenericShader {
   }
 
   /**
-   * ENHANCED: Initialize with new uniform system
+   * BACKWARDS-COMPATIBLE: Initialize with both original and new uniforms
    */
   async initHypercube() {
     const canvas = document.getElementById(this.canvasId);
@@ -216,7 +236,7 @@ class TesseractShader extends GenericShader {
       throw new Error(`Canvas with ID "${this.canvasId}" not found`);
     }
 
-    // Scene setup
+    // Scene setup (unchanged)
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     
@@ -227,7 +247,7 @@ class TesseractShader extends GenericShader {
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     
-    // Create vertex and text textures
+    // Create vertex and text textures (unchanged)
     const vertexData = this.createVertexData();
     const vertexTexture = new THREE.DataTexture(
       vertexData, 33, 1, THREE.RGBAFormat, THREE.FloatType
@@ -236,7 +256,7 @@ class TesseractShader extends GenericShader {
     
     const textTexture = await this.createTesseractTextTexture();
     
-    // ENHANCED: New uniform system for 8-axis control
+    // BACKWARDS-COMPATIBLE: Uniforms that work for both desktop and mobile
     const { vertexShader, fragmentShader } = this.getShaderCode();
     
     this.uniforms = {
@@ -245,9 +265,13 @@ class TesseractShader extends GenericShader {
       u_vertices: { value: vertexTexture },
       u_textTexture: { value: textTexture },
       
-      // NEW: Separated 3D camera and 4D hypercube rotations
-      u_rotation3D: { value: new THREE.Vector3(0, 0, 0) },  // RX, RY, RZ
-      u_rotation4D: { value: new THREE.Vector3(0, 0, 0) },  // RWX, RWY, RW
+      // UNCHANGED: Original uniform (desktop compatibility)
+      u_rotation: { value: new THREE.Vector3(0, 0, 0) },  // RX, RY, RWY
+      
+      // NEW: Mobile-only uniforms
+      u_cameraRotation: { value: new THREE.Vector3(0, 0, 0) },  // Camera RX, RY, RZ
+      u_rwxRotation: { value: 0.0 },                            // RWX 4D rotation
+      u_isMobile: { value: this.isMobile },                     // Platform detection
       
       u_lineWidth: { value: 0.02 },
       u_fov: { value: 7.0 },
@@ -268,37 +292,28 @@ class TesseractShader extends GenericShader {
   }
 
   // ==========================================
-  // NEW: 8-AXIS CONTROL METHODS
+  // MOBILE ENHANCEMENTS (New Methods)
   // ==========================================
 
-  /**
-   * NEW: Enable device orientation for 3D camera rotation
-   */
   enableDeviceOrientation() {
-    if (!this.canUseMotion()) {
-      console.log('📱 Device orientation not available or not consented');
+    if (!this.isMobile || !this.canUseMotion()) {
+      console.log('📱 Device orientation not available');
       return false;
     }
     
     this.deviceOrientationEnabled = true;
-    this.rotationSource = 'combined'; // Both touch and orientation
-    console.log('🎯 Device orientation enabled for 3D camera rotation');
+    this.rotationSource = 'combined';
+    console.log('🪟 Magic Window device orientation enabled');
     return true;
   }
 
-  /**
-   * NEW: Disable device orientation
-   */
   disableDeviceOrientation() {
     this.deviceOrientationEnabled = false;
-    this.rotationSource = 'touch';
+    this.rotationSource = this.isMobile ? 'touch' : 'mouse';
     this.deviceOrientationInput = { rx: 0, ry: 0, rz: 0 };
-    console.log('🎯 Device orientation disabled');
+    console.log('🪟 Magic Window device orientation disabled');
   }
 
-  /**
-   * NEW: Update device orientation input (called from mobileMotionControl)
-   */
   updateDeviceOrientationInput(input) {
     if (!this.deviceOrientationEnabled) return;
     
@@ -307,9 +322,6 @@ class TesseractShader extends GenericShader {
     this.deviceOrientationInput.rz = input.rz || 0;
   }
 
-  /**
-   * NEW: Update touch gesture input
-   */
   updateTouchGestureInput(input) {
     if (!this.touchGestureEnabled) return;
     
@@ -317,15 +329,11 @@ class TesseractShader extends GenericShader {
     this.touchInput.rwy = input.rwy || 0;
   }
 
-  /**
-   * NEW: Toggle specific axis velocity (enhanced for 8-axis)
-   */
   toggleVelocity(axis) {
     if (!this.velocityEnabled) {
       this.velocityEnabled = {};
     }
     
-    // Initialize as enabled by default
     if (this.velocityEnabled[axis] === undefined) {
       this.velocityEnabled[axis] = true;
     }
@@ -335,12 +343,22 @@ class TesseractShader extends GenericShader {
     // Stop velocity when disabled
     if (!this.velocityEnabled[axis]) {
       switch(axis) {
-        case 'rx': this.deviceOrientationInput.rx = 0; break;
-        case 'ry': this.deviceOrientationInput.ry = 0; break;
-        case 'rz': this.deviceOrientationInput.rz = 0; break;
+        case 'rx': 
+          this.velocity.x = 0;
+          this.deviceOrientationInput.rx = 0;
+          break;
+        case 'ry': 
+          this.velocity.y = 0;
+          this.deviceOrientationInput.ry = 0;
+          break;
+        case 'rwy': 
+          this.wheelVelocity = 0;
+          this.touchInput.rwy = 0;
+          break;
+        case 'cameraRx': this.deviceOrientationInput.rx = 0; break;
+        case 'cameraRy': this.deviceOrientationInput.ry = 0; break;
+        case 'cameraRz': this.deviceOrientationInput.rz = 0; break;
         case 'rwx': this.touchInput.rwx = 0; break;
-        case 'rwy': this.touchInput.rwy = 0; break;
-        case 'rw': this.wheelVelocity = 0; break;
       }
     }
     
@@ -349,12 +367,9 @@ class TesseractShader extends GenericShader {
   }
 
   // ==========================================
-  // ENHANCED: ANIMATION LOOP
+  // BACKWARDS-COMPATIBLE: Animation Loop
   // ==========================================
 
-  /**
-   * ENHANCED: Animation loop with 8-axis integration
-   */
   animate() {
     this.animationId = requestAnimationFrame(() => this.animate());
     
@@ -362,89 +377,136 @@ class TesseractShader extends GenericShader {
     
     this.uniforms.u_time.value += 0.016;
     
-    // Apply rotations based on input source and enabled axes
-    this.applyDeviceOrientationRotation();
-    this.applyTouchGestureRotation();
-    this.applyDesktopRotation(); // Keep desktop unchanged
-    
-    // Update shader uniforms
-    this.uniforms.u_rotation3D.value.x = this.angles.rx;  // Camera RX
-    this.uniforms.u_rotation3D.value.y = this.angles.ry;  // Camera RY  
-    this.uniforms.u_rotation3D.value.z = this.angles.rz;  // Camera RZ
-    
-    this.uniforms.u_rotation4D.value.x = this.angles.rwx; // Hypercube RWX
-    this.uniforms.u_rotation4D.value.y = this.angles.rwy; // Hypercube RWY
-    this.uniforms.u_rotation4D.value.z = this.angles.rw;  // Hypercube RW (desktop)
+    if (this.isMobile) {
+      // MOBILE: Enhanced system
+      this.applyMobileControls();
+    } else {
+      // DESKTOP: Original system unchanged
+      this.applyDesktopControls();
+    }
     
     this.renderer.render(this.scene, this.camera);
   }
 
   /**
-   * NEW: Apply device orientation to 3D camera rotation
+   * NEW: Mobile control application
    */
-  applyDeviceOrientationRotation() {
-    if (!this.deviceOrientationEnabled) return;
+  applyMobileControls() {
+    // Apply device orientation to camera (magic window)
+    if (this.deviceOrientationEnabled) {
+      if (this.isVelocityEnabled('cameraRx')) {
+        this.angles.cameraRx += this.deviceOrientationInput.rx;
+      }
+      if (this.isVelocityEnabled('cameraRy')) {
+        this.angles.cameraRy += this.deviceOrientationInput.ry;
+      }
+      if (this.isVelocityEnabled('cameraRz')) {
+        this.angles.cameraRz += this.deviceOrientationInput.rz;
+      }
+      
+      // Damping
+      this.deviceOrientationInput.rx *= 0.95;
+      this.deviceOrientationInput.ry *= 0.95;
+      this.deviceOrientationInput.rz *= 0.95;
+    }
     
-    // Apply device orientation only if velocity enabled
+    // Apply touch gestures to 4D hypercube
+    if (this.touchGestureEnabled) {
+      if (this.isVelocityEnabled('rwx')) {
+        this.angles.rwx += this.touchInput.rwx;
+      }
+      if (this.isVelocityEnabled('rwy')) {
+        this.angles.rwy += this.touchInput.rwy;
+      }
+      
+      // Damping
+      this.touchInput.rwx *= 0.90;
+      this.touchInput.rwy *= 0.90;
+    }
+    
+    // Apply desktop-style controls when available (legacy support)
     if (this.isVelocityEnabled('rx')) {
-      this.angles.rx += this.deviceOrientationInput.rx * 0.02;
+      this.angles.rx += this.velocity.x;
     }
     if (this.isVelocityEnabled('ry')) {
-      this.angles.ry += this.deviceOrientationInput.ry * 0.02;
-    }
-    if (this.isVelocityEnabled('rz')) {
-      this.angles.rz += this.deviceOrientationInput.rz * 0.02;
-    }
-    
-    // Apply damping to device orientation input
-    this.deviceOrientationInput.rx *= 0.95;
-    this.deviceOrientationInput.ry *= 0.95;
-    this.deviceOrientationInput.rz *= 0.95;
-  }
-
-  /**
-   * NEW: Apply touch gestures to 4D hypercube rotation
-   */
-  applyTouchGestureRotation() {
-    if (!this.touchGestureEnabled) return;
-    
-    // Apply touch gestures only if velocity enabled
-    if (this.isVelocityEnabled('rwx')) {
-      this.angles.rwx += this.touchInput.rwx;
+      this.angles.ry += this.velocity.y;
     }
     if (this.isVelocityEnabled('rwy')) {
-      this.angles.rwy += this.touchInput.rwy;
-    }
-    
-    // Apply damping to touch input
-    this.touchInput.rwx *= 0.90;
-    this.touchInput.rwy *= 0.90;
-  }
-
-  /**
-   * UNCHANGED: Keep desktop rotation behavior exactly the same
-   */
-  applyDesktopRotation() {
-    // Desktop mouse/wheel behavior unchanged
-    if (this.isVelocityEnabled('rw')) {
-      this.angles.rw += this.wheelVelocity;
+      this.angles.rwy += this.wheelVelocity;
     }
     
     this.velocity.x *= 0.95;
     this.velocity.y *= 0.95;
     this.wheelVelocity *= 0.96;
     
-    // Note: On mobile, we no longer use mouse velocity for rx/ry
-    // On desktop, this behavior continues as before via mouse events
+    // Update mobile uniforms
+    this.uniforms.u_rotation.value.x = this.angles.rx;
+    this.uniforms.u_rotation.value.y = this.angles.ry;
+    this.uniforms.u_rotation.value.z = this.angles.rwy;
+    
+    this.uniforms.u_cameraRotation.value.x = this.angles.cameraRx;
+    this.uniforms.u_cameraRotation.value.y = this.angles.cameraRy;
+    this.uniforms.u_cameraRotation.value.z = this.angles.cameraRz;
+    
+    this.uniforms.u_rwxRotation.value = this.angles.rwx;
   }
 
   /**
-   * ENHANCED: Reset all rotation values
+   * UNCHANGED: Desktop control application (original behavior)
+   */
+  applyDesktopControls() {
+    // Apply rotations only if velocity enabled
+    if (this.isVelocityEnabled('rx')) {
+      this.angles.rx += this.velocity.x;
+    }
+    if (this.isVelocityEnabled('ry')) {
+      this.angles.ry += this.velocity.y;
+    }
+    if (this.isVelocityEnabled('rwy')) {
+      this.angles.rwy += this.wheelVelocity;
+    }
+    
+    // Apply damping
+    this.velocity.x *= 0.95;
+    this.velocity.y *= 0.95;
+    this.wheelVelocity *= 0.96;
+    
+    // Calculate slow velocity targets
+    const targetSlowVelX = this.isVelocityEnabled('rx') ? this.normalizedMouse.y * 0.0125 : 0;
+    const targetSlowVelY = this.isVelocityEnabled('ry') ? this.normalizedMouse.x * 0.0125 : 0;
+    
+    this.slowVelocity.x += (targetSlowVelX - this.slowVelocity.x) * 0.1;
+    this.slowVelocity.y += (targetSlowVelY - this.slowVelocity.y) * 0.1;
+    
+    const slowSpeed = Math.sqrt(this.slowVelocity.x * this.slowVelocity.x + this.slowVelocity.y * this.slowVelocity.y);
+    if (slowSpeed > this.maxSlowVelocity) {
+      this.slowVelocity.x = (this.slowVelocity.x / slowSpeed) * this.maxSlowVelocity;
+      this.slowVelocity.y = (this.slowVelocity.y / slowSpeed) * this.maxSlowVelocity;
+    }
+    
+    this.angles.rx += this.slowVelocity.x;
+    this.angles.ry += this.slowVelocity.y;
+    
+    // Update original uniforms only
+    this.uniforms.u_rotation.value.x = this.angles.rx;
+    this.uniforms.u_rotation.value.y = this.angles.ry;
+    this.uniforms.u_rotation.value.z = this.angles.rwy;
+  }
+
+  /**
+   * ENHANCED: Reset all rotations (both desktop and mobile)
    */
   resetRotation() {
-    // Reset all 8 axes
-    this.angles.rx = 0; this.angles.ry = 0; this.angles.rz = 0;
-    this.angles.rwx = 0; this.angles.rwy = 0; this.angles.rw = 0;
+    // Reset original desktop angles
+    this.angles.rx = 0;
+    this.angles.ry = 0;
+    this.angles.rwy = 0;
+    
+    // Reset mobile camera angles
+    this.angles.cameraRx = 0;
+    this.angles.cameraRy = 0;
+    this.angles.cameraRz = 0;
+    this.angles.rwx = 0;
     
     // Reset all input sources
     this.velocity.x = 0; this.velocity.y = 0;
@@ -453,12 +515,9 @@ class TesseractShader extends GenericShader {
     this.deviceOrientationInput = { rx: 0, ry: 0, rz: 0 };
     this.touchInput = { rwx: 0, rwy: 0 };
     
-    console.log('🔄 All 8 axes reset to zero');
+    console.log('🔄 All rotations reset to zero');
   }
 
-  /**
-   * ENHANCED: Reset all parameters and state
-   */
   resetAll() {
     this.resetRotation();
     
@@ -467,55 +526,22 @@ class TesseractShader extends GenericShader {
     this.setParameter('perspective', 2.3);
     this.setParameter('cameraZ', 10.0);
     
-    // Reset velocity states for all 8 axes
+    // Reset velocity states
     this.velocityEnabled = {
-      rx: true, ry: true, rz: true,
-      rwx: true, rwy: true, rw: true
+      rx: true, ry: true, rwy: true,
+      cameraRx: true, cameraRy: true, cameraRz: true,
+      rwx: true
     };
     
-    // Reset mobile control states
     this.xAxisInverted = false;
     
-    console.log('🔄 All Enhanced Tesseract parameters reset');
+    console.log('🔄 All parameters reset');
   }
 
   // ==========================================
-  // ENHANCED: MOBILE CONTROL TOGGLES
+  // MOBILE TOUCH EVENTS (Enhanced)
   // ==========================================
 
-  /**
-   * NEW: Toggle device orientation control
-   */
-  toggleDeviceOrientationControl() {
-    if (this.deviceOrientationEnabled) {
-      this.disableDeviceOrientation();
-      return false;
-    } else {
-      return this.enableDeviceOrientation();
-    }
-  }
-
-  /**
-   * NEW: Toggle touch gesture control
-   */
-  toggleTouchGestureControl() {
-    this.touchGestureEnabled = !this.touchGestureEnabled;
-    
-    if (!this.touchGestureEnabled) {
-      this.touchInput = { rwx: 0, rwy: 0 };
-    }
-    
-    console.log(`🎯 Touch gesture control: ${this.touchGestureEnabled ? 'enabled' : 'disabled'}`);
-    return this.touchGestureEnabled;
-  }
-
-  // ==========================================
-  // ENHANCED: EVENT HANDLERS (Mobile-specific)
-  // ==========================================
-
-  /**
-   * ENHANCED: Touch start - prepare for separated gestures
-   */
   onTouchStart(event) {
     if (this.isTouchOnButton(event)) return;
     
@@ -523,12 +549,9 @@ class TesseractShader extends GenericShader {
     const touch = event.touches[0];
     this.touchStartX = touch.clientX;
     this.touchStartY = touch.clientY;
-    console.log('Touch start for separated 4D gesture control');
+    console.log('Touch start for separated 4D gestures');
   }
 
-  /**
-   * NEW: Touch move - separated RWX (horizontal) and RWY (vertical)
-   */
   onTouchMove(event) {
     if (this.isTouchOnButton(event)) return;
     if (!this.touchGestureEnabled) return;
@@ -541,9 +564,9 @@ class TesseractShader extends GenericShader {
       const deltaX = (touch.clientX - this.touchStartX) / window.innerWidth;
       const deltaY = (touch.clientY - this.touchStartY) / window.innerHeight;
       
-      // NEW: Separated gesture mapping
-      this.touchInput.rwx += deltaX * 0.15;  // Horizontal → RWX (4D)
-      this.touchInput.rwy += deltaY * 0.15;  // Vertical → RWY (4D)
+      // NEW: Separated 4D gesture mapping
+      this.touchInput.rwx += deltaX * 0.15;  // Horizontal → RWX (NEW 4D)
+      this.touchInput.rwy += deltaY * 0.15;  // Vertical → RWY (same as wheel)
       
       // Update start position for continuous gesture
       this.touchStartX = touch.clientX;
@@ -551,23 +574,17 @@ class TesseractShader extends GenericShader {
     }
   }
 
-  /**
-   * ENHANCED: Touch end
-   */
   onTouchEnd(event) {
     if (this.isTouchOnButton(event)) return;
     
     event.preventDefault();
-    console.log('Touch end for separated 4D gesture control');
+    console.log('Touch end for separated 4D gestures');
   }
 
   // ==========================================
-  // COMPATIBILITY: LEGACY METHODS
+  // COMPATIBILITY METHODS
   // ==========================================
 
-  /**
-   * LEGACY: Keep old motion control methods for compatibility
-   */
   enableMotionControl() {
     return this.enableDeviceOrientation();
   }
@@ -577,11 +594,23 @@ class TesseractShader extends GenericShader {
   }
 
   toggleMotionControl() {
-    return this.toggleDeviceOrientationControl();
+    if (this.deviceOrientationEnabled) {
+      this.disableDeviceOrientation();
+      return false;
+    } else {
+      return this.enableDeviceOrientation();
+    }
   }
 
   toggleTouchControl() {
-    return this.toggleTouchGestureControl();
+    this.touchGestureEnabled = !this.touchGestureEnabled;
+    
+    if (!this.touchGestureEnabled) {
+      this.touchInput = { rwx: 0, rwy: 0 };
+    }
+    
+    console.log(`🎯 Touch gesture control: ${this.touchGestureEnabled ? 'enabled' : 'disabled'}`);
+    return this.touchGestureEnabled;
   }
 
   updateMotionInput(input) {
@@ -596,8 +625,6 @@ class TesseractShader extends GenericShader {
   isMotionControlActive() {
     return this.deviceOrientationEnabled;
   }
-
-  console.log('✅ Enhanced TesseractShader with 8-axis mobile system ready!');
 }
 
 // Export
@@ -606,3 +633,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
   window.TesseractShader = TesseractShader;
 }
+
+console.log('✅ Backwards-Compatible TesseractShader ready - Desktop safe!');
