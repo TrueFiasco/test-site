@@ -96,22 +96,41 @@ class MobileMotionControl {
   }
   
   autoEnableMotionControl() {
+    console.log('🎯 Starting auto-enable motion control process...');
+    
     this.isActive = true;
     
     // NEW: Enable device orientation in enhanced shader
     if (this.tesseractShader && typeof this.tesseractShader.enableDeviceOrientation === 'function') {
-      this.tesseractShader.enableDeviceOrientation();
+      const result = this.tesseractShader.enableDeviceOrientation();
+      console.log(`🪟 Magic Window auto-enabled via enhanced shader: ${result}`);
     } else if (this.tesseractShader && typeof this.tesseractShader.enableMotionControl === 'function') {
       // Fallback for compatibility
-      this.tesseractShader.enableMotionControl();
+      const result = this.tesseractShader.enableMotionControl();
+      console.log(`🪟 Magic Window auto-enabled via fallback method: ${result}`);
+    } else {
+      console.warn('⚠️ No shader methods available for enabling motion control');
+    }
+    
+    // IMPORTANT: Set global variables for motion control logic
+    if (typeof window !== 'undefined') {
+      window.currentSection = window.currentSection || 0;
+      window.tutorialOpen = window.tutorialOpen || false;
+      console.log(`🌍 Global state set - Section: ${window.currentSection}, Tutorial: ${window.tutorialOpen}`);
     }
     
     // Auto-calibrate after brief delay
     setTimeout(() => {
       this.calibrateOrientation();
+      console.log('🪟 Auto-calibration complete');
+      
+      // Double-check shader state after calibration
+      if (this.tesseractShader) {
+        console.log(`📊 Post-calibration shader state - DeviceOrientation: ${this.tesseractShader.deviceOrientationEnabled}`);
+      }
     }, 1500);
     
-    console.log('🎯 Magic Window motion control auto-enabled');
+    console.log('🎯 Magic Window motion control auto-enabled and ready');
   }
   
   // UNCHANGED: Permission methods (existing implementation is solid)
@@ -215,7 +234,17 @@ class MobileMotionControl {
       }, 400);
     }
     
-    console.log('🪟 Magic Window calibrated and ready');
+    // ADDED: Update control panel button when calibration completes
+    if (window.enhancedControlPanel && typeof window.enhancedControlPanel.updateMotionControlButton === 'function') {
+      setTimeout(() => {
+        const motionButton = document.getElementById('motion-control-toggle');
+        if (motionButton) {
+          window.enhancedControlPanel.updateMotionControlButton(motionButton);
+        }
+      }, 100);
+    }
+    
+    console.log('🪟 Magic Window calibrated and ready - motion should be active now');
   }
   
   toggleMotionControl() {
@@ -263,6 +292,22 @@ class MobileMotionControl {
     if (window.enhancedControlPanel && typeof window.enhancedControlPanel.updateMotionControlButton === 'function') {
       setTimeout(() => window.enhancedControlPanel.updateMotionControlButton(), 100);
     }
+    
+    // ADDED: Force update control panel button state
+    this.updateControlPanelButton();
+  }
+  
+  /**
+   * ADDED: Helper method to update control panel button state
+   */
+  updateControlPanelButton() {
+    setTimeout(() => {
+      const motionButton = document.getElementById('motion-control-toggle');
+      if (motionButton && window.controlPanelRenderer) {
+        window.controlPanelRenderer.updateMotionControlButton(motionButton);
+        console.log('🎛️ Forced motion control button update');
+      }
+    }, 500);
   }
   
   // NEW: MAGIC WINDOW ORIENTATION HANDLER
