@@ -204,12 +204,12 @@ class ControlPanelRenderer {
   }
 
   /**
-   * FIXED: Mobile-only backdrop with proper controls panel exclusion
+   * FIXED: Mobile backdrop with click-through controls area
    */
   addMobileBackdrop() {
-    if (!this.device.isMobile) return; // NEVER add backdrop on desktop
+    if (!this.device.isMobile) return;
     
-    this.removeBackdrop(); // Remove existing first
+    this.removeBackdrop();
     
     this.backdrop = document.createElement('div');
     this.backdrop.id = 'mobile-backdrop';
@@ -224,29 +224,35 @@ class ControlPanelRenderer {
       pointer-events: auto;
     `;
     
-    // MOBILE: Backdrop can close panel, but NOT if clicking on controls
+    // Create a "hole" in the backdrop where the controls are
+    const controlsBlocker = document.createElement('div');
+    controlsBlocker.id = 'controls-blocker';
+    controlsBlocker.style.cssText = `
+      position: fixed;
+      top: 80px;
+      left: 1rem;
+      right: 1rem;
+      height: calc(100vh - 120px);
+      pointer-events: none;
+      z-index: 2001;
+    `;
+    
+    // Simple backdrop click - only closes if clicking the backdrop itself
     this.backdrop.addEventListener('click', (e) => {
-      const clickX = e.clientX;
-      const clickY = e.clientY;
-      const padding = 30;
-      
-      // Check if click is near settings button
-      const buttonRect = this.settingsButton.getBoundingClientRect();
-      const isNearButton = (
-        clickX >= buttonRect.left - padding &&
-        clickX <= buttonRect.right + padding &&
-        clickY >= buttonRect.top - padding &&
-        clickY <= buttonRect.bottom + padding
-      );
-      
-      // FIXED: Also check if click is inside the controls panel
-      const panelRect = this.controlsPanel.getBoundingClientRect();
-      const isInsidePanel = (
-        clickX >= panelRect.left &&
-        clickX <= panelRect.right &&
-        clickY >= panelRect.top &&
-        clickY <= panelRect.bottom
-      );
+      // Only close if the click target is the backdrop itself
+      if (e.target === this.backdrop) {
+        console.log('🎯 Backdrop clicked directly - closing panel');
+        e.preventDefault();
+        this.closePanel();
+      }
+    });
+    
+    document.body.appendChild(this.backdrop);
+    document.body.appendChild(controlsBlocker);
+    this.forceCorrectPositioning();
+    
+    console.log('📱 Mobile backdrop with click-through controls');
+  }
       
       // Only close if clicking outside both button and panel
       if (!isNearButton && !isInsidePanel) {
@@ -273,7 +279,13 @@ class ControlPanelRenderer {
       this.backdrop.remove();
       this.backdrop = null;
     }
+  
+  // Also remove the controls blocker
+  const controlsBlocker = document.getElementById('controls-blocker');
+  if (controlsBlocker) {
+    controlsBlocker.remove();
   }
+}
 
   /**
    * Check if panel is currently open
