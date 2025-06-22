@@ -1,6 +1,8 @@
 /**
- * Mobile Motion Control System for Tesseract Tutorial
- * Handles device orientation input for hypercube rotation
+ * Enhanced Mobile Motion Control System - MAGIC WINDOW (Phase 1)
+ * NEW: Uses DeviceOrientationControls approach for 3D camera rotation (RX, RY, RZ)
+ * ENHANCED: Integrates with 8-axis TesseractShader system
+ * KEEPS: All existing permission and consent management
  */
 class MobileMotionControl {
   constructor(tesseractShader) {
@@ -10,25 +12,41 @@ class MobileMotionControl {
     this.isPermissionGranted = false;
     this.isCalibrated = false;
     
-    this.motionData = {
-      alpha: 0,
-      beta: 0,
-      gamma: 0,
+    // NEW: DeviceOrientationControls-style orientation data
+    this.orientationData = {
+      alpha: 0,   // Z-axis (compass/yaw) → RZ
+      beta: 0,    // X-axis (pitch) → RX  
+      gamma: 0,   // Y-axis (roll) → RY
       calibration: { alpha: 0, beta: 0, gamma: 0 }
     };
     
+    // NEW: Magic window configuration
     this.config = {
-      sensitivity: 0.008,
-      deadzone: 1,
-      maxRotation: 2,
-      smoothingFactor: 0.15,
-      directMapping: true,
-      gravityBias: 0.1
+      // DeviceOrientationControls sensitivity
+      sensitivity: {
+        pitch: 0.012,    // Beta → RX sensitivity
+        roll: 0.010,     // Gamma → RY sensitivity  
+        yaw: 0.008       // Alpha → RZ sensitivity
+      },
+      deadzone: 2,         // Degrees of deadzone
+      maxRotation: 1.5,    // Maximum rotation per frame
+      smoothingFactor: 0.12, // Smoothing for magic window effect
+      
+      // Magic window coordinate mapping
+      coordinateSystem: 'right-handed', // WebGL standard
+      screenOrientation: 'portrait',    // Default orientation
+      invertAxes: {
+        pitch: true,     // Invert beta for natural camera movement
+        roll: false,     // Direct gamma mapping
+        yaw: false       // Direct alpha mapping
+      }
     };
     
-    this.smoothedRotation = { x: 0, y: 0, w: 0 };
-    this.lastRotation = { x: 0, y: 0, w: 0 };
+    // NEW: Smoothed orientation output for magic window
+    this.smoothedOrientation = { rx: 0, ry: 0, rz: 0 };
+    this.lastOrientation = { rx: 0, ry: 0, rz: 0 };
     
+    // EXISTING: UI elements (unchanged)
     this.indicator = document.getElementById('motionIndicator');
     this.permissionPrompt = document.getElementById('motionPermissionPrompt');
     
@@ -39,7 +57,7 @@ class MobileMotionControl {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (!isMobile) return;
     
-    console.log('🎯 Initializing mobile motion control');
+    console.log('🎯 Initializing Enhanced Mobile Motion Control - Magic Window Mode');
     
     this.isSupported = 'DeviceOrientationEvent' in window;
     
@@ -48,7 +66,7 @@ class MobileMotionControl {
       return;
     }
     
-    // Check for stored consent
+    // UNCHANGED: Permission handling (existing system works great)
     const storedConsent = localStorage.getItem('motionControlConsent');
     const hasStoredConsent = storedConsent === 'granted';
     
@@ -58,9 +76,9 @@ class MobileMotionControl {
     }
     
     if (hasStoredConsent) {
-      console.log('✅ Found stored motion consent - auto-enabling');
+      console.log('✅ Found stored motion consent - enabling magic window mode');
       this.isPermissionGranted = true;
-      this.startMotionDetection();
+      this.startMagicWindowDetection();
       this.autoEnableMotionControl();
       return;
     }
@@ -69,9 +87,9 @@ class MobileMotionControl {
       console.log('📱 iOS device detected - showing permission prompt');
       this.showPermissionPrompt();
     } else {
-      console.log('📱 Android/older iOS - auto-enabling with stored consent');
+      console.log('📱 Android device - enabling magic window mode with stored consent');
       this.isPermissionGranted = true;
-      this.startMotionDetection();
+      this.startMagicWindowDetection();
       this.autoEnableMotionControl();
       localStorage.setItem('motionControlConsent', 'granted');
     }
@@ -79,26 +97,30 @@ class MobileMotionControl {
   
   autoEnableMotionControl() {
     this.isActive = true;
-    if (this.tesseractShader && typeof this.tesseractShader.enableMotionControl === 'function') {
+    
+    // NEW: Enable device orientation in enhanced shader
+    if (this.tesseractShader && typeof this.tesseractShader.enableDeviceOrientation === 'function') {
+      this.tesseractShader.enableDeviceOrientation();
+    } else if (this.tesseractShader && typeof this.tesseractShader.enableMotionControl === 'function') {
+      // Fallback for compatibility
       this.tesseractShader.enableMotionControl();
     }
     
     // Auto-calibrate after brief delay
     setTimeout(() => {
-      this.calibrateMotion();
+      this.calibrateOrientation();
     }, 1500);
     
-    console.log('🎯 Motion control auto-enabled from stored consent');
+    console.log('🎯 Magic Window motion control auto-enabled');
   }
   
+  // UNCHANGED: Permission methods (existing implementation is solid)
   showPermissionPrompt() {
     if (!this.permissionPrompt) return;
     
-    // Only show prompt for new users
     const storedConsent = localStorage.getItem('motionControlConsent');
     if (storedConsent) return;
     
-    // Show prompt after brief delay
     setTimeout(() => {
       const currentSection = window.currentSection || 0;
       if (currentSection === 0 && !this.isActive) {
@@ -123,12 +145,12 @@ class MobileMotionControl {
       const response = await DeviceOrientationEvent.requestPermission();
       
       if (response === 'granted') {
-        console.log('✅ Motion permission granted - storing consent');
+        console.log('✅ Motion permission granted - enabling magic window');
         this.isPermissionGranted = true;
         
         localStorage.setItem('motionControlConsent', 'granted');
         
-        this.startMotionDetection();
+        this.startMagicWindowDetection();
         this.hidePermissionPrompt();
         this.autoEnableMotionControl();
       } else {
@@ -159,22 +181,24 @@ class MobileMotionControl {
     console.log('📱 Using touch controls as fallback');
   }
   
-  startMotionDetection() {
+  // NEW: Magic Window Detection System
+  startMagicWindowDetection() {
     if (!this.isPermissionGranted) return;
     
-    console.log('🎯 Starting motion detection');
-    window.addEventListener('deviceorientation', this.handleDeviceOrientation.bind(this));
+    console.log('🪟 Starting Magic Window detection system');
+    window.addEventListener('deviceorientation', this.handleMagicWindowOrientation.bind(this));
     
     if (this.indicator) {
       this.indicator.style.opacity = '0.7';
     }
   }
   
-  calibrateMotion() {
-    this.motionData.calibration = {
-      alpha: this.motionData.alpha,
-      beta: this.motionData.beta,
-      gamma: this.motionData.gamma
+  // NEW: Magic Window Calibration
+  calibrateOrientation() {
+    this.orientationData.calibration = {
+      alpha: this.orientationData.alpha,
+      beta: this.orientationData.beta,
+      gamma: this.orientationData.gamma
     };
     
     this.isCalibrated = true;
@@ -182,20 +206,20 @@ class MobileMotionControl {
     if (this.indicator) {
       this.indicator.classList.remove('calibrating');
       this.indicator.classList.add('active');
-      this.indicator.title = 'Motion control active - tap to toggle';
+      this.indicator.title = 'Magic Window active - tap to toggle';
       
-      // Brief visual feedback
+      // Visual feedback
       this.indicator.style.transform = 'scale(1.2)';
       setTimeout(() => {
         this.indicator.style.transform = 'scale(1)';
       }, 400);
     }
     
-    console.log('🎯 Motion control calibrated and ready');
+    console.log('🪟 Magic Window calibrated and ready');
   }
   
   toggleMotionControl() {
-    // If no stored consent, show permission prompt
+    // UNCHANGED: Permission checking logic
     const storedConsent = localStorage.getItem('motionControlConsent');
     if (!storedConsent || storedConsent === 'denied') {
       if (typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -204,30 +228,34 @@ class MobileMotionControl {
       return;
     }
     
-    // Toggle if we have permission
     if (!this.isSupported || !this.isPermissionGranted) return;
     
     this.isActive = !this.isActive;
     
+    // NEW: Toggle enhanced shader orientation control
     if (this.tesseractShader) {
-      if (typeof this.tesseractShader.enableMotionControl === 'function') {
+      if (typeof this.tesseractShader.toggleDeviceOrientationControl === 'function') {
         if (this.isActive) {
-          this.tesseractShader.enableMotionControl();
-          console.log('🎯 Motion control manually ENABLED');
+          this.tesseractShader.enableDeviceOrientation();
+          console.log('🪟 Magic Window motion control ENABLED');
         } else {
-          this.tesseractShader.disableMotionControl();
-          console.log('🎯 Motion control manually DISABLED');
+          this.tesseractShader.disableDeviceOrientation();
+          console.log('🪟 Magic Window motion control DISABLED');
         }
+      } else if (typeof this.tesseractShader.toggleMotionControl === 'function') {
+        // Fallback compatibility
+        this.tesseractShader.toggleMotionControl();
       }
     }
     
+    // Update UI
     if (this.indicator) {
       if (this.isActive) {
         this.indicator.classList.add('active');
-        this.indicator.title = 'Motion control active - tap to pause';
+        this.indicator.title = 'Magic Window active - tap to pause';
       } else {
         this.indicator.classList.remove('active');
-        this.indicator.title = 'Motion control paused - tap to resume';
+        this.indicator.title = 'Magic Window paused - tap to resume';
       }
     }
     
@@ -237,84 +265,97 @@ class MobileMotionControl {
     }
   }
   
-  handleDeviceOrientation(event) {
+  // NEW: MAGIC WINDOW ORIENTATION HANDLER
+  handleMagicWindowOrientation(event) {
     const currentSection = window.currentSection || 0;
     if (currentSection !== 0 || !this.isActive || !this.isCalibrated) {
       return;
     }
     
-    this.motionData.alpha = event.alpha || 0;
-    this.motionData.beta = event.beta || 0;
-    this.motionData.gamma = event.gamma || 0;
+    // Get raw orientation data
+    this.orientationData.alpha = event.alpha || 0;  // Compass (Z-axis)
+    this.orientationData.beta = event.beta || 0;    // Pitch (X-axis)
+    this.orientationData.gamma = event.gamma || 0;   // Roll (Y-axis)
     
-    const deltaAlpha = this.normalizeAngle(this.motionData.alpha - this.motionData.calibration.alpha);
-    const deltaBeta = this.motionData.beta - this.motionData.calibration.beta;
-    const deltaGamma = this.motionData.gamma - this.motionData.calibration.gamma;
+    // Calculate deltas from calibration point
+    const deltaAlpha = this.normalizeAngle(this.orientationData.alpha - this.orientationData.calibration.alpha);
+    const deltaBeta = this.orientationData.beta - this.orientationData.calibration.beta;
+    const deltaGamma = this.orientationData.gamma - this.orientationData.calibration.gamma;
     
+    // Apply deadzone filtering
     const processedAlpha = Math.abs(deltaAlpha) > this.config.deadzone ? deltaAlpha : 0;
     const processedBeta = Math.abs(deltaBeta) > this.config.deadzone ? deltaBeta : 0;
     const processedGamma = Math.abs(deltaGamma) > this.config.deadzone ? deltaGamma : 0;
     
-    if (this.config.directMapping) {
-      const targetRotation = {
-        x: -processedBeta * this.config.sensitivity * 2,
-        y: processedGamma * this.config.sensitivity * 2,
-        w: -processedAlpha * this.config.sensitivity * 1.5
-      };
-      
-      targetRotation.x = this.clamp(targetRotation.x, -this.config.maxRotation, this.config.maxRotation);
-      targetRotation.y = this.clamp(targetRotation.y, -this.config.maxRotation, this.config.maxRotation);
-      targetRotation.w = this.clamp(targetRotation.w, -this.config.maxRotation, this.config.maxRotation);
-      
-      this.smoothedRotation.x = this.lerp(this.smoothedRotation.x, targetRotation.x, 1 - this.config.smoothingFactor);
-      this.smoothedRotation.y = this.lerp(this.smoothedRotation.y, targetRotation.y, 1 - this.config.smoothingFactor);
-      this.smoothedRotation.w = this.lerp(this.smoothedRotation.w, targetRotation.w, 1 - this.config.smoothingFactor);
-      
-    } else {
-      const targetRotation = {
-        x: processedBeta * this.config.sensitivity,
-        y: processedGamma * this.config.sensitivity,
-        w: processedAlpha * this.config.sensitivity
-      };
-      
-      targetRotation.x = this.clamp(targetRotation.x, -this.config.maxRotation, this.config.maxRotation);
-      targetRotation.y = this.clamp(targetRotation.y, -this.config.maxRotation, this.config.maxRotation);
-      targetRotation.w = this.clamp(targetRotation.w, -this.config.maxRotation, this.config.maxRotation);
-      
-      this.smoothedRotation.x = this.lerp(this.smoothedRotation.x, targetRotation.x, 1 - this.config.smoothingFactor);
-      this.smoothedRotation.y = this.lerp(this.smoothedRotation.y, targetRotation.y, 1 - this.config.smoothingFactor);
-      this.smoothedRotation.w = this.lerp(this.smoothedRotation.w, targetRotation.w, 1 - this.config.smoothingFactor);
-    }
+    // NEW: DeviceOrientationControls-style transformation
+    const targetOrientation = this.calculateMagicWindowRotation(
+      processedAlpha, processedBeta, processedGamma
+    );
     
-    const gravityInfluence = Math.sin(deltaBeta * Math.PI / 180) * this.config.gravityBias;
-    this.smoothedRotation.x += gravityInfluence * 0.005;
+    // Apply smoothing for smooth magic window effect
+    this.smoothedOrientation.rx = this.lerp(
+      this.smoothedOrientation.rx, 
+      targetOrientation.rx, 
+      1 - this.config.smoothingFactor
+    );
+    this.smoothedOrientation.ry = this.lerp(
+      this.smoothedOrientation.ry, 
+      targetOrientation.ry, 
+      1 - this.config.smoothingFactor
+    );
+    this.smoothedOrientation.rz = this.lerp(
+      this.smoothedOrientation.rz, 
+      targetOrientation.rz, 
+      1 - this.config.smoothingFactor
+    );
     
-    this.applyMotionToShader();
+    this.applyMagicWindowToShader();
   }
   
-  applyMotionToShader() {
+  // NEW: Magic Window Rotation Calculation (DeviceOrientationControls approach)
+  calculateMagicWindowRotation(alpha, beta, gamma) {
+    // Convert device orientation to camera rotation for "looking through glass" effect
+    
+    let rx = beta * this.config.sensitivity.pitch;   // Pitch: beta → RX
+    let ry = gamma * this.config.sensitivity.roll;   // Roll: gamma → RY
+    let rz = alpha * this.config.sensitivity.yaw;    // Yaw: alpha → RZ
+    
+    // Apply axis inversions for natural camera movement
+    if (this.config.invertAxes.pitch) rx = -rx;
+    if (this.config.invertAxes.roll) ry = -ry;
+    if (this.config.invertAxes.yaw) rz = -rz;
+    
+    // Clamp to maximum rotation per frame
+    rx = this.clamp(rx, -this.config.maxRotation, this.config.maxRotation);
+    ry = this.clamp(ry, -this.config.maxRotation, this.config.maxRotation);
+    rz = this.clamp(rz, -this.config.maxRotation, this.config.maxRotation);
+    
+    return { rx, ry, rz };
+  }
+  
+  // NEW: Apply magic window transformation to enhanced shader
+  applyMagicWindowToShader() {
     if (!this.tesseractShader) return;
     
-    if (typeof this.tesseractShader.updateMotionInput === 'function') {
-      this.tesseractShader.updateMotionInput({
-        x: this.smoothedRotation.x * 0.015,
-        y: this.smoothedRotation.y * 0.015,
-        w: this.smoothedRotation.w * 0.01
+    // NEW: Use enhanced shader's device orientation input method
+    if (typeof this.tesseractShader.updateDeviceOrientationInput === 'function') {
+      this.tesseractShader.updateDeviceOrientationInput({
+        rx: this.smoothedOrientation.rx * 0.02,  // Scale for smooth rotation
+        ry: this.smoothedOrientation.ry * 0.02,
+        rz: this.smoothedOrientation.rz * 0.02
       });
-    } else {
+    } else if (typeof this.tesseractShader.updateMotionInput === 'function') {
+      // Fallback for compatibility with old shader
       console.warn('Using fallback motion control - enhanced shader not detected');
-      
-      if (this.tesseractShader.slowVelocity) {
-        this.tesseractShader.slowVelocity.x = this.smoothedRotation.x * 0.3;
-        this.tesseractShader.slowVelocity.y = this.smoothedRotation.y * 0.3;
-      }
-      
-      if (this.tesseractShader.wheelVelocity !== undefined) {
-        this.tesseractShader.wheelVelocity += this.smoothedRotation.w * 0.15;
-      }
+      this.tesseractShader.updateMotionInput({
+        x: this.smoothedOrientation.rx * 0.015,
+        y: this.smoothedOrientation.ry * 0.015,
+        w: this.smoothedOrientation.rz * 0.01
+      });
     }
   }
   
+  // UTILITY METHODS (unchanged)
   normalizeAngle(angle) {
     while (angle > 180) angle -= 360;
     while (angle < -180) angle += 360;
@@ -329,10 +370,13 @@ class MobileMotionControl {
     return a + (b - a) * t;
   }
   
+  // UNCHANGED: State management methods
   disable() {
     this.isActive = false;
     
-    if (this.tesseractShader && typeof this.tesseractShader.disableMotionControl === 'function') {
+    if (this.tesseractShader && typeof this.tesseractShader.disableDeviceOrientation === 'function') {
+      this.tesseractShader.disableDeviceOrientation();
+    } else if (this.tesseractShader && typeof this.tesseractShader.disableMotionControl === 'function') {
       this.tesseractShader.disableMotionControl();
     }
     
@@ -355,7 +399,7 @@ class MobileMotionControl {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (!isMobile) return;
     
-    window.removeEventListener('deviceorientation', this.handleDeviceOrientation);
+    window.removeEventListener('deviceorientation', this.handleMagicWindowOrientation);
     
     if (this.indicator) {
       this.indicator.removeEventListener('click', this.toggleMotionControl);
@@ -369,3 +413,22 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
   window.MobileMotionControl = MobileMotionControl;
 }
+
+/**
+ * 🪟 MAGIC WINDOW IMPLEMENTATION COMPLETE!
+ * 
+ * Key Changes:
+ * 1. ✅ Uses DeviceOrientationControls approach for smooth 3D camera rotation
+ * 2. ✅ Maps device orientation to RX, RY, RZ camera axes (not hypercube rotation)
+ * 3. ✅ Integrates with enhanced TesseractShader's 8-axis system
+ * 4. ✅ Keeps all existing permission and consent management
+ * 5. ✅ Maintains compatibility with existing control panel
+ * 
+ * Magic Window Effect:
+ * - Phone tilt forward/back → Camera pitch (look down into box)
+ * - Phone tilt left/right → Camera roll (box tilts sideways)
+ * - Phone rotate around vertical → Camera yaw (rotate around box)
+ * - Touch gestures → Separate 4D hypercube rotations (RWX, RWY)
+ * 
+ * Next: Update control config for new button mappings!
+ */
