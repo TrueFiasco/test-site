@@ -86,6 +86,23 @@ class TesseractShader extends GenericShader {
   }
 
   /**
+   * Initialize the Three.js scene and start rendering - REQUIRED by GenericShader
+   */
+  async init() {
+    try {
+      await this.initHypercube();
+      this.setupEventListeners();
+      this.setupHeroControls();
+      this.startAnimation();
+      this.isInitialized = true;
+      console.log('✅ TesseractShader initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize TesseractShader:', error);
+      throw error;
+    }
+  }
+
+  /**
    * BACKWARDS-COMPATIBLE: Shader code that works for both desktop and mobile
    */
   getShaderCode() {
@@ -514,6 +531,151 @@ class TesseractShader extends GenericShader {
   }
 
   /**
+   * Create vertex data for the tesseract
+   */
+  createVertexData() {
+    const vertexData = new Float32Array(33 * 4);
+    const vertices = [
+      [0,0,0,0], [0,0,0,1], [1,0,0,1], [1,1,0,1], [0,1,0,1], [0,0,0,1], [0,0,1,1], [0,1,1,1],
+      [0,1,0,1], [0,1,0,0], [0,1,1,0], [0,1,1,1], [1,1,1,1], [1,1,1,0], [1,1,0,0], [1,1,0,1],
+      [1,1,1,1], [1,0,1,1], [1,0,1,0], [1,0,0,0], [1,0,0,1], [1,0,1,1], [0,0,1,1], [0,0,1,0],
+      [1,0,1,0], [1,1,1,0], [0,1,1,0], [0,0,1,0], [0,0,0,0], [1,0,0,0], [1,1,0,0], [0,1,0,0],
+      [0,0,0,0]
+    ];
+    
+    vertices.forEach((vertex, i) => {
+      vertexData[i * 4] = (vertex[0] - 0.5) * 2;
+      vertexData[i * 4 + 1] = (vertex[1] - 0.5) * 2;
+      vertexData[i * 4 + 2] = (vertex[2] - 0.5) * 2;
+      vertexData[i * 4 + 3] = (vertex[3] - 0.5) * 2;
+    });
+    
+    return vertexData;
+  }
+
+  /**
+   * Create text texture for TESSERACT title
+   */
+  async createTesseractTextTexture() {
+    await this.waitForFonts();
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    const baseFontSize = Math.min(window.innerWidth * 0.12, 144);
+    const subtitleFontSize = Math.min(window.innerWidth * 0.036, 36);
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    // Main title
+    ctx.font = `${baseFontSize}px "Spy Agency"`;
+    const titleY = centerY - 30;
+    ctx.fillText('TESSERACT', centerX, titleY);
+    
+    // Clean subtitle text
+    ctx.font = `400 ${subtitleFontSize}px Orbitron`;
+    const subtitleLine1 = 'TouchDesigner Tutorial using GLSL';
+    const subtitleLine2 = 'Interactive 4D Hypercube Visualization';
+    const subtitleY = titleY + baseFontSize * 0.8 + 20;
+    const lineSpacing = subtitleFontSize * 1.2;
+    
+    ctx.fillText(subtitleLine1, centerX, subtitleY);
+    ctx.fillText(subtitleLine2, centerX, subtitleY + lineSpacing);
+    
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  /**
+   * Wait for custom fonts to load
+   */
+  async waitForFonts() {
+    return new Promise((resolve) => {
+      const testCanvas = document.createElement('canvas');
+      const testCtx = testCanvas.getContext('2d');
+      
+      function checkFonts() {
+        testCtx.font = '48px "Spy Agency", serif';
+        const spyAgencyWidth = testCtx.measureText('TESSERACT').width;
+        testCtx.font = '48px serif';
+        const serifWidth = testCtx.measureText('TESSERACT').width;
+        
+        if (Math.abs(spyAgencyWidth - serifWidth) > 1) {
+          resolve();
+        } else {
+          setTimeout(checkFonts, 100);
+        }
+      }
+      checkFonts();
+      setTimeout(resolve, 5000); // Fallback timeout
+    });
+  }
+
+  /**
+   * Setup event listeners for interaction
+   */
+  setupEventListeners() {
+    const canvas = document.getElementById(this.canvasId);
+    
+    // Mouse events for rotation
+    document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+    document.addEventListener('wheel', (e) => this.onWheel(e));
+    
+    // DESKTOP: Click anywhere functionality (except on controls)
+    if (!this.isMobile) {
+      canvas.addEventListener('click', (e) => this.onCanvasClick(e));
+      canvas.style.cursor = 'pointer';
+    } else {
+      // MOBILE: Default cursor, touch events will be more selective
+      canvas.style.cursor = 'default';
+      
+      // MOBILE: Touch events only for rotation, avoid button area
+      canvas.addEventListener('touchstart', (e) => this.onTouchStart(e));
+      canvas.addEventListener('touchmove', (e) => this.onTouchMove(e));
+      canvas.addEventListener('touchend', (e) => this.onTouchEnd(e));
+    }
+    
+    // Window resize
+    window.addEventListener('resize', () => this.onWindowResize());
+  }
+
+  /**
+   * Setup hero controls panel
+   */
+  setupHeroControls() {
+    // Skip hero-specific controls - using main controls panel instead
+    console.log('✅ Using main controls panel for hero section');
+  }
+
+  /**
+   * Start animation loop
+   */
+  startAnimation() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+    this.animate();
+  }
+
+  /**
+   * Stop animation loop
+   */
+  stopAnimation() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+  }
+
+  /**
    * ENHANCED: Reset all rotations (both desktop and mobile)
    */
   resetRotation() {
@@ -601,6 +763,107 @@ class TesseractShader extends GenericShader {
     console.log('Touch end for separated 4D gestures');
   }
 
+  /**
+   * DESKTOP: Mouse move event handler
+   */
+  onMouseMove(event) {
+    if (this.getTutorialState()) return;
+    
+    const newMousePos = {
+      x: event.clientX / window.innerWidth,
+      y: event.clientY / window.innerHeight
+    };
+    
+    const deltaX = (newMousePos.x - this.mousePos.x) * 2.0;
+    const deltaY = (newMousePos.y - this.mousePos.y) * 2.0;
+    
+    this.velocity.x += deltaY * 0.15;
+    this.velocity.y += deltaX * 0.15;
+    
+    this.mousePos = newMousePos;
+    
+    this.normalizedMouse.x = (this.mousePos.x - 0.5) * 2;
+    this.normalizedMouse.y = (this.mousePos.y - 0.5) * 2;
+  }
+
+  /**
+   * DESKTOP: Canvas click event handler
+   */
+  onCanvasClick(event) {
+    // DESKTOP ONLY: Click anywhere to open tutorial (except on controls)
+    if (!this.getTutorialState() && !this.isMobile) {
+      // Check if click was on controls panel or settings toggle
+      const settingsToggle = document.getElementById('settings-toggle');
+      const controlsPanel = document.getElementById('controls-panel');
+      const closeButton = document.querySelector('.close-btn');
+      
+      // Don't open tutorial if clicking on controls
+      if (settingsToggle && settingsToggle.contains(event.target)) return;
+      if (controlsPanel && controlsPanel.contains(event.target)) return;
+      if (closeButton && closeButton.contains(event.target)) return;
+      
+      event.preventDefault();
+      console.log('Canvas clicked - opening tutorial');
+      this.onTutorialOpen();
+    }
+  }
+
+  /**
+   * DESKTOP: Mouse wheel event handler
+   */
+  onWheel(event) {
+    // Only handle wheel events when on hero page (not in tutorial)
+    if (this.getTutorialState()) return;
+    
+    const wheelDelta = event.deltaY > 0 ? -0.1963 : 0.1963;
+    this.wheelVelocity += wheelDelta * 0.07;
+  }
+
+  /**
+   * Window resize event handler
+   */
+  onWindowResize() {
+    if (this.camera && this.renderer && this.uniforms) {
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.uniforms.u_resolution.value.x = window.innerWidth;
+      this.uniforms.u_resolution.value.y = window.innerHeight;
+    }
+  }
+
+  /**
+   * Check if touch event is on the tutorial button area
+   */
+  isTouchOnButton(event) {
+    if (!this.isMobile) return false;
+    
+    const buttonContainer = document.getElementById('mobileTutorialBtn');
+    if (!buttonContainer) return false;
+    
+    const rect = buttonContainer.getBoundingClientRect();
+    const touch = event.touches && event.touches[0] ? event.touches[0] : event.changedTouches && event.changedTouches[0];
+    
+    if (!touch) return false;
+    
+    // Add generous padding around the button area to be safe
+    const padding = 50;
+    const isInButtonArea = (
+      touch.clientX >= rect.left - padding &&
+      touch.clientX <= rect.right + padding &&
+      touch.clientY >= rect.top - padding &&
+      touch.clientY <= rect.bottom + padding
+    );
+    
+    return isInButtonArea;
+  }
+
+  /**
+   * Check if velocity is enabled for a specific axis
+   */
+  isVelocityEnabled(axis) {
+    if (!this.velocityEnabled) return true; // Default to enabled
+    return this.velocityEnabled[axis] !== false;
+  }
+
   // ==========================================
   // COMPATIBILITY METHODS
   // ==========================================
@@ -644,6 +907,36 @@ class TesseractShader extends GenericShader {
 
   isMotionControlActive() {
     return this.deviceOrientationEnabled;
+  }
+
+  /**
+   * Cleanup resources - FRAMEWORK INTERFACE
+   */
+  destroy() {
+    this.stopAnimation();
+    
+    // Call parent destroy
+    super.destroy();
+    
+    // Remove event listeners
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('wheel', this.onWheel);
+    window.removeEventListener('resize', this.onWindowResize);
+    
+    const canvas = document.getElementById(this.canvasId);
+    if (canvas) {
+      // Remove click event listener for desktop
+      if (!this.isMobile) {
+        canvas.removeEventListener('click', this.onCanvasClick);
+      } else {
+        // Remove touch event listeners for mobile
+        canvas.removeEventListener('touchstart', this.onTouchStart);
+        canvas.removeEventListener('touchmove', this.onTouchMove);
+        canvas.removeEventListener('touchend', this.onTouchEnd);
+      }
+    }
+    
+    console.log('🧹 TesseractShader destroyed');
   }
 }
 
