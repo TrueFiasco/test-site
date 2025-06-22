@@ -24,7 +24,7 @@ class MobileMotionControl {
     this.config = {
       // CHANGED: Position-based sensitivity (not velocity)
       sensitivity: {
-        pitch: 0.01745,    // Beta → RX sensitivity (INCREASED for direct control)
+        pitch: -0.01745,    // Beta → RX sensitivity (INCREASED for direct control)
         roll: 0.01745,     // Gamma → RY sensitivity  
         yaw: 0.000       // Alpha → RZ sensitivity
       },
