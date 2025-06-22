@@ -1227,7 +1227,7 @@ setupSmartPositioning();
 </div>
 
   <script>
-  // FIXED Motion Debug System
+  // ENHANCED Motion Debug System
   document.getElementById('motion-debug-btn').addEventListener('click', function() {
     let eventCount = 0;
     const debugDiv = document.getElementById('motion-debug-display');
@@ -1235,7 +1235,6 @@ setupSmartPositioning();
     this.textContent = 'Debug Active';
     this.style.background = 'green';
     
-    // FIXED: Better object references
     const motionControl = window.mobileMotionControl || mobileMotionControl;
     const shader = window.tesseractShader || tesseractShader;
     
@@ -1246,9 +1245,16 @@ setupSmartPositioning();
         Alpha: ${(event.alpha || 0).toFixed(1)}<br>
         Beta: ${(event.beta || 0).toFixed(1)}<br>
         Gamma: ${(event.gamma || 0).toFixed(1)}<br>
+        <br>
         Motion Control Found: ${!!motionControl}<br>
         Motion Active: ${motionControl ? motionControl.isActive : 'N/A'}<br>
         Motion Calibrated: ${motionControl ? motionControl.isCalibrated : 'N/A'}<br>
+        Motion Supported: ${motionControl ? motionControl.isSupported : 'N/A'}<br>
+        Motion Permission: ${motionControl ? motionControl.isPermissionGranted : 'N/A'}<br>
+        <br>
+        Current Section: ${window.currentSection || 'undefined'}<br>
+        Tutorial Open: ${window.tutorialOpen || 'undefined'}<br>
+        <br>
         Shader Found: ${!!shader}<br>
         Shader Motion Enabled: ${shader ? shader.deviceOrientationEnabled : 'N/A'}<br>
         Shader CameraRX: ${shader && shader.angles ? shader.angles.cameraRx.toFixed(3) : 'N/A'}<br>
@@ -1256,23 +1262,51 @@ setupSmartPositioning();
       `;
     });
     
-    // IMMEDIATE: Try to enable motion control
-    if (motionControl && !motionControl.isActive) {
-      debugDiv.innerHTML += '<br><br>🔧 Trying to enable motion control...';
-      motionControl.toggleMotionControl();
+    // MANUAL FIX ATTEMPTS
+    setTimeout(() => {
+      debugDiv.innerHTML += '<br><br>🔧 ATTEMPTING FIXES:<br>';
       
-      setTimeout(() => {
-        debugDiv.innerHTML += '<br>Motion now active: ' + motionControl.isActive;
-      }, 500);
-    }
+      // 1. Try to activate motion control
+      if (motionControl && !motionControl.isActive) {
+        debugDiv.innerHTML += 'Activating motion control...<br>';
+        motionControl.isActive = true;
+      }
+      
+      // 2. Try to calibrate motion control
+      if (motionControl && !motionControl.isCalibrated) {
+        debugDiv.innerHTML += 'Calibrating motion control...<br>';
+        motionControl.calibrateOrientation();
+      }
+      
+      // 3. Make sure we're on hero section
+      if (window.currentSection !== 0) {
+        debugDiv.innerHTML += `Current section: ${window.currentSection}, setting to 0...<br>`;
+        window.currentSection = 0;
+      }
+      
+      // 4. Make sure tutorial is closed
+      if (window.tutorialOpen !== false) {
+        debugDiv.innerHTML += 'Tutorial open, setting to false...<br>';
+        window.tutorialOpen = false;
+      }
+      
+      // 5. Enable shader device orientation if disabled
+      if (shader && !shader.deviceOrientationEnabled) {
+        debugDiv.innerHTML += 'Enabling shader device orientation...<br>';
+        shader.enableDeviceOrientation();
+      }
+      
+      debugDiv.innerHTML += '<br>✅ Fix attempts complete. Check values above.<br>';
+      
+    }, 1000);
     
-    // Test manual input after 3 seconds
+    // Test manual input after 4 seconds
     setTimeout(() => {
       if (shader) {
         shader.updateDeviceOrientationInput({rx: 0.1, ry: 0.1, rz: 0.1});
-        debugDiv.innerHTML += '<br><br>✅ Manual test input sent to shader';
+        debugDiv.innerHTML += '<br>✅ Manual test input sent to shader';
       }
-    }, 3000);
+    }, 4000);
   });
   </script>
 </body>
