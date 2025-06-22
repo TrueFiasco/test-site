@@ -204,7 +204,7 @@ class ControlPanelRenderer {
   }
 
   /**
-   * FIXED: Mobile-only backdrop
+   * FIXED: Mobile-only backdrop with proper controls panel exclusion
    */
   addMobileBackdrop() {
     if (!this.device.isMobile) return; // NEVER add backdrop on desktop
@@ -224,14 +224,14 @@ class ControlPanelRenderer {
       pointer-events: auto;
     `;
     
-    // MOBILE: Backdrop can close panel
+    // MOBILE: Backdrop can close panel, but NOT if clicking on controls
     this.backdrop.addEventListener('click', (e) => {
-      // Check if click is near settings button
-      const buttonRect = this.settingsButton.getBoundingClientRect();
       const clickX = e.clientX;
       const clickY = e.clientY;
       const padding = 30;
       
+      // Check if click is near settings button
+      const buttonRect = this.settingsButton.getBoundingClientRect();
       const isNearButton = (
         clickX >= buttonRect.left - padding &&
         clickX <= buttonRect.right + padding &&
@@ -239,17 +239,30 @@ class ControlPanelRenderer {
         clickY <= buttonRect.bottom + padding
       );
       
-      if (!isNearButton) {
-        console.log('🎯 Mobile backdrop click - closing panel');
+      // FIXED: Also check if click is inside the controls panel
+      const panelRect = this.controlsPanel.getBoundingClientRect();
+      const isInsidePanel = (
+        clickX >= panelRect.left &&
+        clickX <= panelRect.right &&
+        clickY >= panelRect.top &&
+        clickY <= panelRect.bottom
+      );
+      
+      // Only close if clicking outside both button and panel
+      if (!isNearButton && !isInsidePanel) {
+        console.log('🎯 Mobile backdrop click outside controls - closing panel');
         e.preventDefault();
         this.closePanel();
+      } else if (isInsidePanel) {
+        console.log('🎯 Click inside controls panel - keeping open');
+        // Don't close - user is interacting with controls
       }
     });
     
     document.body.appendChild(this.backdrop);
     this.forceCorrectPositioning(); // Keep button above backdrop
     
-    console.log('📱 Mobile backdrop added');
+    console.log('📱 Mobile backdrop added with controls panel exclusion');
   }
 
   /**
