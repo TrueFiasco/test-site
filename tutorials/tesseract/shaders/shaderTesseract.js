@@ -66,6 +66,26 @@ class TesseractShader extends GenericShader {
   }
 
   /**
+   * Auto-register parameters from TesseractControlConfig
+   */
+  registerTesseractParameters() {
+    // Import and register parameters if TesseractControlConfig is available
+    if (typeof window !== 'undefined' && window.TesseractControlConfig) {
+      const config = window.TesseractControlConfig;
+      config.parameters.forEach(param => {
+        this.registerParameter(param.id, param.uniformName, param.default);
+      });
+      console.log('✅ Auto-registered Tesseract parameters from config');
+    } else {
+      // Fallback manual registration
+      this.registerParameter('fov', 'u_fov', 7.0);
+      this.registerParameter('perspective', 'u_perspective', 2.3);
+      this.registerParameter('cameraZ', 'u_cameraZ', 10.0);
+      console.log('✅ Fallback parameter registration complete');
+    }
+  }
+
+  /**
    * BACKWARDS-COMPATIBLE: Shader code that works for both desktop and mobile
    */
   getShaderCode() {
