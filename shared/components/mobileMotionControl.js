@@ -24,9 +24,9 @@ class MobileMotionControl {
     this.config = {
       // CHANGED: Position-based sensitivity (not velocity)
       sensitivity: {
-        pitch: -0.01745,    // Beta → RX sensitivity (INCREASED for direct control)
-        roll: -0.01745,     // Gamma → RY sensitivity  
-        yaw: -0.01745       // Alpha → RZ sensitivity
+        pitch: 0.01745,    // Beta → RX sensitivity (INCREASED for direct control)
+        roll: 0.01745,     // Gamma → RY sensitivity  
+        yaw: 0.01745       // Alpha → RZ sensitivity
       },
       deadzone: 1.5,       // Degrees of deadzone (REDUCED for responsiveness)
       maxRotation: 2.5,    // Maximum rotation in radians (INCREASED range)
