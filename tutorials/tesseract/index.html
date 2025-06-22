@@ -1227,7 +1227,7 @@ setupSmartPositioning();
 </div>
 
   <script>
-  // ENHANCED Motion Debug System
+  // PERMISSION FIX Debug System
   document.getElementById('motion-debug-btn').addEventListener('click', function() {
     let eventCount = 0;
     const debugDiv = document.getElementById('motion-debug-display');
@@ -1235,78 +1235,59 @@ setupSmartPositioning();
     this.textContent = 'Debug Active';
     this.style.background = 'green';
     
-    const motionControl = window.mobileMotionControl || mobileMotionControl;
-    const shader = window.tesseractShader || tesseractShader;
+    const motionControl = window.mobileMotionControl;
+    const shader = window.tesseractShader;
     
-    window.addEventListener('deviceorientation', (event) => {
-      eventCount++;
-      debugDiv.innerHTML = `
-        Events: ${eventCount}<br>
-        Alpha: ${(event.alpha || 0).toFixed(1)}<br>
-        Beta: ${(event.beta || 0).toFixed(1)}<br>
-        Gamma: ${(event.gamma || 0).toFixed(1)}<br>
-        <br>
-        Motion Control Found: ${!!motionControl}<br>
-        Motion Active: ${motionControl ? motionControl.isActive : 'N/A'}<br>
-        Motion Calibrated: ${motionControl ? motionControl.isCalibrated : 'N/A'}<br>
-        Motion Supported: ${motionControl ? motionControl.isSupported : 'N/A'}<br>
-        Motion Permission: ${motionControl ? motionControl.isPermissionGranted : 'N/A'}<br>
-        <br>
-        Current Section: ${window.currentSection || 'undefined'}<br>
-        Tutorial Open: ${window.tutorialOpen || 'undefined'}<br>
-        <br>
-        Shader Found: ${!!shader}<br>
-        Shader Motion Enabled: ${shader ? shader.deviceOrientationEnabled : 'N/A'}<br>
-        Shader CameraRX: ${shader && shader.angles ? shader.angles.cameraRx.toFixed(3) : 'N/A'}<br>
-        Time: ${new Date().toLocaleTimeString()}
-      `;
-    });
+    // CHECK ALL PERMISSION KEYS
+    debugDiv.innerHTML = `
+      <strong>PERMISSION DEBUG:</strong><br>
+      motionControlConsent: ${localStorage.getItem('motionControlConsent')}<br>
+      tutorial_motion_consent: ${localStorage.getItem('tutorial_motion_consent')}<br>
+      <br>
+      <strong>FIXING PERMISSIONS...</strong><br>
+    `;
     
-    // MANUAL FIX ATTEMPTS
-    setTimeout(() => {
-      debugDiv.innerHTML += '<br><br>🔧 ATTEMPTING FIXES:<br>';
+    // FIX: Set both permission keys
+    localStorage.setItem('motionControlConsent', 'granted');
+    localStorage.setItem('tutorial_motion_consent', 'true');
+    
+    // FIX: Manually override permission
+    if (motionControl) {
+      motionControl.isPermissionGranted = true;
+      motionControl.isActive = true;
       
-      // 1. Try to activate motion control
-      if (motionControl && !motionControl.isActive) {
-        debugDiv.innerHTML += 'Activating motion control...<br>';
-        motionControl.isActive = true;
-      }
+      // Set global variables
+      window.currentSection = 0;
+      window.tutorialOpen = false;
       
-      // 2. Try to calibrate motion control
-      if (motionControl && !motionControl.isCalibrated) {
-        debugDiv.innerHTML += 'Calibrating motion control...<br>';
-        motionControl.calibrateOrientation();
-      }
+      // Force calibration
+      motionControl.calibrateOrientation();
       
-      // 3. Make sure we're on hero section
-      if (window.currentSection !== 0) {
-        debugDiv.innerHTML += `Current section: ${window.currentSection}, setting to 0...<br>`;
-        window.currentSection = 0;
-      }
-      
-      // 4. Make sure tutorial is closed
-      if (window.tutorialOpen !== false) {
-        debugDiv.innerHTML += 'Tutorial open, setting to false...<br>';
-        window.tutorialOpen = false;
-      }
-      
-      // 5. Enable shader device orientation if disabled
-      if (shader && !shader.deviceOrientationEnabled) {
-        debugDiv.innerHTML += 'Enabling shader device orientation...<br>';
+      // Enable shader
+      if (shader) {
         shader.enableDeviceOrientation();
       }
+    }
+    
+    setTimeout(() => {
+      debugDiv.innerHTML += `
+        <br><strong>AFTER FIX:</strong><br>
+        Motion Permission: ${motionControl ? motionControl.isPermissionGranted : 'N/A'}<br>
+        Motion Active: ${motionControl ? motionControl.isActive : 'N/A'}<br>
+        Shader Motion: ${shader ? shader.deviceOrientationEnabled : 'N/A'}<br>
+        Current Section: ${window.currentSection}<br>
+        Tutorial Open: ${window.tutorialOpen}<br>
+      `;
       
-      debugDiv.innerHTML += '<br>✅ Fix attempts complete. Check values above.<br>';
+      // Start monitoring events
+      window.addEventListener('deviceorientation', (event) => {
+        eventCount++;
+        if (eventCount % 10 === 0) { // Update every 10 events to avoid spam
+          debugDiv.innerHTML += `<br>Events: ${eventCount}, CameraRX: ${shader?.angles?.cameraRx?.toFixed(3) || 'N/A'}`;
+        }
+      });
       
     }, 1000);
-    
-    // Test manual input after 4 seconds
-    setTimeout(() => {
-      if (shader) {
-        shader.updateDeviceOrientationInput({rx: 0.1, ry: 0.1, rz: 0.1});
-        debugDiv.innerHTML += '<br>✅ Manual test input sent to shader';
-      }
-    }, 4000);
   });
   </script>
 </body>
