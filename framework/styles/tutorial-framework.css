@@ -1130,3 +1130,217 @@ p {
     right: 0.75rem !important;
   }
 }
+/* ===================================================================
+   NUCLEAR MOBILE CSS FIX - ULTRA HIGH SPECIFICITY
+   This CSS MUST be added to override any conflicting styles
+   Copy this entire block and paste it at the END of tutorial-framework.css
+   =================================================================== */
+
+/* NUCLEAR MOBILE POSITIONING FIX - MAXIMUM SPECIFICITY */
+@media (max-width: 768px) {
+  /* ===============================================================
+     NUCLEAR OPTION: Every possible selector combination
+     This forces the settings button to top-left on mobile
+     =============================================================== */
+     
+  html body div.hero-section div.settings-toggle,
+  html body div.hero-section .settings-toggle,
+  html body .hero-section div.settings-toggle,
+  html body .hero-section .settings-toggle,
+  html body div.settings-toggle,
+  html body .settings-toggle,
+  body div.hero-section div.settings-toggle,
+  body div.hero-section .settings-toggle,
+  body .hero-section div.settings-toggle,
+  body .hero-section .settings-toggle,
+  body div.settings-toggle,
+  body .settings-toggle,
+  div.hero-section div.settings-toggle,
+  div.hero-section .settings-toggle,
+  .hero-section div.settings-toggle,
+  .hero-section .settings-toggle,
+  div.settings-toggle,
+  .settings-toggle,
+  #settings-toggle {
+    /* NUCLEAR POSITIONING: Force top-left on mobile */
+    top: 1rem !important;
+    left: 1rem !important;
+    right: auto !important;
+    bottom: auto !important;
+    
+    /* NUCLEAR Z-INDEX: Above everything */
+    z-index: 999999 !important;
+    
+    /* NUCLEAR POSITIONING TYPE */
+    position: fixed !important;
+    
+    /* NUCLEAR DISPLAY */
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    
+    /* NUCLEAR SIZE FOR MOBILE */
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    max-width: 56px !important;
+    max-height: 56px !important;
+    
+    /* NUCLEAR TRANSFORM RESET */
+    transform: none !important;
+    translate: none !important;
+    
+    /* NUCLEAR BACKGROUND */
+    background: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 50% !important;
+    
+    /* NUCLEAR MARGIN/PADDING RESET */
+    margin: 0 !important;
+    padding: 0 !important;
+    
+    /* NUCLEAR BOX MODEL */
+    box-sizing: border-box !important;
+  }
+  
+  /* ===============================================================
+     NUCLEAR CONTROLS PANEL POSITIONING
+     =============================================================== */
+     
+  html body div.hero-section div.controls-panel,
+  html body div.hero-section .controls-panel,
+  html body .hero-section div.controls-panel,
+  html body .hero-section .controls-panel,
+  html body div.controls-panel,
+  html body .controls-panel,
+  body div.hero-section div.controls-panel,
+  body div.hero-section .controls-panel,
+  body .hero-section div.controls-panel,
+  body .hero-section .controls-panel,
+  body div.controls-panel,
+  body .controls-panel,
+  div.hero-section div.controls-panel,
+  div.hero-section .controls-panel,
+  .hero-section div.controls-panel,
+  .hero-section .controls-panel,
+  div.controls-panel,
+  .controls-panel,
+  #controls-panel {
+    /* NUCLEAR PANEL POSITIONING: Below button */
+    top: 80px !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    bottom: auto !important;
+    
+    /* NUCLEAR PANEL Z-INDEX: Below button, above backdrop */
+    z-index: 2000 !important;
+    
+    /* NUCLEAR PANEL POSITIONING TYPE */
+    position: fixed !important;
+    
+    /* NUCLEAR PANEL SIZE */
+    width: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+    max-height: calc(100vh - 120px) !important;
+    
+    /* NUCLEAR PANEL OVERFLOW */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    
+    /* NUCLEAR TRANSFORM RESET */
+    transform: none !important;
+    translate: none !important;
+    
+    /* NUCLEAR MARGIN RESET */
+    margin: 0 !important;
+  }
+}
+
+/* ===============================================================
+   EXTRA SMALL MOBILE (< 480px) - EVEN STRONGER
+   =============================================================== */
+@media (max-width: 480px) {
+  html body div.hero-section div.settings-toggle,
+  html body div.hero-section .settings-toggle,
+  html body .hero-section div.settings-toggle,
+  html body .hero-section .settings-toggle,
+  html body div.settings-toggle,
+  html body .settings-toggle,
+  body div.hero-section div.settings-toggle,
+  body div.hero-section .settings-toggle,
+  body .hero-section div.settings-toggle,
+  body .hero-section .settings-toggle,
+  body div.settings-toggle,
+  body .settings-toggle,
+  div.hero-section div.settings-toggle,
+  div.hero-section .settings-toggle,
+  .hero-section div.settings-toggle,
+  .hero-section .settings-toggle,
+  div.settings-toggle,
+  .settings-toggle,
+  #settings-toggle {
+    /* EXTRA SMALL: Even closer to corner */
+    top: 0.75rem !important;
+    left: 0.75rem !important;
+    right: auto !important;
+    
+    /* EXTRA SMALL: Slightly smaller */
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+  }
+  
+  html body div.hero-section div.controls-panel,
+  html body div.hero-section .controls-panel,
+  html body .hero-section div.controls-panel,
+  html body .hero-section .controls-panel,
+  html body div.controls-panel,
+  html body .controls-panel,
+  body div.hero-section div.controls-panel,
+  body div.hero-section .controls-panel,
+  body .hero-section div.controls-panel,
+  body .hero-section .controls-panel,
+  body div.controls-panel,
+  body .controls-panel,
+  div.hero-section div.controls-panel,
+  div.hero-section .controls-panel,
+  .hero-section div.controls-panel,
+  .hero-section .controls-panel,
+  div.controls-panel,
+  .controls-panel,
+  #controls-panel {
+    /* EXTRA SMALL: Panel positioned below smaller button */
+    top: 70px !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+  }
+}
+
+/* ===============================================================
+   DESKTOP FALLBACK - Ensure desktop still works
+   =============================================================== */
+@media (min-width: 769px) {
+  .settings-toggle,
+  #settings-toggle {
+    top: 2rem !important;
+    left: 2rem !important;
+    right: auto !important;
+    width: 50px !important;
+    height: 50px !important;
+    z-index: 99999 !important;
+  }
+  
+  .controls-panel,
+  #controls-panel {
+    top: 2rem !important;
+    left: 2rem !important;
+    right: auto !important;
+    z-index: 2000 !important;
+  }
+}
