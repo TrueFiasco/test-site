@@ -1110,51 +1110,109 @@ function nuclearMobilePositionFix() {
   }
 }
 
-// NUCLEAR CONTINUOUS ENFORCEMENT
-function startNuclearPositioningEnforcement() {
-  console.log('🚀 Starting NUCLEAR positioning enforcement...');
+/**
+ * SMART POSITIONING FIX - Only runs when actually needed
+ * Replace the previous "NUCLEAR" JavaScript code with this smarter version
+ * This won't interfere with dialog state management
+ */
+
+// SMART MOBILE POSITIONING ENFORCER - Only when needed
+function smartMobilePositionFix() {
+  const isMobile = window.innerWidth <= 768;
+  const settingsButton = document.getElementById('settings-toggle');
   
-  // Run immediately
-  nuclearMobilePositionFix();
+  if (!settingsButton) return;
+  
+  // Only fix if button is in wrong position
+  const currentTop = settingsButton.style.top;
+  const currentLeft = settingsButton.style.left;
+  const currentRight = settingsButton.style.right;
+  
+  const needsFix = isMobile ? 
+    (currentTop !== '1rem' || currentLeft !== '1rem' || currentRight !== 'auto') :
+    (currentTop !== '2rem' || currentLeft !== '2rem' || currentRight !== 'auto');
+  
+  if (!needsFix) return; // Already in correct position
+  
+  console.log('🔧 SMART positioning fix needed:', { isMobile, currentTop, currentLeft });
+  
+  if (isMobile) {
+    // MOBILE: Force top-left positioning ONLY if wrong
+    settingsButton.style.position = 'fixed';
+    settingsButton.style.top = '1rem';
+    settingsButton.style.left = '1rem';
+    settingsButton.style.right = 'auto';
+    settingsButton.style.zIndex = '999999';
+    settingsButton.style.width = '56px';
+    settingsButton.style.height = '56px';
+    settingsButton.style.transform = 'none';
+    
+    console.log('✅ MOBILE positioning fixed');
+  } else {
+    // DESKTOP: Force top-left positioning ONLY if wrong
+    settingsButton.style.position = 'fixed';
+    settingsButton.style.top = '2rem';
+    settingsButton.style.left = '2rem';
+    settingsButton.style.right = 'auto';
+    settingsButton.style.zIndex = '99999';
+    settingsButton.style.width = '50px';
+    settingsButton.style.height = '50px';
+    settingsButton.style.transform = 'none';
+    
+    console.log('✅ DESKTOP positioning fixed');
+  }
+}
+
+// SMART POSITIONING SETUP - Minimal interference
+function setupSmartPositioning() {
+  console.log('🧠 Setting up SMART positioning (no continuous interference)...');
+  
+  // Run once immediately
+  smartMobilePositionFix();
   
   // Run after page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', nuclearMobilePositionFix);
-  } else {
-    nuclearMobilePositionFix();
+    document.addEventListener('DOMContentLoaded', smartMobilePositionFix);
   }
   
-  // Run on window resize
-  window.addEventListener('resize', nuclearMobilePositionFix);
+  // Run on window resize (debounced)
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(smartMobilePositionFix, 100);
+  });
   
-  // Run periodically to catch any dynamic changes
-  setInterval(nuclearMobilePositionFix, 2000);
-  
-  // Run on orientation change (mobile)
+  // Run on orientation change (mobile only)
   if ('orientation' in window) {
     window.addEventListener('orientationchange', () => {
-      setTimeout(nuclearMobilePositionFix, 100);
+      setTimeout(smartMobilePositionFix, 200);
     });
   }
   
-  // Run when tutorial state changes
-  const originalTransitionToSection = window.transitionToSection;
-  if (originalTransitionToSection) {
-    window.transitionToSection = function(...args) {
-      const result = originalTransitionToSection.apply(this, args);
-      setTimeout(nuclearMobilePositionFix, 100);
-      return result;
-    };
-  }
+  // NO CONTINUOUS INTERVALS - this was causing the dialog to close
   
-  console.log('✅ NUCLEAR positioning enforcement active');
+  console.log('✅ SMART positioning setup complete - no interference with dialog state');
 }
 
-// AUTO-START THE NUCLEAR ENFORCEMENT
-startNuclearPositioningEnforcement();
+// AUTO-START THE SMART SYSTEM
+setupSmartPositioning();
 
-
-    
+/**
+ * CHANGES FROM PREVIOUS VERSION:
+ * 
+ * ✅ REMOVED: setInterval that ran every 2 seconds (was closing dialog)
+ * ✅ REMOVED: Continuous enforcement that interfered with state
+ * ✅ ADDED: Smart detection - only fixes if actually wrong
+ * ✅ ADDED: Debounced resize handling
+ * ✅ KEPT: Initial positioning and orientation change handling
+ * 
+ * This version will:
+ * - Fix positioning once on load
+ * - Fix positioning on window resize (debounced)
+ * - Fix positioning on orientation change (mobile)
+ * - NOT interfere with dialog open/close state
+ * - NOT run continuously in the background
+ */ 
   </script>
 </body>
 </html>
