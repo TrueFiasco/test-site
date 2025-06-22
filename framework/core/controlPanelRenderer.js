@@ -204,7 +204,7 @@ class ControlPanelRenderer {
   }
 
   /**
-   * FIXED: Mobile backdrop with click-through controls area
+   * SIMPLE: Mobile backdrop - visual only, no click detection
    */
   addMobileBackdrop() {
     if (!this.device.isMobile) return;
@@ -221,54 +221,30 @@ class ControlPanelRenderer {
       height: 100vh;
       background: rgba(0, 0, 0, 0.3);
       z-index: 1999;
-      pointer-events: auto;
-    `;
-    
-    // Create a "hole" in the backdrop where the controls are
-    const controlsBlocker = document.createElement('div');
-    controlsBlocker.id = 'controls-blocker';
-    controlsBlocker.style.cssText = `
-      position: fixed;
-      top: 80px;
-      left: 1rem;
-      right: 1rem;
-      height: calc(100vh - 120px);
       pointer-events: none;
-      z-index: 2001;
     `;
     
-    // Simple backdrop click - only closes if clicking the backdrop itself
-    this.backdrop.addEventListener('click', (e) => {
-      // Only close if the click target is the backdrop itself
-      if (e.target === this.backdrop) {
-        console.log('🎯 Backdrop clicked directly - closing panel');
-        e.preventDefault();
-        this.closePanel();
-      }
-    });
+    // NO EVENT LISTENERS - backdrop is purely visual
+    // Panel can only be closed by tapping settings button
     
     document.body.appendChild(this.backdrop);
-    document.body.appendChild(controlsBlocker);
     this.forceCorrectPositioning();
     
-    console.log('📱 Mobile backdrop with click-through controls');
+    console.log('📱 Mobile backdrop - visual only, no click detection');
   }
-      
-  /**
-   * Remove backdrop
-   */
+        
   removeBackdrop() {
     if (this.backdrop) {
       this.backdrop.remove();
       this.backdrop = null;
     }
-  
-  // Also remove the controls blocker
-  const controlsBlocker = document.getElementById('controls-blocker');
-  if (controlsBlocker) {
-    controlsBlocker.remove();
+    
+    // Remove any leftover controls blocker
+    const controlsBlocker = document.getElementById('controls-blocker');
+    if (controlsBlocker) {
+      controlsBlocker.remove();
+    }
   }
-}
 
   /**
    * Check if panel is currently open
