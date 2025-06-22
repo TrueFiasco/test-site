@@ -1,6 +1,7 @@
 /* ===================================================================
-   TESSERACT TUTORIAL - SPECIFIC STYLES
+   TESSERACT TUTORIAL - SPECIFIC STYLES - FIXED
    4D Hypercube visualization specific components and interactions
+   REMOVED conflicting mobile positioning to allow framework control
    =================================================================== */
 
 /* === HERO SECTION STYLES === */
@@ -522,54 +523,16 @@
 }
 
 /* ===================================================================
-   MOBILE SETTINGS BUTTON Z-INDEX AND POSITIONING FIX
-   Comprehensive solution to prevent overlap and ensure button remains clickable
+   MOBILE RESPONSIVE STYLES - FIXED: NO CONFLICTING POSITIONING
+   Framework CSS handles all positioning - this only adds mobile visibility
    =================================================================== */
 
 @media (max-width: 768px) {
-  /* === SOLUTION: MOVE SETTINGS BUTTON TO TOP-RIGHT === */
-  .settings-toggle {
-    /* CRITICAL: Move button to top-right to avoid overlap */
-    top: 1rem !important;
-    right: 1rem !important;
-    left: auto !important;
-    
-    /* NUCLEAR Z-INDEX: Stay above everything */
-    z-index: 99999 !important;
-    
-    /* ENHANCED MOBILE PROPERTIES */
-    width: 56px !important;
-    height: 56px !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    backdrop-filter: blur(10px) !important;
-    
-    /* FORCE PROPERTIES TO OVERRIDE CONFLICTS */
-    position: fixed !important;
-    pointer-events: auto !important;
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-  }
-  
-  /* === ADJUST CONTROLS PANEL TO AVOID BUTTON === */
-  .controls-panel {
-    /* Position below the moved button */
-    top: 80px !important;
-    left: 1rem !important;
-    right: 1rem !important;
-    width: auto !important;
-    min-width: auto !important;
-    max-width: none !important;
-    
-    /* Lower z-index than button */
-    z-index: 2000 !important;
-    
-    /* Prevent overflow on mobile */
-    max-height: calc(100vh - 120px) !important;
-    overflow-y: auto !important;
-  }
-  
+  /* ===============================================================
+     FIXED: REMOVED ALL CONFLICTING POSITIONING CSS
+     Framework tutorial-framework.css now handles ALL positioning
+     =============================================================== */
+     
   /* === MOBILE VISIBILITY CLASSES === */
   .mobile-only {
     display: block;
@@ -675,50 +638,5 @@
 
   .parameter-dialog.active {
     display: block !important;
-  }
-}
-
-/* ===================================================================
-   NUCLEAR OPTION Z-INDEX OVERRIDES 
-   Maximum specificity to force proper stacking order
-   =================================================================== */
-
-@media (max-width: 768px) {
-  /* === FORCE SETTINGS BUTTON ABOVE EVERYTHING === */
-  body .settings-toggle,
-  html body .settings-toggle,
-  .hero-section .settings-toggle,
-  div .settings-toggle {
-    z-index: 999999 !important;
-    position: fixed !important;
-    top: 1rem !important;
-    right: 1rem !important;
-    left: auto !important;
-    pointer-events: auto !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-  }
-  
-  /* === FORCE CONTROLS PANEL BELOW BUTTON === */
-  body .controls-panel,
-  html body .controls-panel,
-  .hero-section .controls-panel,
-  div .controls-panel {
-    z-index: 2000 !important;
-    top: 80px !important;
-    left: 1rem !important;
-    right: 1rem !important;
-  }
-  
-  /* === BACKDROP POSITIONING === */
-  #settings-backdrop {
-    z-index: 1999 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
   }
 }
