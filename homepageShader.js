@@ -8,7 +8,7 @@ class HomepageTesseractShader extends TesseractShader {
     
     // Store custom text options
     this.customTitle = options.title || 'TRUE FIASCO';
-    this.customSubtitle = options.subtitle || 'taking event to the next dimension';
+    this.customSubtitle = options.subtitle || 'taking events to the next dimension';
     this.titleFont = options.titleFont || 'Spy Agency';
     this.subtitleFont = options.subtitleFont || 'Orbitron';
     
