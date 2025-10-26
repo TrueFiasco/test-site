@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Session | TRUE FIASCO</title>
+    <style>
+        @font-face {
+            font-family: 'Orbitron';
+            src: url('./fonts/Orbitron-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .booking-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .step {
+            margin-bottom: 2.5rem;
+        }
+
+        .step h2 {
+            color: #4ecdc4;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        /* Service Type Selection */
+        .service-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .service-btn {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
+
+        .service-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .service-btn.selected {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .service-description {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .service-description.active {
+            display: block;
+        }
+
+        /* Calendar */
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .calendar-header {
+            text-align: center;
+            padding: 1rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .calendar-day:hover:not(.disabled):not(.past) {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .calendar-day.selected {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: #4ecdc4;
+        }
+
+        .calendar-day.disabled,
+        .calendar-day.past {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.today {
+            border-color: #ff6b6b;
+        }
+
+        /* Month Navigation */
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .month-nav button {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
+
+        .month-nav button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .month-nav h3 {
+            font-size: 1.5rem;
+            color: #4ecdc4;
+        }
+
+        /* Time Selection */
+        .time-dropdown {
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .time-dropdown-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
+
+        .time-dropdown-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .time-dropdown-btn.open {
+            border-color: #4ecdc4;
+        }
+
+        .time-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 0.5rem;
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .time-options.open {
+            display: block;
+        }
+
+        .time-option {
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .time-option:hover {
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .time-option.booked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        /* Contact Form */
+        .contact-form {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            padding: 1.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', Arial, sans-serif;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(78, 205, 196, 0.1);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box h3 {
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+        }
+
+        .info-box ul {
+            list-style-position: inside;
+            opacity: 0.9;
+        }
+
+        .info-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Loading & Messages */
+        .loading,
+        .message {
+            text-align: center;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 10px;
+        }
+
+        .loading {
+            background: rgba(78, 205, 196, 0.1);
+            color: #4ecdc4;
+        }
+
+        .message.success {
+            background: rgba(0, 255, 128, 0.1);
+            border: 1px solid rgba(0, 255, 128, 0.3);
+            color: #00ff80;
+        }
+
+        .message.error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .booking-container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .calendar {
+                gap: 0.3rem;
+            }
+
+            .calendar-day {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="back-link">← Back to Home</a>
+
+        <header>
+            <h1>Book Your Session</h1>
+            <p class="subtitle">Choose your service, pick a time, and let's create something amazing</p>
+        </header>
+
+        <div class="info-box">
+            <h3>✨ What to Expect</h3>
+            <ul>
+                <li><strong>First TouchDesigner lesson is FREE</strong> (60 minutes)</li>
+                <li>Discovery calls: 30-45 minutes (1 hour booking window)</li>
+                <li>All times are in UK timezone (GMT/BST)</li>
+                <li>You'll receive a confirmation email with meeting details</li>
+            </ul>
+        </div>
+
+        <div class="booking-container">
+            <!-- Step 1: Service Type -->
+            <div class="step" id="step1">
+                <h2>Step 1: Choose Your Session Type</h2>
+                <div class="service-buttons">
+                    <button class="service-btn" data-service="discovery">
+                        Discovery Call
+                    </button>
+                    <button class="service-btn" data-service="lesson">
+                        TouchDesigner Lesson
+                    </button>
+                </div>
+                <div class="service-description" id="desc-discovery">
+                    <strong>Discovery Call (Free)</strong><br>
+                    30-45 minute consultation to discuss your project, goals, or questions about TouchDesigner and interactive art.
+                </div>
+                <div class="service-description" id="desc-lesson">
+                    <strong>TouchDesigner Lesson</strong><br>
+                    <strong>First lesson FREE!</strong> One-on-one personalized instruction. Learn TouchDesigner, creative coding, GLSL shaders, and live performance techniques.
+                </div>
+            </div>
+
+            <!-- Step 2: Date Selection -->
+            <div class="step" id="step2" style="display: none;">
+                <h2>Step 2: Select a Date</h2>
+                <div class="month-nav">
+                    <button id="prevMonth">← Previous</button>
+                    <h3 id="currentMonth">Loading...</h3>
+                    <button id="nextMonth">Next →</button>
+                </div>
+                <div class="calendar" id="calendar">
+                    <!-- Days of week -->
+                    <div class="calendar-header">Sun</div>
+                    <div class="calendar-header">Mon</div>
+                    <div class="calendar-header">Tue</div>
+                    <div class="calendar-header">Wed</div>
+                    <div class="calendar-header">Thu</div>
+                    <div class="calendar-header">Fri</div>
+                    <div class="calendar-header">Sat</div>
+                    <!-- Calendar days generated by JS -->
+                </div>
+            </div>
+
+            <!-- Step 3: Time Selection -->
+            <div class="step" id="step3" style="display: none;">
+                <h2>Step 3: Select a Time</h2>
+                <p style="opacity: 0.8; margin-bottom: 1rem;">Selected Date: <strong id="selectedDateDisplay">-</strong></p>
+                <div class="time-dropdown">
+                    <button class="time-dropdown-btn" id="timeDropdownBtn">
+                        <span id="selectedTimeDisplay">Choose a time slot</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="time-options" id="timeOptions">
+                        <!-- Time slots generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Contact Details -->
+            <div class="step" id="step4" style="display: none;">
+                <h2>Step 4: Your Details</h2>
+                <form class="contact-form" id="bookingForm">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" required placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone (Optional)</label>
+                        <input type="tel" id="phone" placeholder="+44 7XXX XXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Additional Notes (Optional)</label>
+                        <textarea id="notes" rows="4" placeholder="Tell me about your project or what you'd like to learn..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Confirm Booking</button>
+                </form>
+            </div>
+
+            <div id="loadingMessage" class="loading" style="display: none;">
+                Processing your booking...
+            </div>
+
+            <div id="successMessage" class="message success" style="display: none;">
+                <h3>🎉 Booking Confirmed!</h3>
+                <p>Check your email for confirmation and meeting details.</p>
+                <button onclick="location.reload()" style="margin-top: 1rem; padding: 1rem 2rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; color: white; cursor: pointer;">Book Another Session</button>
+            </div>
+
+            <div id="errorMessage" class="message error" style="display: none;">
+                <h3>❌ Booking Failed</h3>
+                <p id="errorText"></p>
+                <button onclick="location.reload()" style="margin-top: 1rem; padding: 1rem 2rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; color: white; cursor: pointer;">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="./firebase-config.js"></script>
+    
+    <!-- Booking Logic -->
+    <script src="./booking.js"></script>
+</body>
+</html>
