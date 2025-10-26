@@ -488,24 +488,34 @@
             <!-- Step 4: Contact Details -->
             <div class="step" id="step4" style="display: none;">
                 <h2>Step 4: Your Details</h2>
-                <form class="contact-form" id="bookingForm">
-                    <div class="form-group">
-                        <label for="name">Name *</label>
-                        <input type="text" id="name" required placeholder="Your name">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" required placeholder="your@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone (Optional)</label>
-                        <input type="tel" id="phone" placeholder="+44 7XXX XXXXXX">
-                    </div>
-                    <div class="form-group">
-                        <label for="notes">Additional Notes (Optional)</label>
-                        <textarea id="notes" rows="4" placeholder="Tell me about your project or what you'd like to learn..."></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Confirm Booking</button>
+                <form class="contact-form" id="bookingForm" action="https://formspree.io/f/xxxxxxxx" method="POST">
+                	<!-- visible fields -->
+                	<div class="form-group">
+                		<label for="name">Name *</label>
+                		<input type="text" id="name" name="name" required placeholder="Your name">
+                	</div>
+                	<div class="form-group">
+                		<label for="email">Email *</label>
+                		<input type="email" id="email" name="email" required placeholder="your@email.com">
+                	</div>
+                	<div class="form-group">
+                		<label for="phone">Phone (Optional)</label>
+                		<input type="tel" id="phone" name="phone" placeholder="+44 7XXX XXXXXX">
+                	</div>
+                	<div class="form-group">
+                		<label for="notes">Additional Notes (Optional)</label>
+                		<textarea id="notes" name="notes" rows="4" placeholder="Tell me about your project or what you'd like to learn..."></textarea>
+                	</div>
+                
+                	<!-- hidden fields populated by JS -->
+                	<input type="hidden" name="service" id="hiddenService">
+                	<input type="hidden" name="date" id="hiddenDate">
+                	<input type="hidden" name="time" id="hiddenTime">
+                	<input type="hidden" name="_subject" id="hiddenSubject" value="New booking via website">
+                	<!-- optional spam honeypot -->
+                	<input type="text" name="_gotcha" style="display:none">
+                
+                	<button type="submit" class="submit-btn">Confirm Booking</button>
                 </form>
             </div>
 
