@@ -407,12 +407,49 @@ async function submitBooking(bookingData) {
             throw new Error('This time slot was just booked. Please choose another time.');
         }
         
-        // Create booking
+        // Create booking in Firebase
         await db.collection('bookings').add(bookingData);
         
-        // Send confirmation email (you'll need to set up a Cloud Function for this)
-        // For now, just log it
-        console.log('📧 Email would be sent to:', bookingData.email);
+        console.log('✅ Booking saved to Firebase');
+        
+        // Send email notification via Formspree (same method as contact form)
+        try {
+            const serviceType = bookingData.service === 'discovery' ? 'Discovery Call' : 'TouchDesigner Lesson';
+            const bookingDate = new Date(bookingData.dateTime);
+            const dateStr = bookingDate.toLocaleString('en-GB', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Europe/London'
+            });
+            
+            const formData = new FormData();
+            formData.append('_subject', `🎉 New Booking: ${serviceType}`);
+            formData.append('Service', serviceType);
+            formData.append('Date & Time', dateStr);
+            formData.append('Client Name', bookingData.name);
+            formData.append('Client Email', bookingData.email);
+            formData.append('Client Phone', bookingData.phone || 'Not provided');
+            formData.append('Notes', bookingData.notes || 'None');
+            formData.append('_replyto', bookingData.email);
+            
+            // ⚠️ REPLACE 'YOUR_FORMSPREE_ID' with your actual Formspree form ID
+            await fetch('https://formspree.io/f/xeopoqag', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            console.log('✅ Email notification sent via Formspree');
+        } catch (emailError) {
+            console.warn('⚠️ Email notification failed (booking still saved):', emailError);
+            // Don't throw - booking is already saved, email is just a bonus
+        }
         
         return true;
         
