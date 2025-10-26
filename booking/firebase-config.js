@@ -15,12 +15,13 @@
 // YOUR FIREBASE CONFIG
 // Replace these values with your actual Firebase project credentials
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBZUxYOKzZUA_Q32FLSOvF1JHDJMsLT0VE",
+  authDomain: "true-fiasco-bookings.firebaseapp.com",
+  projectId: "true-fiasco-bookings",
+  storageBucket: "true-fiasco-bookings.firebasestorage.app",
+  messagingSenderId: "755464362125",
+  appId: "1:755464362125:web:f754d202836e62c111aac4",
+  measurementId: "G-92TQ1EVMRT"
 };
 
 // Initialize Firebase
